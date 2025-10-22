@@ -50,4 +50,34 @@ def equilibre_genre(list_eleves):
     print("une mixité maximale.")
     return res_pourcentage
 
-equilibre_genre(lire_fichier("exemple.csv"))
+
+def nb_max_eleve_par_groupe(liste_eleve, nb_groupes):
+    """Retourne le nombre de personne maximum par groupes
+
+    Args:
+        liste_eleve (list): la liste des élèves
+        nb_groupes (int): nombre de groupes souhaités
+
+    Returns:
+        int: le nombre d'élèves maximum par jour
+    """    
+    if len(liste_eleve) % nb_groupes == 0 : # Vérifie si le nombre total d'élèves est un multiple parfait du nombre de groupes
+        return len(liste_eleve) // nb_groupes # Si c'est le cas, le nombre d'élèves par groupe est la division entière
+    else:
+        return len(liste_eleve) // nb_groupes + 1 # Si la division n'est pas exacte, on prend la division entière et on ajoute 1 pour couvrir tous les élèves.
+
+def groupes_possible(liste_groupes, nb_elv_grp):
+    """Renvoie une liste d'index qui sont les index des groupes dans lesquels on peut ajouter des élèves.
+
+    Args:
+        liste_groupes (list): une liste de listes qui represente la liste de groupes.
+        nb_elv_grp (int): nombre d'eleve max par grp
+
+    Returns:
+        list: Une liste d'index.
+    """    
+    res = [] # La liste d'index de retour
+    for i in range(len(liste_groupes)):
+        if len(liste_groupes[i]) < nb_elv_grp: # Vérifie que la longueur de chaques groupes dans liste_groupes < au nombre d'élève max par groupe
+            res.append(i) # Ajoute l'index dans res si la condition est remplie
+    return res
