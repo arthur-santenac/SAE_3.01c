@@ -50,6 +50,53 @@ def equilibre_genre(list_eleves):
     print("une mixité maximale.")
     return res_pourcentage
 
+def cout(variable1, variable2):
+    """Calcule le cout entre deux instances d'une variable en faisant la valeur absolue des différences des valeurs des variables
+
+    Args:
+        variable1 (dict): dictionnaire de valeurs d'une variable. Les clés sont les différentes valeurs trouvées 
+        dans le fichier csv et les valeurs associées sont le pourcentage d'élèves associés à cette valeur dans le groupe de la variable.
+        variable2 (dicr): dictionnaire de valeurs d'une variable. Les clés sont les différentes valeurs trouvées 
+        dans le fichier csv et les valeurs associées sont le pourcentage d'élèves associés à cette valeur dans le groupe de la variable.
+
+    Returns:
+        int : différence des deux variables. Plus ce cout est élevé plus les valeurs des variables sont différentes
+    """    
+    cout = 0
+    if len(variable1) == len(variable2):
+        for elem in variable1:
+            cout += abs(variable2[elem] - variable1[elem])
+    return cout
+
+def diff_cout_groupe(groupe1, groupe2):
+    """calcule et renvoie le cout entre deux groupes. 
+
+    Args:
+        groupe1 (list): Ce premier groupe est une liste de variables. Les variables sont des dictionnaires où les clés sont les différentes valeurs trouvées 
+        dans le fichier csv et les valeurs associées sont le pourcentage d'élèves associés à cette valeur dans le groupe de la variable.
+        groupe2 (list): Ce deuxième groupe est une liste de variables. Les variables sont des dictionnaires où les clés sont les différentes valeurs trouvées 
+        dans le fichier csv et les valeurs associées sont le pourcentage d'élèves associés à cette valeur dans le groupe de la variable.
+
+    Returns:
+        int : cout pour les deux groupes. Plus ce cout est élevé plus les valeurs des variables sont différentes
+    """    
+    cout_res = 0
+    if len(groupe1) == len(groupe2):
+        for i in range(len(groupe1)):
+            cout_res += cout(groupe1[i], groupe2[i])
+    return cout_res
+
+def cout_tot(group, liste_groupes):
+    """calcule et renvoie le cout entre un groupe et une liste de groupes. 
+    Args:
+        group (list): Ce premier groupe est une liste de variables. Les variables sont des dictionnaires où les clés sont les différentes valeurs trouvées 
+        dans le fichier csv et les valeurs associées sont le pourcentage d'élèves associés à cette valeur dans le groupe de la variable.
+        liste_group (list): liste de groupes
+    """    
+    cout_total = 0
+    for groupe in liste_groupes:
+        cout_total += diff_cout_groupe(group, groupe)
+    return cout_total
 
 def nb_max_eleve_par_groupe(liste_eleve, nb_groupes):
     """Retourne le nombre de personne maximum par groupes
