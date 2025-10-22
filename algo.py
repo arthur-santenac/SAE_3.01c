@@ -26,6 +26,21 @@ def lire_fichier(nom_fichier):
 liste_eleve = lire_fichier("exemple.csv")
 liste_critere = []
 
+
+
+def csv_en_liste_de_liste(nom_fichier):
+    """
+    Ouvre un fichier CSV et renvoie son contenu sous forme d'une liste de listes.
+    """
+    contenu = []
+
+
+    with open(nom_fichier, "r") as fichier:
+        lecteur = csv.reader(fichier)
+        for ligne in lecteur:
+            contenu.append(ligne) 
+    return contenu 
+
 def equilibre_genre(list_eleves):
     """donne l'objectif du nombre de filles et de garçons par groupe si on veut une mixité
 
@@ -51,3 +66,45 @@ def equilibre_genre(list_eleves):
     return res_pourcentage
 
 equilibre_genre(lire_fichier("exemple.csv"))
+
+
+def equilibre(fichier):
+    """Permet d'avoir une liste de dictionnaires avec pour chaque valeur de chaque catégorie le pourcentage par rapport au total de la catégorie
+
+    Args:
+        fichier (liste(liste)): une liste de liste qui represente le fichier .csv
+
+    Returns:
+        liste(dictionnaire): Une liste de dictionnaires où chaque dictionnaire correspond à une colonne. Chaque dictionnaire contient les valeurs uniques
+                            de la colonne comme clés et leur pourcentage d'apparition comme valeurs.
+    """
+    liste=[]
+    diviseur=len(fichier)-1
+    for colone in range(3,len(fichier[0])):
+        dico_total={}
+        for ligne in fichier[1:]:
+            if ligne[colone] not in dico_total:
+                dico_total[ligne[colone]]=1
+            else:
+                dico_total[ligne[colone]]+=1
+
+        for cle,valeur in dico_total.items():
+            dico_total[cle]=(valeur/diviseur)*100
+        
+        liste.append(dico_total)
+
+    return liste
+
+
+
+
+
+
+
+    
+
+
+#     for _ in range(3,len())
+
+print(equilibre(csv_en_liste_de_liste("exemple.csv")))
+
