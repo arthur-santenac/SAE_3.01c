@@ -24,7 +24,7 @@ def lire_fichier(nom_fichier):
     return liste_eleve
 
 liste_eleve = lire_fichier("exemple.csv")
-liste_critere = []
+
 
 def equilibre_genre(list_eleves):
     """donne l'objectif du nombre de filles et de garçons par groupe si on veut une mixité
@@ -50,7 +50,7 @@ def equilibre_genre(list_eleves):
     print("une mixité maximale.")
     return res_pourcentage
 
-def cout(variable1, variable2, coefficient):
+def cout(variable1, variable2, dico_importance):
     """Calcule le cout entre deux instances d'une variable en faisant la valeur absolue des différences des valeurs des variables
 
     Args:
@@ -66,7 +66,7 @@ def cout(variable1, variable2, coefficient):
     cout = 0
     if len(variable1) == len(variable2):
         for elem in variable1:
-            cout += abs(variable2[elem] - variable1[elem]) * coefficient
+            cout += abs(variable2[elem] - variable1[elem]) * dico_importance[elem]
     return cout
 
 def diff_cout_groupe(groupe1, groupe2, dico_importance):
@@ -85,7 +85,7 @@ def diff_cout_groupe(groupe1, groupe2, dico_importance):
     cout_res = 0
     if len(groupe1) == len(groupe2):
         for i in range(len(groupe1)):
-            cout_res += cout(groupe1[i], groupe2[i], dico_importance.values()[i])
+            cout_res += cout(groupe1[i], groupe2[i], dico_importance)
     return cout_res
 
 def cout_tot(group, liste_groupes, dico_importance):
@@ -103,6 +103,19 @@ def cout_tot(group, liste_groupes, dico_importance):
     for groupe in liste_groupes:
         cout_total += diff_cout_groupe(group, groupe, dico_importance)
     return cout_total
+
+dico_importance = {"genre" : 3, "niveau Français" : 1}
+
+total = [{"F":60, "H":40}, {1:25, 2:25, 3:25, 4:25}]
+groupe1 = [{"F":80, "H":20}, {1:45, 2:5, 3:35, 4:15}]
+groupe2 = [{"F":70, "H":30}, {1:30, 2:20, 3:25, 4:25}]
+groupe3 = [{"F":50, "H":50}, {1:25, 2:25, 3:35, 4:15}]
+liste_groupe = [groupe1, groupe2, groupe3]
+
+print(lire_fichier("exemple.csv"))
+
+print(cout_tot(total, liste_groupe, dico_importance))
+
 
 def nb_max_eleve_par_groupe(liste_eleve, nb_groupes):
     """Retourne le nombre de personne maximum par groupes

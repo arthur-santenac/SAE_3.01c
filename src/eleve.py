@@ -15,4 +15,4 @@ class Eleve():
         return self.critere
     
     def __repr__(self):
-        return str(self.num)+" "+self.nom
+        return str(self)
