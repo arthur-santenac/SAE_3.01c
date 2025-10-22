@@ -50,14 +50,15 @@ def equilibre_genre(list_eleves):
     print("une mixité maximale.")
     return res_pourcentage
 
-def cout(variable1, variable2):
+def cout(variable1, variable2, coefficient):
     """Calcule le cout entre deux instances d'une variable en faisant la valeur absolue des différences des valeurs des variables
 
     Args:
         variable1 (dict): dictionnaire de valeurs d'une variable. Les clés sont les différentes valeurs trouvées 
         dans le fichier csv et les valeurs associées sont le pourcentage d'élèves associés à cette valeur dans le groupe de la variable.
-        variable2 (dicr): dictionnaire de valeurs d'une variable. Les clés sont les différentes valeurs trouvées 
+        variable2 (dict): dictionnaire de valeurs d'une variable. Les clés sont les différentes valeurs trouvées 
         dans le fichier csv et les valeurs associées sont le pourcentage d'élèves associés à cette valeur dans le groupe de la variable.
+        coefficient (int) : coefficient d'importance de la variable
 
     Returns:
         int : différence des deux variables. Plus ce cout est élevé plus les valeurs des variables sont différentes
@@ -65,10 +66,10 @@ def cout(variable1, variable2):
     cout = 0
     if len(variable1) == len(variable2):
         for elem in variable1:
-            cout += abs(variable2[elem] - variable1[elem])
+            cout += abs(variable2[elem] - variable1[elem]) * coefficient
     return cout
 
-def diff_cout_groupe(groupe1, groupe2):
+def diff_cout_groupe(groupe1, groupe2, dico_importance):
     """calcule et renvoie le cout entre deux groupes. 
 
     Args:
@@ -76,6 +77,7 @@ def diff_cout_groupe(groupe1, groupe2):
         dans le fichier csv et les valeurs associées sont le pourcentage d'élèves associés à cette valeur dans le groupe de la variable.
         groupe2 (list): Ce deuxième groupe est une liste de variables. Les variables sont des dictionnaires où les clés sont les différentes valeurs trouvées 
         dans le fichier csv et les valeurs associées sont le pourcentage d'élèves associés à cette valeur dans le groupe de la variable.
+        dico_importance (dict) : Dictionnaire avec comme clés les noms de variables et commes valeurs les coefficients d'importance.
 
     Returns:
         int : cout pour les deux groupes. Plus ce cout est élevé plus les valeurs des variables sont différentes
@@ -83,18 +85,22 @@ def diff_cout_groupe(groupe1, groupe2):
     cout_res = 0
     if len(groupe1) == len(groupe2):
         for i in range(len(groupe1)):
-            cout_res += cout(groupe1[i], groupe2[i])
+            cout_res += cout(groupe1[i], groupe2[i], dico_importance.values()[i])
     return cout_res
 
-def cout_tot(group, liste_groupes):
+def cout_tot(group, liste_groupes, dico_importance):
     """calcule et renvoie le cout entre un groupe et une liste de groupes. 
     Args:
         group (list): Ce premier groupe est une liste de variables. Les variables sont des dictionnaires où les clés sont les différentes valeurs trouvées 
         dans le fichier csv et les valeurs associées sont le pourcentage d'élèves associés à cette valeur dans le groupe de la variable.
         liste_group (list): liste de groupes
+        dico_importance (dict) : Dictionnaire avec comme clés les noms de variables et commes valeurs les coefficients d'importance.
+    
+    Returns:
+        int : cout entre le groupe "group" et la liste de groupes
     """    
     cout_total = 0
     for groupe in liste_groupes:
-        cout_total += diff_cout_groupe(group, groupe)
+        cout_total += diff_cout_groupe(group, groupe, dico_importance)
     return cout_total
 
