@@ -24,30 +24,6 @@ def lire_fichier(nom_fichier):
             liste_eleve.append(new_eleve)
     return liste_eleve
 
-def equilibre_genre(list_eleves):
-    """donne l'objectif du nombre de filles et de garçons par groupe si on veut une mixité
-
-    Args:
-        list_eleves (list): liste des élèves pour les groupes
-        nb_groupe (int): nombre de groupes souhaités
-
-    Returns:
-        tuple: tuple de deux nombres. Le premier est l'objectif de garçon, le deuxième est l'objectif de filles. Les deux sont en pourcentage
-    """    
-    total_genre = [0, 0]
-    for eleve in list_eleves:
-        genre = eleve.critere["genre"]
-        if genre == "M":
-            total_genre[0] += 1
-        elif genre == "F":
-            total_genre[1] += 1
-    pct_G = (total_genre[0] / (total_genre[0]+total_genre[1])) * 100
-    pct_F = (total_genre[1] / (total_genre[0]+total_genre[1])) * 100
-    res_pourcentage = (pct_G, pct_F)
-    print("il faut essayer d'avoir au moins " + str(res_pourcentage[0]) +"% garçons par groupe et " + str(res_pourcentage[1]) +"% filles par groupe pour avoir")
-    print("une mixité maximale.")
-    return res_pourcentage
-
 def cout(variable1, variable2):
     """Calcule le cout entre deux instances d'une variable en faisant la valeur absolue des différences des valeurs des variables
 
@@ -106,10 +82,10 @@ def nb_max_eleve_par_groupe(liste_eleve, nb_groupes):
     Returns:
         int: le nombre d'élèves maximum par jour
     """    
-    if len(liste_eleve) % nb_groupes == 0 : # Vérifie si le nombre total d'élèves est un multiple parfait du nombre de groupes
-        return len(liste_eleve) // nb_groupes # Si c'est le cas, le nombre d'élèves par groupe est la division entière
+    if len(liste_eleve) % nb_groupes == 0 :
+        return len(liste_eleve) // nb_groupes
     else:
-        return len(liste_eleve) // nb_groupes + 1 # Si la division n'est pas exacte, on prend la division entière et on ajoute 1 pour couvrir tous les élèves.
+        return len(liste_eleve) // nb_groupes + 1
 
 def groupes_possible(liste_groupes, nb_elv_grp):
     """Renvoie une liste d'index qui sont les index des groupes dans lesquels on peut ajouter des élèves.
@@ -120,26 +96,26 @@ def groupes_possible(liste_groupes, nb_elv_grp):
 
     Returns:
         list: Une liste d'index.
-    """    
-    res = [] # La liste d'index de retour
+    """   
+    res = []
     for i in range(len(liste_groupes)):
-        if len(liste_groupes[i]) < nb_elv_grp: # Vérifie que la longueur de chaques groupes dans liste_groupes < au nombre d'élève max par groupe
-            res.append(i) # Ajoute l'index dans res si la condition est remplie
+        if len(liste_groupes[i]) < nb_elv_grp:
+            res.append(i)
     return res
 
 def creer_groupe(liste_eleve, dico_importance, nb_groupe):
     liste_groupes = [[]] * nb_groupe
     dico_equil_elv = ...
-    nb_elv_grp = ... 
+    nb_elv_grp = nb_max_eleve_par_groupe(liste_eleve, nb_groupe)
     for eleve in liste_eleve:
-        liste_groupes_possibles = ... # groupes_possibles(liste_groupes, nb_elv_grp)
+        liste_groupes_possibles = groupes_possible(liste_groupes, nb_elv_grp)
         liste_cout = []
         for ind_groupe in liste_groupes_possibles:
             liste_simul = []
             for grp in liste_groupes:
-                liste_simul.append(grp.copy())
-            liste_simul[ind_groupe].append(eleve)            
-            liste_cout.append(...)
+                liste_simul.append(...(grp.copy()))
+            liste_simul[ind_groupe].append(eleve)
+            liste_cout.append(cout_tot(dico_equil_elv, liste_simul))
         liste_groupes_possibles[liste_cout.index(max(liste_cout))].append(eleve)
     return liste_groupes
 
