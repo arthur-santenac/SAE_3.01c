@@ -1,5 +1,6 @@
 import csv
-import eleve
+import eleve as eleve
+import critere as critere
 
 def lire_fichier(nom_fichier):
     """ Lit un fichier csv et le transforme en liste
@@ -23,34 +24,7 @@ def lire_fichier(nom_fichier):
             liste_eleve.append(new_eleve)
     return liste_eleve
 
-liste_eleve = lire_fichier("exemple.csv")
-
-
-def equilibre_genre(list_eleves):
-    """donne l'objectif du nombre de filles et de garçons par groupe si on veut une mixité
-
-    Args:
-        list_eleves (list): liste des élèves pour les groupes
-        nb_groupe (int): nombre de groupes souhaités
-
-    Returns:
-        tuple: tuple de deux nombres. Le premier est l'objectif de garçon, le deuxième est l'objectif de filles. Les deux sont en pourcentage
-    """    
-    total_genre = [0, 0]
-    for eleve in list_eleves:
-        genre = eleve.critere["genre"]
-        if genre == "M":
-            total_genre[0] += 1
-        elif genre == "F":
-            total_genre[1] += 1
-    pct_G = (total_genre[0] / (total_genre[0]+total_genre[1])) * 100
-    pct_F = (total_genre[1] / (total_genre[0]+total_genre[1])) * 100
-    res_pourcentage = (pct_G, pct_F)
-    print("il faut essayer d'avoir au moins " + str(res_pourcentage[0]) +"% garçons par groupe et " + str(res_pourcentage[1]) +"% filles par groupe pour avoir")
-    print("une mixité maximale.")
-    return res_pourcentage
-
-def cout(variable1, variable2, dico_importance):
+def cout(variable1, variable2):
     """Calcule le cout entre deux instances d'une variable en faisant la valeur absolue des différences des valeurs des variables
 
     Args:
@@ -66,7 +40,7 @@ def cout(variable1, variable2, dico_importance):
     cout = 0
     if len(variable1) == len(variable2):
         for elem in variable1:
-            cout += abs(variable2[elem] - variable1[elem]) * dico_importance[elem]
+            cout += abs(variable2[elem] - variable1[elem])
     return cout
 
 def diff_cout_groupe(groupe1, groupe2, dico_importance):
@@ -84,8 +58,8 @@ def diff_cout_groupe(groupe1, groupe2, dico_importance):
     """    
     cout_res = 0
     if len(groupe1) == len(groupe2):
-        for i in range(len(groupe1)):
-            cout_res += cout(groupe1[i], groupe2[i], dico_importance)
+        for critere in groupe1:
+            cout_res += dico_importance[critere] * cout(groupe1[critere], groupe2[critere])
     return cout_res
 
 def cout_tot(group, liste_groupes, dico_importance):
@@ -104,19 +78,6 @@ def cout_tot(group, liste_groupes, dico_importance):
         cout_total += diff_cout_groupe(group, groupe, dico_importance)
     return cout_total
 
-dico_importance = {"genre" : 3, "niveau Français" : 1}
-
-total = [{"F":60, "H":40}, {1:25, 2:25, 3:25, 4:25}]
-groupe1 = [{"F":80, "H":20}, {1:45, 2:5, 3:35, 4:15}]
-groupe2 = [{"F":70, "H":30}, {1:30, 2:20, 3:25, 4:25}]
-groupe3 = [{"F":50, "H":50}, {1:25, 2:25, 3:35, 4:15}]
-liste_groupe = [groupe1, groupe2, groupe3]
-
-print(lire_fichier("exemple.csv"))
-
-print(cout_tot(total, liste_groupe, dico_importance))
-
-
 def nb_max_eleve_par_groupe(liste_eleve, nb_groupes):
     """Retourne le nombre de personne maximum par groupes
 
@@ -127,10 +88,10 @@ def nb_max_eleve_par_groupe(liste_eleve, nb_groupes):
     Returns:
         int: le nombre d'élèves maximum par jour
     """    
-    if len(liste_eleve) % nb_groupes == 0 : # Vérifie si le nombre total d'élèves est un multiple parfait du nombre de groupes
-        return len(liste_eleve) // nb_groupes # Si c'est le cas, le nombre d'élèves par groupe est la division entière
+    if len(liste_eleve) % nb_groupes == 0 :
+        return len(liste_eleve) // nb_groupes
     else:
-        return len(liste_eleve) // nb_groupes + 1 # Si la division n'est pas exacte, on prend la division entière et on ajoute 1 pour couvrir tous les élèves.
+        return len(liste_eleve) // nb_groupes + 1
 
 def groupes_possible(liste_groupes, nb_elv_grp):
     """Renvoie une liste d'index qui sont les index des groupes dans lesquels on peut ajouter des élèves.
@@ -141,18 +102,14 @@ def groupes_possible(liste_groupes, nb_elv_grp):
 
     Returns:
         list: Une liste d'index.
-    """    
-    res = [] # La liste d'index de retour
+    """   
+    res = []
     for i in range(len(liste_groupes)):
-        if len(liste_groupes[i]) < nb_elv_grp: # Vérifie que la longueur de chaques groupes dans liste_groupes < au nombre d'élève max par groupe
-            res.append(i) # Ajoute l'index dans res si la condition est remplie
+        if len(liste_groupes[i]) < nb_elv_grp:
+            res.append(i)
     return res
 
-
-
-
-
-def dico_poucentage(list_eleves):
+def dico_poucentage(liste_eleves):
     """Permet d'avoir une liste de dictionnaires avec pour chaque valeur de chaque catégorie le pourcentage par rapport au total de la catégorie
 
     Args:
@@ -162,19 +119,47 @@ def dico_poucentage(list_eleves):
         liste(dictionnaire): Une liste de dictionnaires où chaque dictionnaire correspond à une colonne. Chaque dictionnaire contient les valeurs uniques
                             de la colonne comme clés et leur pourcentage d'apparition comme valeurs.
     """
-    diviseur=len(list_eleves)
-    liste=[]
-    for critere in list_eleves[1].get_critere().keys():
-        dico_total={}
-        for eleve in list_eleves:
-            valeur_critere = eleve.get_critere()[critere]
-            if valeur_critere not in dico_total:
-                dico_total[valeur_critere]=1
-            else:
-                dico_total[valeur_critere]+=1
-        for cle,valeur in dico_total.items():
-            dico_total[cle]=(valeur/diviseur)*100
-        liste.append(dico_total)
+    diviseur = len(liste_eleves)
+    liste = []
+    if len(liste_eleves) > 0:
+        for critere in liste_eleves[0].critere.keys():
+            dico_total = {}
+            for eleve in liste_eleves:
+                valeur_critere = eleve.critere[critere]
+                if valeur_critere not in dico_total:
+                    dico_total[valeur_critere] = 1
+                else:
+                    dico_total[valeur_critere] += 1
+            for cle, valeur in dico_total.items():
+                dico_total[cle] = (valeur / diviseur) * 100
+            liste.append(dico_total)
     return liste
-         
-print(dico_poucentage(liste_eleve))
+
+def creer_groupe(liste_eleve, dico_importance, nb_groupe):
+    liste_groupes = []
+    for _ in range(nb_groupe):
+        liste_groupes.append([])
+    dico_pourc_elv = dico_poucentage(liste_eleve)
+    nb_elv_grp = nb_max_eleve_par_groupe(liste_eleve, nb_groupe)
+    for eleve in liste_eleve:
+        liste_groupes_possibles = groupes_possible(liste_groupes, nb_elv_grp)
+        liste_cout = []
+        for ind_groupe in liste_groupes_possibles:
+            liste_simul = []
+            liste_simul_pourc = []
+            for grp in liste_groupes:
+                liste_simul.append(grp.copy())
+            liste_simul[ind_groupe].append(eleve)
+            liste_cout.append(cout_tot(dico_pourc_elv, liste_simul_pourc, dico_importance))
+        liste_groupes[liste_groupes_possibles[liste_cout.index(max(liste_cout))]].append(eleve)
+    return liste_groupes
+
+liste_eleve = lire_fichier("exemple2.csv")
+dico_importance = {"genre" : 3, "niveau Français" : 1}
+groupes = creer_groupe(liste_eleve, dico_importance, 3)
+
+for groupe in groupes:
+    for elev in groupe:
+        print(elev)
+    print()
+
