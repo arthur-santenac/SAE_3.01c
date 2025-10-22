@@ -26,4 +26,28 @@ def lire_fichier(nom_fichier):
 liste_eleve = lire_fichier("exemple.csv")
 liste_critere = []
 
+def equilibre_genre(list_eleves):
+    """donne l'objectif du nombre de filles et de garçons par groupe si on veut une mixité
 
+    Args:
+        list_eleves (list): liste des élèves pour les groupes
+        nb_groupe (int): nombre de groupes souhaités
+
+    Returns:
+        tuple: tuple de deux nombres. Le premier est l'objectif de garçon, le deuxième est l'objectif de filles. Les deux sont en pourcentage
+    """    
+    total_genre = [0, 0]
+    for eleve in list_eleves:
+        genre = eleve.critere["genre"]
+        if genre == "M":
+            total_genre[0] += 1
+        elif genre == "F":
+            total_genre[1] += 1
+    pct_G = (total_genre[0] / (total_genre[0]+total_genre[1])) * 100
+    pct_F = (total_genre[1] / (total_genre[0]+total_genre[1])) * 100
+    res_pourcentage = (pct_G, pct_F)
+    print("il faut essayer d'avoir au moins " + str(res_pourcentage[0]) +"% garçons par groupe et " + str(res_pourcentage[1]) +"% filles par groupe pour avoir")
+    print("une mixité maximale.")
+    return res_pourcentage
+
+equilibre_genre(lire_fichier("exemple.csv"))
