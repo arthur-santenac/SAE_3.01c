@@ -10,3 +10,9 @@ class Eleve():
 
     def __str__(self):
         return f"{str(self.num)} {self.nom} {self.prenom} {self.critere}"
+    
+    def get_critere(self):
+        return self.critere
+    
+    def __repr__(self):
+        return str(self.num)+" "+self.nom
