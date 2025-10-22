@@ -128,3 +128,34 @@ def groupes_possible(liste_groupes, nb_elv_grp):
         if len(liste_groupes[i]) < nb_elv_grp: # Vérifie que la longueur de chaques groupes dans liste_groupes < au nombre d'élève max par groupe
             res.append(i) # Ajoute l'index dans res si la condition est remplie
     return res
+
+
+
+
+
+def dico_poucentage(list_eleves):
+    """Permet d'avoir une liste de dictionnaires avec pour chaque valeur de chaque catégorie le pourcentage par rapport au total de la catégorie
+
+    Args:
+        liste_eleve (list): la liste des élèves
+
+    Returns:
+        liste(dictionnaire): Une liste de dictionnaires où chaque dictionnaire correspond à une colonne. Chaque dictionnaire contient les valeurs uniques
+                            de la colonne comme clés et leur pourcentage d'apparition comme valeurs.
+    """
+    diviseur=len(list_eleves)
+    liste=[]
+    for critere in list_eleves[1].get_critere().keys():
+        dico_total={}
+        for eleve in list_eleves:
+            valeur_critere = eleve.get_critere()[critere]
+            if valeur_critere not in dico_total:
+                dico_total[valeur_critere]=1
+            else:
+                dico_total[valeur_critere]+=1
+        for cle,valeur in dico_total.items():
+            dico_total[cle]=(valeur/diviseur)*100
+        liste.append(dico_total)
+    return liste
+         
+print(dico_poucentage(liste_eleve))
