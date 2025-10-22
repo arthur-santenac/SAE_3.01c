@@ -1,6 +1,6 @@
 import csv
-import src.eleve as eleve
-import src.critere as critere
+import eleve as eleve
+import critere as critere
 
 def lire_fichier(nom_fichier):
     """ Lit un fichier csv et le transforme en liste
@@ -103,20 +103,49 @@ def groupes_possible(liste_groupes, nb_elv_grp):
             res.append(i)
     return res
 
+def dico_poucentage(liste_eleves):
+    """Permet d'avoir une liste de dictionnaires avec pour chaque valeur de chaque catégorie le pourcentage par rapport au total de la catégorie
+
+    Args:
+        liste_eleve (list): la liste des élèves
+
+    Returns:
+        liste(dictionnaire): Une liste de dictionnaires où chaque dictionnaire correspond à une colonne. Chaque dictionnaire contient les valeurs uniques
+                            de la colonne comme clés et leur pourcentage d'apparition comme valeurs.
+    """
+    diviseur = len(liste_eleves)
+    liste = []
+    if len(liste_eleves) > 0:
+        for critere in liste_eleves[0].critere.keys():
+            dico_total = {}
+            for eleve in liste_eleves:
+                valeur_critere = eleve.critere[critere]
+                if valeur_critere not in dico_total:
+                    dico_total[valeur_critere] = 1
+                else:
+                    dico_total[valeur_critere] += 1
+            for cle, valeur in dico_total.items():
+                dico_total[cle] = (valeur / diviseur) * 100
+            liste.append(dico_total)
+    return liste
+
 def creer_groupe(liste_eleve, dico_importance, nb_groupe):
-    liste_groupes = [[]] * nb_groupe
-    dico_equil_elv = ...
+    liste_groupes = []
+    for _ in range(nb_groupe):
+        liste_groupes.append([])
+    dico_pourc_elv = dico_poucentage(liste_eleve)
     nb_elv_grp = nb_max_eleve_par_groupe(liste_eleve, nb_groupe)
     for eleve in liste_eleve:
         liste_groupes_possibles = groupes_possible(liste_groupes, nb_elv_grp)
         liste_cout = []
         for ind_groupe in liste_groupes_possibles:
             liste_simul = []
+            liste_simul_pourc = []
             for grp in liste_groupes:
-                liste_simul.append(...(grp.copy()))
+                liste_simul.append(grp.copy())
             liste_simul[ind_groupe].append(eleve)
-            liste_cout.append(cout_tot(dico_equil_elv, liste_simul))
-        liste_groupes_possibles[liste_cout.index(max(liste_cout))].append(eleve)
+            liste_cout.append(cout_tot(dico_pourc_elv, liste_simul_pourc, dico_importance))
+        liste_groupes[liste_groupes_possibles[liste_cout.index(max(liste_cout))]].append(eleve)
     return liste_groupes
 
 liste_eleve = lire_fichier("exemple2.csv")
@@ -127,5 +156,4 @@ for groupe in groupes:
     for elev in groupe:
         print(elev)
     print()
-liste_eleve = lire_fichier("exemple.csv")
-liste_critere = []
+
