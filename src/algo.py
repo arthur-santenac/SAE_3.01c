@@ -1,6 +1,6 @@
 import csv
-import eleve
-import critere
+import src.eleve as eleve
+import src.critere as critere
 
 def lire_fichier(nom_fichier):
     """ Lit un fichier csv et le transforme en liste
