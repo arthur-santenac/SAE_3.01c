@@ -104,3 +104,64 @@ def cout_tot(group, liste_groupes, dico_importance):
         cout_total += diff_cout_groupe(group, groupe, dico_importance)
     return cout_total
 
+def nb_max_eleve_par_groupe(liste_eleve, nb_groupes):
+    """Retourne le nombre de personne maximum par groupes
+
+    Args:
+        liste_eleve (list): la liste des élèves
+        nb_groupes (int): nombre de groupes souhaités
+
+    Returns:
+        int: le nombre d'élèves maximum par jour
+    """    
+    if len(liste_eleve) % nb_groupes == 0 : # Vérifie si le nombre total d'élèves est un multiple parfait du nombre de groupes
+        return len(liste_eleve) // nb_groupes # Si c'est le cas, le nombre d'élèves par groupe est la division entière
+    else:
+        return len(liste_eleve) // nb_groupes + 1 # Si la division n'est pas exacte, on prend la division entière et on ajoute 1 pour couvrir tous les élèves.
+
+def groupes_possible(liste_groupes, nb_elv_grp):
+    """Renvoie une liste d'index qui sont les index des groupes dans lesquels on peut ajouter des élèves.
+
+    Args:
+        liste_groupes (list): une liste de listes qui represente la liste de groupes.
+        nb_elv_grp (int): nombre d'eleve max par grp
+
+    Returns:
+        list: Une liste d'index.
+    """    
+    res = [] # La liste d'index de retour
+    for i in range(len(liste_groupes)):
+        if len(liste_groupes[i]) < nb_elv_grp: # Vérifie que la longueur de chaques groupes dans liste_groupes < au nombre d'élève max par groupe
+            res.append(i) # Ajoute l'index dans res si la condition est remplie
+    return res
+
+
+
+
+
+def dico_poucentage(list_eleves):
+    """Permet d'avoir une liste de dictionnaires avec pour chaque valeur de chaque catégorie le pourcentage par rapport au total de la catégorie
+
+    Args:
+        liste_eleve (list): la liste des élèves
+
+    Returns:
+        liste(dictionnaire): Une liste de dictionnaires où chaque dictionnaire correspond à une colonne. Chaque dictionnaire contient les valeurs uniques
+                            de la colonne comme clés et leur pourcentage d'apparition comme valeurs.
+    """
+    diviseur=len(list_eleves)
+    liste=[]
+    for critere in list_eleves[1].get_critere().keys():
+        dico_total={}
+        for eleve in list_eleves:
+            valeur_critere = eleve.get_critere()[critere]
+            if valeur_critere not in dico_total:
+                dico_total[valeur_critere]=1
+            else:
+                dico_total[valeur_critere]+=1
+        for cle,valeur in dico_total.items():
+            dico_total[cle]=(valeur/diviseur)*100
+        liste.append(dico_total)
+    return liste
+         
+print(dico_poucentage(liste_eleve))
