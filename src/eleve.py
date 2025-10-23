@@ -12,4 +12,4 @@ class Eleve():
         return f"{str(self.num)} {self.nom} {self.prenom} {self.critere}"
     
     def __repr__(self):
-        return str(self.num)+" "+self.nom
+        return str(self)
