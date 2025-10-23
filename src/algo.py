@@ -143,6 +143,8 @@ def creer_groupe(liste_eleve, dico_importance, nb_groupe):
             liste_simul_pourc = []
             for grp in liste_groupes:
                 liste_simul.append(grp.copy())
+            for grp_simul in liste_simul:
+                liste_simul_pourc.append(dico_poucentage(grp_simul))
             liste_simul[ind_groupe].append(eleve)
             liste_cout.append(cout_tot(dico_pourc_elv, liste_simul_pourc, dico_importance))
         liste_groupes[liste_groupes_possibles[liste_cout.index(max(liste_cout))]].append(eleve)
