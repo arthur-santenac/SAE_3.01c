@@ -205,7 +205,7 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
             liste_groupes[-1].append(eleve)
     return liste_groupes
 
-liste_eleve = lire_fichier("exemple.csv")
+liste_eleve = lire_fichier("monApp/static/exemple/exemple.csv")
 liste_critere = [critere.Critere(1, lambda math : math <= 3, "niveau Maths", True), critere.Critere(2, lambda francais : francais > 4, "niveau Français", False)]
 dico_importance = {"genre" : 3, "niveau Français" : 0, "niveau Maths" : 0, "Pénibilité" : 3}
 groupes = creer_groupe(liste_eleve, liste_critere, dico_importance, 3)
