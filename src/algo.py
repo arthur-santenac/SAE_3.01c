@@ -93,7 +93,7 @@ def nb_max_eleve_par_groupe(liste_eleve, nb_groupes):
     else:
         return len(liste_eleve) // nb_groupes + 1
 
-def groupes_possible(liste_groupes, nb_elv_grp):
+def groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupes):
     """Renvoie une liste d'index qui sont les index des groupes dans lesquels on peut ajouter des élèves.
 
     Args:
@@ -102,10 +102,25 @@ def groupes_possible(liste_groupes, nb_elv_grp):
 
     Returns:
         list: Une liste d'index.
-    """   
+    """
+    nb_elv_grp = nb_max_eleve_par_groupe(liste_eleve, nb_groupes)
     res = []
-    for i in range(len(liste_groupes)):
-        if len(liste_groupes[i]) < nb_elv_grp:
+    for i in range(len(liste_groupes) - 1):
+        ajouter = True
+        if len(liste_groupes[i]) >= nb_elv_grp:
+            ajouter = False
+        for critere in liste_critere:
+            if critere.groupe == i + 1:
+                if not critere.condition(int(eleve.critere[critere.nom_critere])):
+                    if not critere.obligatoire:
+                        ajouter = False
+                else:
+                    if critere.obligatoire:
+                        if ajouter:
+                            res = [critere.groupe - 1]
+                            return res
+                        return []      
+        if ajouter:  
             res.append(i)
     return res
 
@@ -152,7 +167,7 @@ def min_aleatoire(liste_cout):
             liste_index.append(i)
     return random.choice(liste_index)
 
-def creer_groupe(liste_eleve, dico_importance, nb_groupe):
+def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
     """ creer des groupes d'élève en répartissant les critères
 
     Args:
@@ -165,31 +180,35 @@ def creer_groupe(liste_eleve, dico_importance, nb_groupe):
     """
     random.shuffle(liste_eleve)
     liste_groupes = []
-    for _ in range(nb_groupe):
+    for _ in range(nb_groupe + 1):
         liste_groupes.append([])
     dico_pourc_elv = dico_poucentage(liste_eleve)
     nb_elv_grp = nb_max_eleve_par_groupe(liste_eleve, nb_groupe)
     for eleve in liste_eleve:
-        liste_groupes_possibles = groupes_possible(liste_groupes, nb_elv_grp)
-        liste_cout = []
-        for ind_groupe in liste_groupes_possibles:
-            liste_simul = []
-            liste_simul_pourc = []
-            for grp in liste_groupes:
-                liste_simul.append(grp.copy())
-            liste_simul[ind_groupe].append(eleve)
-            for grp_simul in liste_simul:
-                liste_simul_pourc.append(dico_poucentage(grp_simul))
-            if len(liste_simul[ind_groupe]) == 1:
-                liste_cout.append(0)
-            else:
-                liste_cout.append(cout_tot(dico_pourc_elv, liste_simul_pourc, dico_importance))
-        liste_groupes[liste_groupes_possibles[min_aleatoire(liste_cout)]].append(eleve)
+        liste_groupes_possibles = groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe)
+        if len(liste_groupes_possibles) > 0:
+            liste_cout = []
+            for ind_groupe in liste_groupes_possibles:
+                liste_simul = []
+                liste_simul_pourc = []
+                for grp in liste_groupes:
+                    liste_simul.append(grp.copy())
+                liste_simul[ind_groupe].append(eleve)
+                for grp_simul in liste_simul:
+                    liste_simul_pourc.append(dico_poucentage(grp_simul))
+                if len(liste_simul[ind_groupe]) == 1:
+                    liste_cout.append(0)
+                else:
+                    liste_cout.append(cout_tot(dico_pourc_elv, liste_simul_pourc, dico_importance))
+            liste_groupes[liste_groupes_possibles[min_aleatoire(liste_cout)]].append(eleve)
+        else:
+            liste_groupes[-1].append(eleve)
     return liste_groupes
 
-liste_eleve = lire_fichier("exemple2.csv")
-dico_importance = {"genre" : 3, "niveau Français" : 1}
-groupes = creer_groupe(liste_eleve, dico_importance, 3)
+liste_eleve = lire_fichier("exemple.csv")
+liste_critere = [critere.Critere(1, lambda math : math <= 3, "niveau Maths", True), critere.Critere(2, lambda francais : francais > 4, "niveau Français", False)]
+dico_importance = {"genre" : 3, "niveau Français" : 0, "niveau Maths" : 0, "Pénibilité" : 3}
+groupes = creer_groupe(liste_eleve, liste_critere, dico_importance, 3)
 
 for groupe in groupes:
     for elev in groupe:
