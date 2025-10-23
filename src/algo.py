@@ -1,6 +1,7 @@
 import csv
 import eleve as eleve
 import critere as critere
+import random
 
 def lire_fichier(nom_fichier):
     """ Lit un fichier csv et le transforme en liste
@@ -38,18 +39,17 @@ def cout(variable1, variable2):
         int : différence des deux variables. Plus ce cout est élevé plus les valeurs des variables sont différentes
     """    
     cout = 0
-    if len(variable1) == len(variable2):
-        for elem in variable1:
-            cout += abs(variable2[elem] - variable1[elem])
+    for elem in variable2:
+        cout += abs(variable2[elem] - variable1[elem])
     return cout
 
 def diff_cout_groupe(groupe1, groupe2, dico_importance):
     """calcule et renvoie le cout entre deux groupes. 
 
     Args:
-        groupe1 (list): Ce premier groupe est une liste de variables. Les variables sont des dictionnaires où les clés sont les différentes valeurs trouvées 
+        groupe1 (dict): clé : le nom d'un crière valeur : des dictionnaires où les clés sont les différentes valeurs trouvées 
         dans le fichier csv et les valeurs associées sont le pourcentage d'élèves associés à cette valeur dans le groupe de la variable.
-        groupe2 (list): Ce deuxième groupe est une liste de variables. Les variables sont des dictionnaires où les clés sont les différentes valeurs trouvées 
+        groupe2 (dict): clé : le nom d'un crière valeur : des dictionnaires où les clés sont les différentes valeurs trouvées 
         dans le fichier csv et les valeurs associées sont le pourcentage d'élèves associés à cette valeur dans le groupe de la variable.
         dico_importance (dict) : Dictionnaire avec comme clés les noms de variables et commes valeurs les coefficients d'importance.
 
@@ -120,7 +120,7 @@ def dico_poucentage(liste_eleves):
                             de la colonne comme clés et leur pourcentage d'apparition comme valeurs.
     """
     diviseur = len(liste_eleves)
-    liste = []
+    dico_res = {}
     if len(liste_eleves) > 0:
         for critere in liste_eleves[0].critere.keys():
             dico_total = {}
@@ -132,10 +132,38 @@ def dico_poucentage(liste_eleves):
                     dico_total[valeur_critere] += 1
             for cle, valeur in dico_total.items():
                 dico_total[cle] = (valeur / diviseur) * 100
-            liste.append(dico_total)
-    return liste
+            dico_res[critere] = dico_total
+    return dico_res
+
+def min_aleatoire(liste_cout):
+    """ Renvoie l'indice de l'élément le plus petit de la liste,
+        si il y en a plusieurs renvoie un indice aléatoire parmis ceux des élément les plus petits
+
+    Args:
+        liste_cout (list): liste de cout d'insertion d'un élève dans un groupe
+
+    Returns:
+        int: indice pour insérer un élève
+    """
+    min_val = min(liste_cout)
+    liste_index = []
+    for i in range(len(liste_cout)):
+        if liste_cout[i] == min_val:
+            liste_index.append(i)
+    return random.choice(liste_index)
 
 def creer_groupe(liste_eleve, dico_importance, nb_groupe):
+    """ creer des groupes d'élève en répartissant les critères
+
+    Args:
+        liste_eleve (list): liste des élèves importer d'un fichier csv
+        dico_importance (dict): dictionnaire contenant les coefficient d'importance des critères
+        nb_groupe (int): nombre de groupes a créer
+
+    Returns:
+        list: liste des groupes finis
+    """
+    random.shuffle(liste_eleve)
     liste_groupes = []
     for _ in range(nb_groupe):
         liste_groupes.append([])
@@ -149,11 +177,14 @@ def creer_groupe(liste_eleve, dico_importance, nb_groupe):
             liste_simul_pourc = []
             for grp in liste_groupes:
                 liste_simul.append(grp.copy())
+            liste_simul[ind_groupe].append(eleve)
             for grp_simul in liste_simul:
                 liste_simul_pourc.append(dico_poucentage(grp_simul))
-            liste_simul[ind_groupe].append(eleve)
-            liste_cout.append(cout_tot(dico_pourc_elv, liste_simul_pourc, dico_importance))
-        liste_groupes[liste_groupes_possibles[liste_cout.index(max(liste_cout))]].append(eleve)
+            if len(liste_simul[ind_groupe]) == 1:
+                liste_cout.append(0)
+            else:
+                liste_cout.append(cout_tot(dico_pourc_elv, liste_simul_pourc, dico_importance))
+        liste_groupes[liste_groupes_possibles[min_aleatoire(liste_cout)]].append(eleve)
     return liste_groupes
 
 liste_eleve = lire_fichier("exemple2.csv")
