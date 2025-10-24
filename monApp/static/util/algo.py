@@ -183,7 +183,6 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
     for _ in range(nb_groupe + 1):
         liste_groupes.append([])
     dico_pourc_elv = dico_poucentage(liste_eleve)
-    nb_elv_grp = nb_max_eleve_par_groupe(liste_eleve, nb_groupe)
     for eleve in liste_eleve:
         liste_groupes_possibles = groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe)
         if len(liste_groupes_possibles) > 0:
