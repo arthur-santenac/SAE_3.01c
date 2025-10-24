@@ -1,7 +1,132 @@
 {% extends "base.html" %}
 {% block title %}Test{% endblock %}
-{% block content %}
-<div class="container mt-5 pt-2">
-    <h1>je suis la page repartition</h1>
-</div>
+{% block main %}
+
+<head>
+    <link rel="stylesheet" href="../static/css/style.css" />
+</head>
+<main class="main_repartition">
+    <section>
+        <h1>élèves classés</h1>
+        {% set ns = namespace(num_eleve=0) %}
+        {% for i in range(1, nombre_groupes + 1) %}
+
+        <article>
+            <header>
+                <h2>groupe {{ i }}</h2>
+                <button>voir configuration</button>
+                <span class="count">{{ nb_eleve_groupe[i-1] }} élèves</span>
+            </header>
+            <ul data-group="{{ i }}-classe" >
+                {% for j in range(nb_eleve_groupe[i-1]) %}
+                <li draggable="true">
+                    {% set ns.num_eleve = ns.num_eleve + 1 %}
+                    <span>{{ ns.num_eleve }}</span>
+                    <span>prenom {{ ns.num_eleve }}</span>
+                    <span>nom {{ ns.num_eleve }}</span>
+                    <button aria-label="Rechercher">loupe</button>
+                    <button aria-label="Supprimer">croix</button>
+                </li>
+                {% endfor %}
+            </ul>
+        </article>
+        {% endfor %}
+    </section>
+
+    <section>
+        <h1>élèves restant</h1>
+
+        <article>
+            <header>
+                <h2>groupe 1</h2>
+                <span class="count">4 élèves</span>
+            </header>
+            <ul data-group="1-restant">
+                <li draggable="true">
+                    <span>12</span>
+                    <span>Blanc</span>
+                    <span>Marc</span>
+                    <button aria-label="Rechercher">loupe</button>
+                </li>
+                <li draggable="true">
+                    <span>13</span>
+                    <span>Girard</span>
+                    <span>Anne</span>
+                    <button aria-label="Rechercher">loupe</button>
+                </li>
+                <li draggable="true">
+                    <span>14</span>
+                    <span>Fontaine</span>
+                    <span>Lucas</span>
+                    <button aria-label="Rechercher">loupe</button>
+                </li>
+                <li draggable="true">
+                    <span>15</span>
+                    <span>Chevalier</span>
+                    <span>Sarah</span>
+                    <button aria-label="Rechercher">loupe</button>
+                </li>
+            </ul>
+        </article>
+    </section>
+
+    <section>
+        <h1>contrainte</h1>
+
+        <article>
+            <header>
+                <h2>contrainte global</h2>
+                <button aria-label="rajouter">rajouter contrainte</button>
+
+            </header>
+            <ul data-group="1-restant">
+                <li>
+                    <p> je suis une contrainte </p>
+
+                </li>
+                <li>
+                    <p> je suis une contrainte </p>
+
+                </li>
+                <li>
+                    <p> je suis une contrainte </p>
+
+                </li>
+                <li>
+                    <p> je suis une contrainte </p>
+
+                </li>
+            </ul>
+        </article>
+
+        <article>
+            <header>
+                <h2>contrainte par groupe</h2>
+                <button aria-label="rajouter">rajouter contrainte</button>
+
+            </header>
+            <ul data-group="1-restant">
+                <li>
+                    <p> je suis une contrainte </p>
+
+                </li>
+                <li>
+                    <p> je suis une contrainte </p>
+
+                </li>
+                <li>
+                    <p> je suis une contrainte </p>
+
+                </li>
+                <li>
+                    <p> je suis une contrainte </p>
+
+                </li>
+            </ul>
+        </article>
+    </section>
+</main>
+
+<script src="../static/script/repartition.js"></script>
+
 {% endblock %}

@@ -13,9 +13,12 @@ def importer():
 def configuration():
     return render_template("configuration.html",title ="R3.01 Dev Web avec yannnis ")
 
+nb_eleve_groupe = [5,2,10,7,5]
+nombre_groupes = len(nb_eleve_groupe)
+
 @app.route('/repartition/')
 def repartition():
-    return render_template("repartition.html",title ="R3.01 Dev Web avec yannnis ")
+    return render_template("repartition.html",title ="R3.01 Dev Web avec yannnis ",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes)
 
 @app.route('/exporter/')
 def exporter():
