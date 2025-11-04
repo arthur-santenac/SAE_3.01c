@@ -173,7 +173,7 @@ def min_aleatoire(liste_cout):
 def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
     """ creer des groupes d'élève en répartissant les critères
 
-    Args:
+    Args: 
         liste_eleve (list): liste des élèves importer d'un fichier csv
         dico_importance (dict): dictionnaire contenant les coefficient d'importance des critères
         nb_groupe (int): nombre de groupes a créer
@@ -210,7 +210,16 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
             if cout_tot(dico_pourc_elv, liste_groupes, dico_importance) < cout_tot(dico_pourc_elv, liste_max, dico_importance):
                 liste_max = copy.deepcopy(liste_groupes)
 # len(liste_groupes[-1]) < len(liste_max[-1])
-    return liste_groupes
+    return liste_max
+
+def score_totale(liste_eleve, groupes, dico_importance):
+    dico_pourc_elv = dico_poucentage(liste_eleve)
+    cout_grp = cout_tot(dico_pourc_elv, groupes, dico_importance)
+    cout_totale = 0
+    for critere in dico_pourc_elv:
+        cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
+    return int((cout_totale - cout_grp) / cout_totale * 100) 
+
 
 liste_eleve = lire_fichier("monApp/static/exemple/exemple.csv")
 liste_critere = [critere.Critere(1, lambda math : math <= 3, "niveau Maths", True), critere.Critere(2, lambda francais : francais > 4, "niveau Français", False)]
@@ -222,10 +231,14 @@ groupes = creer_groupe(liste_eleve, liste_critere, dico_importance, 3)
 
 fin = time.time()
 
+score = score_totale(liste_eleve, groupes, dico_importance)
+
 for groupe in groupes:
     for elev in groupe:
         print(elev)
     print()
+
+print(f"Score : {score}%")
 
 print(f"Temps d'exécution : {fin - debut:.3f} secondes")
 
