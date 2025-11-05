@@ -1,7 +1,27 @@
 {% extends "base.html" %}
 {% block title %}Test{% endblock %}
 {% block main %}
+<head>
+  <link rel="stylesheet" href="../static/css/style.css" />
+</head>
 <div class="container mt-5 pt-2">
-    <h1>je suis la page importer</h1>
+    <section>
+        <p>Importer un fichier CSV</p>
+        <label id="drop-zone">
+        Drop images here, or click to upload.
+        <input type="file" id="file-input" multiple accept=".csv" />
+        </label>
+        <ul id="preview"></ul>
+        <button id="clear-btn">Clear</button>
+    </section>
+    <section>
+        <p>Importer un fichier de configuration</p>
+        <label id="drop-zone">
+        Drop images here, or click to upload.
+        <input type="file" id="file-input" multiple accept=".csv" />
+        </label>
+        <ul id="preview"></ul>
+        <button id="clear-btn">Clear</button>
+    </section>
 </div>
 {% endblock %}
