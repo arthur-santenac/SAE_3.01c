@@ -1,130 +1,68 @@
-{% extends "base.html" %}
-{% block title %}Test{% endblock %}
-{% block main %}
+{% extends "base.html" %} {% block title %}Test{% endblock %} {% block main %}
 
 <head>
-    <link rel="stylesheet" href="../static/css/style.css" />
+  <link rel="stylesheet" href="../static/css/style.css" />
 </head>
+
 <main class="main_repartition">
-    <section>
-        <h1>élèves classés</h1>
-        {% set ns = namespace(num_eleve=0) %}
-        {% for i in range(1, nombre_groupes + 1) %}
-
-        <article>
-            <header>
-                <h2>groupe {{ i }}</h2>
-                <button>voir configuration</button>
-                <span class="count">{{ nb_eleve_groupe[i-1] }} élèves</span>
-            </header>
-            <ul data-group="{{ i }}-classe" >
-                {% for j in range(nb_eleve_groupe[i-1]) %}
-                <li draggable="true">
-                    {% set ns.num_eleve = ns.num_eleve + 1 %}
-                    <span>{{ ns.num_eleve }}</span>
-                    <span>prenom {{ ns.num_eleve }}</span>
-                    <span>nom {{ ns.num_eleve }}</span>
-                    <button aria-label="Rechercher">loupe</button>
-                    <button aria-label="Supprimer">croix</button>
-                </li>
-                {% endfor %}
-            </ul>
-        </article>
+  <section id="eleves_classes">
+    <h1>Élèves classés</h1>
+    {% for i in range(groupes|length - 1) %}
+    <article>
+      <header>
+        <h2>Groupe {{ i + 1 }}</h2>
+        <button>voir configuration</button>
+        <span class="count">{{ nb_eleve_groupe[i] }} élèves</span>
+      </header>
+      <ul class="liste-eleves" data-group="{{ i + 1 }}-classe">
+        {% for eleve in groupes[i] %}
+        <li draggable="true" class="eleve">
+          <span>{{ eleve.num }}</span>
+          <span>{{ eleve.prenom }}</span>
+          <span>{{ eleve.nom }}</span>
+          <button aria-label="Rechercher">loupe</button>
+          <button class="supprimer" aria-label="Supprimer">croix</button>
+        </li>
         {% endfor %}
-    </section>
+      </ul>
+    </article>
+    {% endfor %}
+  </section>
 
-    <section>
-        <h1>élèves restant</h1>
+  <section id="eleves_restants">
+    <h1>Élèves restants</h1>
+    <article>
+      <header>
+        <h2>Élèves non classés</h2>
+        <span class="count">{{ nb_eleve_groupe[-1] }} élèves</span>
+      </header>
+      <ul class="liste-eleves" data-group="restant">
+        {% for eleve in groupes[-1] %}
+        <li draggable="true" class="eleve">
+          <span>{{ eleve.num }}</span>
+          <span>{{ eleve.prenom }}</span>
+          <span>{{ eleve.nom }}</span>
+          <button aria-label="Rechercher">loupe</button>
+        </li>
+        {% endfor %}
+      </ul>
+    </article>
+  </section>
 
-        <article>
-            <header>
-                <h2>groupe 1</h2>
-                <span class="count">4 élèves</span>
-            </header>
-            <ul data-group="1-restant">
-                <li draggable="true">
-                    <span>12</span>
-                    <span>Blanc</span>
-                    <span>Marc</span>
-                    <button aria-label="Rechercher">loupe</button>
-                </li>
-                <li draggable="true">
-                    <span>13</span>
-                    <span>Girard</span>
-                    <span>Anne</span>
-                    <button aria-label="Rechercher">loupe</button>
-                </li>
-                <li draggable="true">
-                    <span>14</span>
-                    <span>Fontaine</span>
-                    <span>Lucas</span>
-                    <button aria-label="Rechercher">loupe</button>
-                </li>
-                <li draggable="true">
-                    <span>15</span>
-                    <span>Chevalier</span>
-                    <span>Sarah</span>
-                    <button aria-label="Rechercher">loupe</button>
-                </li>
-            </ul>
-        </article>
-    </section>
+  <section id="contraintes">
+    <h1>Contraintes</h1>
 
-    <section>
-        <h1>contrainte</h1>
-
-        <article>
-            <header>
-                <h2>contrainte global</h2>
-                <button aria-label="rajouter">rajouter contrainte</button>
-
-            </header>
-            <ul data-group="1-restant">
-                <li>
-                    <p> je suis une contrainte </p>
-
-                </li>
-                <li>
-                    <p> je suis une contrainte </p>
-
-                </li>
-                <li>
-                    <p> je suis une contrainte </p>
-
-                </li>
-                <li>
-                    <p> je suis une contrainte </p>
-
-                </li>
-            </ul>
-        </article>
-
-        <article>
-            <header>
-                <h2>contrainte par groupe</h2>
-                <button aria-label="rajouter">rajouter contrainte</button>
-
-            </header>
-            <ul data-group="1-restant">
-                <li>
-                    <p> je suis une contrainte </p>
-
-                </li>
-                <li>
-                    <p> je suis une contrainte </p>
-
-                </li>
-                <li>
-                    <p> je suis une contrainte </p>
-
-                </li>
-                <li>
-                    <p> je suis une contrainte </p>
-
-                </li>
-            </ul>
-        </article>
-    </section>
+    <article>
+      <header>
+        <h2>Contrainte globale</h2>
+        <button aria-label="rajouter">Rajouter contrainte</button>
+      </header>
+      <ul>
+        <li><p>Je suis une contrainte</p></li>
+        <li><p>Je suis une contrainte</p></li>
+      </ul>
+    </article>
+  </section>
 </main>
 
 <script src="../static/script/repartition.js"></script>

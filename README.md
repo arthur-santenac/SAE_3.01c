@@ -10,3 +10,9 @@ source venv/bin/activate
 pip freeze > requirements.txt
 pip install -r requirements.txt
 flask run
+
+# si vs code ne trouve pas les imports
+
+Appuyez sur Ctrl+Shift+P
+Tapez "Python: Select Interpreter"
+Choisissez l'interpréteur avec venv dans le chemin
