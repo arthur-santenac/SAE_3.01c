@@ -1,7 +1,70 @@
-{% extends "base.html" %}
-{% block title %}Test{% endblock %}
-{% block content %}
-<div class="container mt-5 pt-2">
-    <h1>je suis la page repartition</h1>
-</div>
+{% extends "base.html" %} {% block title %}Test{% endblock %} {% block main %}
+
+<head>
+  <link rel="stylesheet" href="../static/css/style.css" />
+</head>
+
+<main class="main_repartition">
+  <section id="eleves_classes">
+    <h1>Élèves classés</h1>
+    {% for i in range(groupes|length - 1) %}
+    <article>
+      <header>
+        <h2>Groupe {{ i + 1 }}</h2>
+        <button>voir configuration</button>
+        <span class="count">{{ nb_eleve_groupe[i] }} élèves</span>
+      </header>
+      <ul class="liste-eleves" data-group="{{ i + 1 }}-classe">
+        {% for eleve in groupes[i] %}
+        <li draggable="true" class="eleve">
+          <span>{{ eleve.num }}</span>
+          <span>{{ eleve.prenom }}</span>
+          <span>{{ eleve.nom }}</span>
+          <button aria-label="Rechercher">loupe</button>
+          <button class="supprimer" aria-label="Supprimer">croix</button>
+        </li>
+        {% endfor %}
+      </ul>
+    </article>
+    {% endfor %}
+  </section>
+
+  <section id="eleves_restants">
+    <h1>Élèves restants</h1>
+    <article>
+      <header>
+        <h2>Élèves non classés</h2>
+        <span class="count">{{ nb_eleve_groupe[-1] }} élèves</span>
+      </header>
+      <ul class="liste-eleves" data-group="restant">
+        {% for eleve in groupes[-1] %}
+        <li draggable="true" class="eleve">
+          <span>{{ eleve.num }}</span>
+          <span>{{ eleve.prenom }}</span>
+          <span>{{ eleve.nom }}</span>
+          <button aria-label="Rechercher">loupe</button>
+        </li>
+        {% endfor %}
+      </ul>
+    </article>
+  </section>
+
+  <section id="contraintes">
+    <h1>Contraintes</h1>
+
+    <article>
+      <header>
+        <h2>Contrainte globale</h2>
+        <button aria-label="rajouter">Rajouter contrainte</button>
+      </header>
+      <ul>
+        <li><p>Je suis une contrainte</p></li>
+        <li><p>Je suis une contrainte</p></li>
+      </ul>
+    </article>
+  </section>
+</main>
+
+<script src="../static/script/repartition.js"></script>
+
 {% endblock %}

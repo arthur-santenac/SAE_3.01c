@@ -1,7 +1,7 @@
 import time
 import csv
-import eleve as eleve
-import critere as critere
+from monApp.static.util import eleve
+from monApp.static.util import critere
 import random
 import copy
 
@@ -39,7 +39,7 @@ def cout(variable1, variable2):
 
     Returns:
         int : différence des deux variables. Plus ce cout est élevé plus les valeurs des variables sont différentes
-    """    
+    """
     cout = 0
     for elem in variable2:
         cout += abs(variable2[elem] - variable1[elem])
@@ -57,7 +57,7 @@ def diff_cout_groupe(groupe1, groupe2, dico_importance):
 
     Returns:
         int : cout pour les deux groupes. Plus ce cout est élevé plus les valeurs des variables sont différentes
-    """    
+    """
     cout_res = 0
     if len(groupe1) == len(groupe2):
         for critere in groupe1:
@@ -90,7 +90,7 @@ def nb_max_eleve_par_groupe(liste_eleve, nb_groupes):
 
     Returns:
         int: le nombre d'élèves maximum par jour
-    """    
+    """
     if len(liste_eleve) % nb_groupes == 0 :
         return len(liste_eleve) // nb_groupes
     else:
@@ -122,8 +122,8 @@ def groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe
                         if ajouter:
                             res = [critere.groupe - 1]
                             return res
-                        return []      
-        if ajouter:  
+                        return []
+        if ajouter:
             res.append(i)
     return res
 
@@ -233,10 +233,13 @@ fin = time.time()
 
 score = score_totale(liste_eleve, groupes, dico_importance)
 
+ll=0
+nb_eleve_groupe=[]
 for groupe in groupes:
-    for elev in groupe:
-        print(elev)
-    print()
+    nb_eleve_groupe.append(len(groupe))
+
+
+
 
 print(f"Score : {score}%")
 
