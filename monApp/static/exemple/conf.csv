@@ -1,0 +1,7 @@
+type,groupe,nom_critere,appartient,obligatoire
+critere,2,niveau Français,5|6,False
+critere,1,niveau Maths,1|2|3,True
+importance,,genre,1,
+importance,,niveau Français,0,
+importance,,niveau Maths,0,
+importance,,Pénibilité,1,
