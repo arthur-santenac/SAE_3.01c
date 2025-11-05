@@ -1,7 +1,9 @@
+import time
 import csv
 from monApp.static.util import eleve
 from monApp.static.util import critere
 import random
+import copy
 
 def lire_fichier(nom_fichier):
     """ Lit un fichier csv et le transforme en liste
@@ -62,7 +64,7 @@ def diff_cout_groupe(groupe1, groupe2, dico_importance):
             cout_res += dico_importance[critere] * cout(groupe1[critere], groupe2[critere])
     return cout_res
 
-def cout_tot(group, liste_groupes, dico_importance):
+def cout_tot(groupe, liste_groupes, dico_importance):
     """calcule et renvoie le cout entre un groupe et une liste de groupes. 
     Args:
         group (list): Ce premier groupe est une liste de variables. Les variables sont des dictionnaires où les clés sont les différentes valeurs trouvées 
@@ -74,8 +76,9 @@ def cout_tot(group, liste_groupes, dico_importance):
         int : cout entre le groupe "group" et la liste de groupes
     """
     cout_total = 0
-    for groupe in liste_groupes:
-        cout_total += diff_cout_groupe(group, groupe, dico_importance)
+    for un_groupe in liste_groupes:
+        pourcentage = dico_poucentage(un_groupe)
+        cout_total += diff_cout_groupe(groupe, pourcentage, dico_importance)
     return cout_total
 
 def nb_max_eleve_par_groupe(liste_eleve, nb_groupes):
@@ -170,7 +173,7 @@ def min_aleatoire(liste_cout):
 def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
     """ creer des groupes d'élève en répartissant les critères
 
-    Args:
+    Args: 
         liste_eleve (list): liste des élèves importer d'un fichier csv
         dico_importance (dict): dictionnaire contenant les coefficient d'importance des critères
         nb_groupe (int): nombre de groupes a créer
@@ -178,36 +181,57 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
     Returns:
         list: liste des groupes finis
     """
-    random.shuffle(liste_eleve)
-    liste_groupes = []
-    for _ in range(nb_groupe + 1):
-        liste_groupes.append([])
+    liste_max = None
     dico_pourc_elv = dico_poucentage(liste_eleve)
-    for eleve in liste_eleve:
-        liste_groupes_possibles = groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe)
-        if len(liste_groupes_possibles) > 0:
-            liste_cout = []
-            for ind_groupe in liste_groupes_possibles:
-                liste_simul = []
-                liste_simul_pourc = []
-                for grp in liste_groupes:
-                    liste_simul.append(grp.copy())
-                liste_simul[ind_groupe].append(eleve)
-                for grp_simul in liste_simul:
-                    liste_simul_pourc.append(dico_poucentage(grp_simul))
-                if len(liste_simul[ind_groupe]) == 1:
-                    liste_cout.append(0)
-                else:
-                    liste_cout.append(cout_tot(dico_pourc_elv, liste_simul_pourc, dico_importance))
-            liste_groupes[liste_groupes_possibles[min_aleatoire(liste_cout)]].append(eleve)
+    for _ in range(1000):
+        random.shuffle(liste_eleve)
+        liste_groupes = []
+        for _ in range(nb_groupe + 1):
+            liste_groupes.append([])
+        for eleve in liste_eleve:
+            liste_groupes_possibles = groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe)
+            if len(liste_groupes_possibles) > 0:
+                liste_cout = []
+                for ind_groupe in liste_groupes_possibles:
+                    if len(liste_groupes[ind_groupe]) == 1:
+                        liste_cout.append(0)
+                    else:
+                        groupe_simul = copy.deepcopy(liste_groupes[ind_groupe])
+                        ancien_cout = diff_cout_groupe(dico_pourc_elv, dico_poucentage(groupe_simul), dico_importance)
+                        groupe_simul.append(eleve)
+                        nouveau_cout = diff_cout_groupe(dico_pourc_elv, dico_poucentage(groupe_simul), dico_importance)
+                        liste_cout.append(ancien_cout - nouveau_cout)
+                liste_groupes[liste_groupes_possibles[min_aleatoire(liste_cout)]].append(eleve)
+            else:
+                liste_groupes[-1].append(eleve)
+        if liste_max is None:
+            liste_max = copy.deepcopy(liste_groupes)
         else:
-            liste_groupes[-1].append(eleve)
-    return liste_groupes
+            if cout_tot(dico_pourc_elv, liste_groupes, dico_importance) < cout_tot(dico_pourc_elv, liste_max, dico_importance):
+                liste_max = copy.deepcopy(liste_groupes)
+# len(liste_groupes[-1]) < len(liste_max[-1])
+    return liste_max
+
+def score_totale(liste_eleve, groupes, dico_importance):
+    dico_pourc_elv = dico_poucentage(liste_eleve)
+    cout_grp = cout_tot(dico_pourc_elv, groupes, dico_importance)
+    cout_totale = 0
+    for critere in dico_pourc_elv:
+        cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
+    return int((cout_totale - cout_grp) / cout_totale * 100) 
+
 
 liste_eleve = lire_fichier("monApp/static/exemple/exemple.csv")
 liste_critere = [critere.Critere(1, lambda math : math <= 3, "niveau Maths", True), critere.Critere(2, lambda francais : francais > 4, "niveau Français", False)]
 dico_importance = {"genre" : 3, "niveau Français" : 0, "niveau Maths" : 0, "Pénibilité" : 3}
+
+debut = time.time()
+
 groupes = creer_groupe(liste_eleve, liste_critere, dico_importance, 3)
+
+fin = time.time()
+
+score = score_totale(liste_eleve, groupes, dico_importance)
 
 ll=0
 nb_eleve_groupe=[]
@@ -217,4 +241,7 @@ for groupe in groupes:
 
 
 
-print(nb_eleve_groupe)
+print(f"Score : {score}%")
+
+print(f"Temps d'exécution : {fin - debut:.3f} secondes")
+
