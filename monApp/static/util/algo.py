@@ -1,9 +1,10 @@
 import time
 import csv
-from monApp.static.util import eleve
-from monApp.static.util import critere
+import eleve
+import critere
 import random
 import copy
+import json
 
 def lire_fichier(nom_fichier):
     """ Lit un fichier csv et le transforme en liste
@@ -17,7 +18,7 @@ def lire_fichier(nom_fichier):
     liste_eleve = []
     with open(nom_fichier) as fichier_csv:
         reader = csv.reader(fichier_csv, delimiter=',')
-        criteres =  next(reader)[3:]
+        criteres = next(reader)[3:]
         for ligne in reader:
             dico_critere = dict()
             liste_critere = ligne[3:]
@@ -26,6 +27,21 @@ def lire_fichier(nom_fichier):
             new_eleve = eleve.Eleve(ligne[0], ligne[1], ligne[2], dico_critere)
             liste_eleve.append(new_eleve)
     return liste_eleve
+
+def exporter_fichier():
+    ...
+
+def lire_config(nom_fichier):
+    with open(nom_fichier) as fichier_json:
+        config = json.load(fichier_json)
+    liste_critere = []
+    for un_critere in config["liste_critere"]:
+        liste_critere.append(critere.Critere(un_critere["groupe"], un_critere["appartient"], un_critere["nom"]))
+    dico_importance = config["dico_importance"]
+    return liste_critere, dico_importance
+
+def exporter_config(liste_critere, dico_importance):
+    ...
 
 def cout(variable1, variable2):
     """Calcule le cout entre deux instances d'une variable en faisant la valeur absolue des différences des valeurs des variables
@@ -114,15 +130,8 @@ def groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe
             ajouter = False
         for critere in liste_critere:
             if critere.groupe == i + 1:
-                if not critere.condition(int(eleve.critere[critere.nom_critere])):
-                    if not critere.obligatoire:
-                        ajouter = False
-                else:
-                    if critere.obligatoire:
-                        if ajouter:
-                            res = [critere.groupe - 1]
-                            return res
-                        return []
+                if int(eleve.critere[critere.nom_critere]) not in critere.condition:
+                    ajouter = False
         if ajouter:
             res.append(i)
     return res
@@ -185,7 +194,7 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
     debut, actuel = time.time(), time.time()
     dico_pourc_elv = dico_poucentage(liste_eleve)
     cpt = 0
-    while actuel - debut < 2:
+    while actuel - debut < 3:
         cpt += 1
         actuel = time.time()
         random.shuffle(liste_eleve)
@@ -198,7 +207,7 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
                 liste_cout = []
                 for ind_groupe in liste_groupes_possibles:
                     if len(liste_groupes[ind_groupe]) == 0:
-                        liste_cout.append(0)
+                        liste_cout.append(float('inf'))
                     else:
                         groupe_simul = copy.deepcopy(liste_groupes[ind_groupe])
                         ancien_cout = diff_cout_groupe(dico_pourc_elv, dico_poucentage(groupe_simul), dico_importance)
@@ -221,21 +230,22 @@ def score_totale(liste_eleve, groupes, dico_importance):
         cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
     return int((cout_totale - cout_grp) / cout_totale * 100) 
 
-liste_eleve = lire_fichier("monApp/static/exemple/exemple.csv")
-liste_critere = [critere.Critere(1, lambda math : math in [1, 2, 3], "niveau Maths", True), critere.Critere(2, lambda francais : francais in [5, 6], "niveau Français", False)]
-dico_importance = {"genre" : 3, "niveau Français" : 0, "niveau Maths" : 0, "Pénibilité" : 3}
+liste_eleve = lire_fichier("monApp/static/exemple/eleves.csv")
 
-groupes = creer_groupe(liste_eleve, liste_critere, dico_importance, 3)
+# liste_critere, dico_importance = [], {"genre" : 1, "niveau Français" : 0}
+liste_critere, dico_importance = lire_config("monApp/static/exemple/config.json")
+# liste_critere = [critere.Critere(2, [4, 5, 6], "niveau Maths"), critere.Critere(2, [5, 6], "niveau Français"), critere.Critere(3, [4, 5, 6], "niveau Maths")]
+# dico_importance = {"genre" : 3, "niveau Français" : 0, "niveau Maths" : 0, "Pénibilité" : 3}
+
+groupes = creer_groupe(liste_eleve, liste_critere, dico_importance, 12)
 score = score_totale(liste_eleve, groupes, dico_importance)
 
-ll=0
 nb_eleve_groupe=[]
 for groupe in groupes:
     nb_eleve_groupe.append(len(groupe))
-
-
-
+    for elev in groupe:
+        print(elev)
+    print()
 
 print(f"Score : {score}%")
-
 
