@@ -43,6 +43,13 @@ def lire_config(nom_fichier):
 def exporter_config(liste_critere, dico_importance):
     ...
 
+def init_dico_importance(liste_eleve):
+    dico_importance = {}
+    if len(liste_eleve) > 0:
+        for critere in liste_eleve[0].critere:
+            dico_importance[critere] = 100 // len(liste_eleve[0].critere)
+    return dico_importance
+
 def cout(variable1, variable2):
     """Calcule le cout entre deux instances d'une variable en faisant la valeur absolue des différences des valeurs des variables
 
@@ -232,20 +239,24 @@ def score_totale(liste_eleve, groupes, dico_importance):
 
 liste_eleve = lire_fichier("monApp/static/exemple/eleves.csv")
 
+dico_importance = init_dico_importance(liste_eleve)
+
+print(dico_importance)
+
 # liste_critere, dico_importance = [], {"genre" : 1, "niveau Français" : 0}
-liste_critere, dico_importance = lire_config("monApp/static/exemple/config.json")
+# liste_critere, dico_importance = lire_config("monApp/static/exemple/config.json")
 # liste_critere = [critere.Critere(2, [4, 5, 6], "niveau Maths"), critere.Critere(2, [5, 6], "niveau Français"), critere.Critere(3, [4, 5, 6], "niveau Maths")]
 # dico_importance = {"genre" : 3, "niveau Français" : 0, "niveau Maths" : 0, "Pénibilité" : 3}
 
-groupes = creer_groupe(liste_eleve, liste_critere, dico_importance, 12)
-score = score_totale(liste_eleve, groupes, dico_importance)
+# groupes = creer_groupe(liste_eleve, liste_critere, dico_importance, 12)
+# score = score_totale(liste_eleve, groupes, dico_importance)
 
-nb_eleve_groupe=[]
-for groupe in groupes:
-    nb_eleve_groupe.append(len(groupe))
-    for elev in groupe:
-        print(elev)
-    print()
+# nb_eleve_groupe=[]
+# for groupe in groupes:
+#     nb_eleve_groupe.append(len(groupe))
+#     for elev in groupe:
+#         print(elev)
+#     print()
 
-print(f"Score : {score}%")
+# print(f"Score : {score}%")
 
