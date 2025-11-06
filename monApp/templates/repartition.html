@@ -4,27 +4,64 @@
   <link rel="stylesheet" href="../static/css/style.css" />
 </head>
 
+<header class="header_score">
+  <section>
+    <h1>score</h1>
+  </section>
+  <section class="score">
+    <article>
+      <h1>graph 1</h1>
+    </article>
+    <article>
+      <h1>graph 1</h1>
+    </article>
+    <article>
+      <h1>graph 1</h1>
+    </article>
+    <article>
+      <h1>graph 1</h1>
+    </article>
+  </section>
+</header>
+
 <main class="main_repartition">
   <section id="eleves_classes">
     <h1>Élèves classés</h1>
     {% for i in range(groupes|length - 1) %}
     <article>
-      <header>
-        <h2>Groupe {{ i + 1 }}</h2>
-        <button>voir configuration</button>
-        <span class="count">{{ nb_eleve_groupe[i] }} élèves</span>
-      </header>
-      <ul class="liste-eleves" data-group="{{ i + 1 }}-classe">
-        {% for eleve in groupes[i] %}
-        <li draggable="true" class="eleve">
-          <span>{{ eleve.num }}</span>
-          <span>{{ eleve.prenom }}</span>
-          <span>{{ eleve.nom }}</span>
-          <button aria-label="Rechercher">loupe</button>
-          <button class="supprimer" aria-label="Supprimer">croix</button>
-        </li>
-        {% endfor %}
-      </ul>
+      <details open>
+        <summary>
+          <header>
+            <h2>Groupe {{ i + 1 }}</h2>
+            <span class="count">{{ nb_eleve_groupe[i] }} élèves</span>
+          </header>
+        </summary>
+        <details open>
+          <summary>
+            <header>
+              <h2>voir configuration Groupe {{ i + 1 }}</h2>
+            </header>
+          </summary>
+          <ul class="liste-eleves">
+            <li class="eleve">
+              <span>vfvfvfvf</span>
+              <button class="supprimer" aria-label="Supprimer">croix</button>
+            </li>
+          </ul>
+        </details>
+
+        <ul class="liste-eleves" data-group="{{ i + 1 }}-classe">
+          {% for eleve in groupes[i] %}
+          <li draggable="true" class="eleve">
+            <span>{{ eleve.num }}</span>
+            <span>{{ eleve.prenom }}</span>
+            <span>{{ eleve.nom }}</span>
+            <button aria-label="Rechercher">loupe</button>
+            <button class="supprimer" aria-label="Supprimer">croix</button>
+          </li>
+          {% endfor %}
+        </ul>
+      </details>
     </article>
     {% endfor %}
   </section>
@@ -32,20 +69,24 @@
   <section id="eleves_restants">
     <h1>Élèves restants</h1>
     <article>
-      <header>
-        <h2>Élèves non classés</h2>
-        <span class="count">{{ nb_eleve_groupe[-1] }} élèves</span>
-      </header>
-      <ul class="liste-eleves" data-group="restant">
-        {% for eleve in groupes[-1] %}
-        <li draggable="true" class="eleve">
-          <span>{{ eleve.num }}</span>
-          <span>{{ eleve.prenom }}</span>
-          <span>{{ eleve.nom }}</span>
-          <button aria-label="Rechercher">loupe</button>
-        </li>
-        {% endfor %}
-      </ul>
+      <details open>
+        <summary>
+          <header>
+            <h2>Élèves non classés</h2>
+            <span class="count">{{ nb_eleve_groupe[-1] }} élèves</span>
+          </header>
+        </summary>
+        <ul class="liste-eleves" data-group="restant">
+          {% for eleve in groupes[-1] %}
+          <li draggable="true" class="eleve">
+            <span>{{ eleve.num }}</span>
+            <span>{{ eleve.prenom }}</span>
+            <span>{{ eleve.nom }}</span>
+            <button aria-label="Rechercher">loupe</button>
+          </li>
+          {% endfor %}
+        </ul>
+      </details>
     </article>
   </section>
 
@@ -58,8 +99,12 @@
         <button aria-label="rajouter">Rajouter contrainte</button>
       </header>
       <ul>
-        <li><p>Je suis une contrainte</p></li>
-        <li><p>Je suis une contrainte</p></li>
+        <li>
+          <p>Je suis une contrainte</p>
+        </li>
+        <li>
+          <p>Je suis une contrainte</p>
+        </li>
       </ul>
     </article>
   </section>
