@@ -1,0 +1,25 @@
+{
+  "liste_critere": [
+    {
+      "groupe": 2,
+      "appartient": [5, 6],
+      "nom": "niveau Français"
+    },
+    {
+      "groupe": 2,
+      "appartient": [4, 5, 6],
+      "nom": "niveau Maths"
+    },
+    {
+      "groupe": 3,
+      "appartient": [4, 5, 6],
+      "nom": "niveau Maths"
+    }
+  ],
+  "dico_importance": {
+    "genre": 1,
+    "niveau Français": 0,
+    "niveau Maths": 0,
+    "Pénibilité": 1
+  }
+}
