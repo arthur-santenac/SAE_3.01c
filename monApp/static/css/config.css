@@ -106,3 +106,26 @@ body {
     background-color: #a6cfff;
     padding: 1%;
 }  
+
+
+.genre{
+    display: flex;
+    flex-wrap: nowrap;
+    background-color: #ebf4ff;
+    padding: 1%;
+}
+
+.genre h4{
+    flex-grow: 0;
+    flex-basis: 10%;
+}
+
+.genre input{
+    flex-grow: 0;
+    flex-basis: 25%;
+}
+
+.niv-genre{
+    margin-left: 1%;
+    width: 3vw;
+}
