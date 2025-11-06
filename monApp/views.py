@@ -1,13 +1,26 @@
-from flask import Flask
+from flask import Flask, request, redirect, url_for, render_template
 from monApp.app import app;
-from flask import render_template, request
-from flask import render_template
 from monApp.static.util.algo import groupes,nb_eleve_groupe
+import os
+
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
 
 @app.route('/')
-@app.route('/importer/')
+def index():
+    return render_template('importer.html')
+
+@app.route('/importer/', methods=['POST'])
 def importer():
-    return render_template("importer.html",title ="R3.01 Dev Web avec yannnis ")
+    if 'csv_file' not in request.files:
+        return "Aucun fichier sélectionné", 400
+    file = request.files['csv_file']
+    if file.filename == '':
+        return "Nom de fichier vide", 400
+    if file and file.filename.endswith('.csv'):
+        filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+        file.save(filepath)
+        return "Fichier importé avec succès"
+    return "Format de fichier non supporté", 400
 
 @app.route('/configuration/')
 def configuration():
@@ -22,6 +35,8 @@ def repartition():
 @app.route('/exporter/')
 def exporter():
     return render_template("exporter.html",title ="R3.01 Dev Web avec yannnis ")
+
+
 
 
 

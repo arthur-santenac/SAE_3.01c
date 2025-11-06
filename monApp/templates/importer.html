@@ -6,22 +6,11 @@
 </head>
 <div class="container mt-5 pt-2">
     <section>
-        <p>Importer un fichier CSV</p>
-        <label id="drop-zone">
-        Drop images here, or click to upload.
-        <input type="file" id="file-input" multiple accept=".csv" />
-        </label>
-        <ul id="preview"></ul>
-        <button id="clear-btn">Clear</button>
-    </section>
-    <section>
-        <p>Importer un fichier de configuration</p>
-        <label id="drop-zone">
-        Drop images here, or click to upload.
-        <input type="file" id="file-input" multiple accept=".csv" />
-        </label>
-        <ul id="preview"></ul>
-        <button id="clear-btn">Clear</button>
+        <h2>Importer un fichier CSV</h2>
+        <form action="{{ url_for('importer') }}" method="post" enctype="multipart/form-data">
+            <input type="file" accept=".csv" name="csv_file" required>
+            <button type="submit">Importer</button>
+        </form>
     </section>
 </div>
 {% endblock %}
