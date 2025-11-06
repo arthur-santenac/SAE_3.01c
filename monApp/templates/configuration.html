@@ -1,7 +1,69 @@
 {% extends "base.html" %}
-{% block title %}Test{% endblock %}
+{% block title %}Page de configuration{% endblock %}
 {% block content %}
-<div class="container mt-5 pt-2">
-    <h1>je suis la page configuration</h1>
-</div>
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/config.css') }}">
+</head>
+<body class="container mt-5 pt-2">
+
+    <section class="config-section">
+        <section class="config-base">
+            <h2>Configuration de base</h2>
+            <div class="div-base">
+                <h3>Nombre de groupe</h3>
+                <div>
+                    <input type="text" class="level-input" name="nb-grp">
+                </div>
+            </div>
+        </section>
+        <section class="config-groupe">
+            <h2>Contraintes par groupe</h2>
+            <div class="group-box">
+                <h3>groupe 1</h3>
+                <div class="constraint-row">
+                    <span>en</span>
+                    <select name="matiere_g1_c1">
+                        <option value="francais">Francais</option>
+                        <option value="maths">Maths</option>
+                    </select>
+                    <select name="condition_g1_c1">
+                        <option value="contient">contient</option>
+                        <option value="ne_contient_pas">ne contient pas</option>
+                    </select>
+                    <select name="type_g1_c1">
+                        <option value="tout">tout</option>
+                        <option value="uniquement">uniquement</option>
+                    </select>
+                    <span>les élèves avec un niveau de</span>
+                    <input type="text" class="level-input" name="level_g1_c1">
+                    <button type="button" class="delete-btn" title="Supprimer la contrainte">X</button>
+                </div>
+                
+                <div class="constraint-row">
+                    <span>en</span>
+                    <select name="matiere_g1_c2">
+                        <option value="maths">Maths</option>
+                        <option value="francais">Francais</option>
+                    </select>
+                    <select name="condition_g1_c2">
+                        <option value="contient">contient</option>
+                        <option value="ne_contient_pas">ne contient pas</option>
+                    </select>
+                    <select name="type_g1_c2">
+                        <option value="uniquement">uniquement</option>
+                        <option value="tout">tout</option>
+                    </select>
+                    <span>les élèves avec un niveau de</span>
+                    <input type="text" class="level-input" name="level_g1_c2">
+                    <button type="button" class="delete-btn" title="Supprimer la contrainte">X</button>
+                </div>
+
+                <button type="button" class="add-btn">+ ajouter une contrainte</button>
+            </div>
+        </section>
+    </section>
+
+</body>
+
 {% endblock %}
