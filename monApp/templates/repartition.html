@@ -56,7 +56,9 @@
                 <td>{{jj.nom_critere}}</td>
                 <td>{{jj.condition}}</td>
                 <td>
-                  <button class="supprimer_critere" aria-label="Supprimer">×</button>
+                  <button class="supprimer_critere" aria-label="Supprimer">
+                    ×
+                  </button>
                 </td>
               </tr>
               {% endif %} {% endfor %}
@@ -66,7 +68,6 @@
         <table class="liste-eleves" data-group="{{ i + 1 }}-classe">
           <thead>
             <tr>
-              <th>Num</th>
               <th>Prénom</th>
               <th>Nom</th>
               {% for chiffre in liste_critere_base %}
@@ -78,7 +79,6 @@
           <tbody>
             {% for eleve in groupes[i] %}
             <tr draggable="true" class="eleve">
-              <td>{{ eleve.num }}</td>
               <td>{{ eleve.prenom }}</td>
               <td>{{ eleve.nom }}</td>
               {% for critere_nom in liste_critere_base %}
@@ -110,7 +110,6 @@
         <table class="liste-eleves" data-group="restants">
           <thead>
             <tr>
-              <th>Num</th>
               <th>Prénom</th>
               <th>Nom</th>
               {% for chiffre in liste_critere_base %}
@@ -122,7 +121,6 @@
           <tbody>
             {% for eleve in groupes[-1] %}
             <tr draggable="true" class="eleve">
-              <td>{{ eleve.num }}</td>
               <td>{{ eleve.prenom }}</td>
               <td>{{ eleve.nom }}</td>
               {% for critere_nom in liste_critere_base %}
@@ -141,5 +139,9 @@
 </main>
 
 <script src="../static/script/repartition.js"></script>
+
+<footer class="header_score">
+  <button aria-label="Rechercher">exporter</button>
+</footer>
 
 {% endblock %}
