@@ -1,0 +1,22 @@
+section {
+  background: #A6CFFF;
+  color: #333;
+  margin: 3em;
+  padding: 2em;
+  border-radius: 30px;
+}
+ 
+button {
+    border-radius: 6px;
+}
+
+.importer {
+    padding-top: 4em;
+    padding-bottom: 4em;
+    padding-left: 7em;
+    padding-right: 7em;
+    border-radius: 20px;
+    position: fixed;
+    bottom: 20px;
+    left: 42%;
+}

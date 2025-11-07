@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for, render_template
+from flask import Flask, render_template, request, redirect, url_for
 from monApp.app import app;
 from monApp.static.util.algo import groupes,nb_eleve_groupe
 import os
@@ -17,26 +17,23 @@ def importer():
     if file.filename == '':
         return "Nom de fichier vide", 400
     if file and file.filename.endswith('.csv'):
-        filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(filepath)
-        return "Fichier importé avec succès"
+        file.save(os.path.join(UPLOAD_FOLDER, "groupes.csv"))
+        return render_template("configuration.html",title ="COHORT App")
     return "Format de fichier non supporté", 400
 
 @app.route('/configuration/')
 def configuration():
-    return render_template("configuration.html",title ="R3.01 Dev Web avec yannnis ")
+    return render_template("configuration.html",title ="COHORT App")
 
 nombre_groupes = len(nb_eleve_groupe)
 
 @app.route('/repartition/')
 def repartition():
-    return render_template("repartition.html",title ="R3.01 Dev Web avec yannnis ",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes)
+    return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes)
 
 @app.route('/exporter/')
 def exporter():
-    return render_template("exporter.html",title ="R3.01 Dev Web avec yannnis ")
-
-
+    return render_template("exporter.html",title ="COHORT App")
 
 
 

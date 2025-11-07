@@ -2,15 +2,16 @@
 {% block title %}Test{% endblock %}
 {% block main %}
 <head>
-  <link rel="stylesheet" href="../static/css/style.css" />
+  <link rel="stylesheet" href="../static/css/importer.css" />
 </head>
 <div class="container mt-5 pt-2">
     <section>
         <h2>Importer un fichier CSV</h2>
-        <form action="{{ url_for('importer') }}" method="post" enctype="multipart/form-data">
+        <form id="uploadForm" action="{{ url_for('importer') }}" method="post" enctype="multipart/form-data">
             <input type="file" accept=".csv" name="csv_file" required>
-            <button type="submit">Importer</button>
-        </form>
+            <button type="reset">Supprimer le fichier</button>
+        </form> 
     </section>
+    <button class="importer" type="submit" form="uploadForm">Importer</button>
 </div>
 {% endblock %}
