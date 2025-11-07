@@ -5,6 +5,10 @@ body {
     padding: 20px;
 }
 
+h2{
+    font-weight: bold;
+}
+
 h4{
     text-align: center;
 }
@@ -109,7 +113,7 @@ h4{
 .section-importance{
     background-color: #a6cfff;
     padding: 1%;
-    border-radius: 0px 0px 10px 10px;
+    border-radius: 20px;
 }  
 
 .section-importance > div {
@@ -118,36 +122,31 @@ h4{
     background-color: #ebf4ff;
     padding: 1%;
     margin: 1% 0 0 0;
+    justify-content: start;
 }
 
 
-.genre h4{
+.section-importance > div > h4{
     flex-grow: 0;
-    flex-basis: 10%;
+    flex-basis: 30%;
     margin: 0;
 }
 
-.genre input{
+.section-importance > div > input{
     flex-grow: 0;
-    flex-basis: 25%;
+    flex-basis: 40%;
 }
 
-.score-importance{
+
+
+.section-importance > div > div{
     flex-grow: 1;
-    flex-basis: 22%;
+    flex-basis: 30%;
 }
 
-.score-genre{
+.section-importance > div > div > input {
     margin-left: 1vw;
-}
-
-.niv-genre{
-    margin-left: 2%;
     width: 3vw;
-}
-
-.section-importance > div > div {
-    
 }
 
 /*############## L'importance du francais #############*/

@@ -24,33 +24,144 @@
                 <h4>Répartion d'importance</h4>
                 <div class="genre">
                     <h4>Genre</h4>
-                    <input type="range" min="0" max="100" step="1">
-                    <div class="score-genre">
-                        <input type="text" class="niv-genre" name="nb-genre">
+                    <input type="range" min="0" max="100" step="1" class="slider" value="25">
+                    <div>
+                        <input type="number" name="importance_genre" class="slider-value" min="0" max="100" step="1" value="25">
                     </div>
                 </div>
+
                 <div class="francais">
                     <h4>Niveau Français</h4>
-                    <input type="range" min="0" max="100" step="1">
-                    <div class="score-francais">
-                        <input type="text" class="niv-francais" name="nb-genre">
+                    <input type="range" min="0" max="100" step="1" class="slider" value="25">
+                    <div>
+                        <input type="number" name="importance_francais" class="slider-value" min="0" max="100" step="1" value="25">
                     </div>
                 </div>
+
                 <div class="maths">
                     <h4>Niveau Mathématiques</h4>
-                    <input type="range" min="0" max="100" step="1">
-                    <div class="score-maths">
-                        <input type="text" class="niv-math" name="nb-genre">
+                    <input type="range" min="0" max="100" step="1" class="slider" value="25">
+                    <div>
+                        <input type="number" name="importance_maths" class="slider-value" min="0" max="100" step="1" value="25">
                     </div>
                 </div>
+
                 <div class="penibilite">
                     <h4>Pénibilité</h4>
-                    <input type="range" min="0" max="100" step="1">
-                    <div class="score-penibilite">
-                        <input type="text" class="niv-penibilite" name="nb-genre">
+                    <input type="range" min="0" max="100" step="1" class="slider" value="25">
+                    <div>
+                        <input type="number" name="importance_penibilite" class="slider-value" min="0" max="100" step="1" value="25">
                     </div>
                 </div>
             </section>
+            <script>
+                const sliders = document.querySelectorAll(".slider");
+                const values = document.querySelectorAll(".slider-value");
+                const totalDisplay = document.getElementById("total");
+                const TOTAL_MAX = 100;
+
+                function updateTotal() {
+                    let total = 0;
+                    sliders.forEach(s => total += Math.round(Number(s.value)));
+                    totalDisplay.textContent = total;
+                    
+                    let roundDiff = TOTAL_MAX - total;
+                    if (roundDiff !== 0) {
+                        const targetSlider = [...sliders].find(s => (roundDiff > 0 && Number(s.value) < 100) || (roundDiff < 0 && Number(s.value) > 0));
+                        if (targetSlider) {
+                            targetSlider.value = Number(targetSlider.value) + roundDiff;
+                            updateAllFields();
+                        }
+                    }
+                }
+                
+                function updateAllFields() {
+                    let total = 0;
+                    sliders.forEach((s, i) => {
+                        let val = Math.round(Number(s.value));
+                        s.value = val;
+                        values[i].value = val;
+                        total += val;
+                    });
+                    totalDisplay.textContent = total;
+                }
+
+                function adjustSliders(changedIndex) {
+                    let total = 0;
+                    sliders.forEach(s => total += Number(s.value));
+
+                    let diff = TOTAL_MAX - total;
+                    if (diff === 0) {
+                        updateAllFields();
+                        return;
+                    }
+
+                    let adjustable;
+                    if (diff > 0) {
+                        adjustable = [...sliders].filter((_, i) => i !== changedIndex && Number(sliders[i].value) < 100);
+                    } else {
+                        adjustable = [...sliders].filter((_, i) => i !== changedIndex && Number(sliders[i].value) > 0);
+                    }
+
+                    if (adjustable.length === 0) {
+                        updateAllFields();
+                        updateTotal(); 
+                        return;
+                    }
+
+                    let remainingDiff = diff;
+                    
+                    while (Math.abs(remainingDiff) > 0 && adjustable.length > 0) {
+                        let amountPerSlider = (remainingDiff > 0) ? 1 : -1;
+                        
+                        for (let i = 0; i < adjustable.length; i++) {
+                            const s = adjustable[i];
+                            let currentVal = Number(s.value);
+                            
+                            s.value = currentVal + amountPerSlider;
+                            remainingDiff -= amountPerSlider;
+
+                            if (Number(s.value) === 100 || Number(s.value) === 0) {
+                                adjustable.splice(i, 1);
+                                i--; 
+                            }
+                            
+                            if (remainingDiff === 0) {
+                                break;
+                            }
+                        }
+                        
+                        if (adjustable.length === 0 && remainingDiff !== 0) {
+                            let originalSlider = sliders[changedIndex];
+                            originalSlider.value = Number(originalSlider.value) + remainingDiff;
+                            remainingDiff = 0; 
+                        }
+                    }
+
+                    updateAllFields();
+                    updateTotal();
+                }
+
+                sliders.forEach((slider, i) => {
+                    slider.addEventListener("input", () => {
+                        values[i].value = Math.round(Number(slider.value));
+                        adjustSliders(i);
+                    });
+                });
+
+                values.forEach((v, i) => {
+                    v.addEventListener("input", () => {
+                        let val = Number(v.value);
+                        if (val > 100) val = 100;
+                        if (val < 0) val = 0;
+                        
+                        sliders[i].value = val;
+                        adjustSliders(i);
+                    });
+                });
+                updateAllFields();
+                updateTotal();
+            </script>
         </section>
         <section class="config-groupe">
             <h2>Contraintes par groupe</h2>
