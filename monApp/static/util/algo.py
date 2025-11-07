@@ -249,4 +249,3 @@ def score_totale(liste_eleve, groupes, dico_importance):
 
 
 liste_critere_base=recup_critere("monApp/static/exemple/exemple.csv")
-

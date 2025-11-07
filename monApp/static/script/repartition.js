@@ -132,3 +132,4 @@ document.getElementById('eleves_classes').addEventListener('click', function(e) 
 
 // Initialisation des compteurs au chargement
 updateCounts();
+
