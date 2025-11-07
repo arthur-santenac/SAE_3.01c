@@ -245,7 +245,7 @@ liste_eleve = lire_fichier("monApp/static/exemple/exemple.csv")
 
 # liste_critere, dico_importance = [], {"genre" : 1, "niveau Français" : 0}
 liste_critere, dico_importance = lire_config("monApp/static/exemple/config.json")
-# liste_critere = [critere.Critere(2, [4, 5, 6], "niveau Maths"), critere.Critere(2, [5, 6], "niveau Français"), critere.Critere(3, [4, 5, 6], "niveau Maths")]
+liste_critere = [critere.Critere(2, [4, 5, 6], "niveau Maths"), critere.Critere(2, [5, 6], "niveau Français"), critere.Critere(3, [4, 5, 6], "niveau Maths")]
 # dico_importance = {"genre" : 3, "niveau Français" : 0, "niveau Maths" : 0, "Pénibilité" : 3}
 
 groupes = creer_groupe(liste_eleve, liste_critere, dico_importance, 3)
@@ -259,4 +259,6 @@ for groupe in groupes:
     print()
 
 print(f"Score : {score}%")
+
+print(liste_critere[0].nom_critere,liste_critere[0].condition)
 

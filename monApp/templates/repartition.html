@@ -43,10 +43,12 @@
             </header>
           </summary>
           <ul class="liste-eleves">
+            {% for jj in liste_critere %} {% if jj.groupe == i+1 %}
             <li class="eleve">
-              <span>vfvfvfvf</span>
+              <span>{{jj.nom_critere}}, {{jj.condition}}</span>
               <button class="supprimer" aria-label="Supprimer">croix</button>
             </li>
+            {% endif %} {% endfor %}
           </ul>
         </details>
 
@@ -87,25 +89,6 @@
           {% endfor %}
         </ul>
       </details>
-    </article>
-  </section>
-
-  <section id="contraintes">
-    <h1>Contraintes</h1>
-
-    <article>
-      <header>
-        <h2>Contrainte globale</h2>
-        <button aria-label="rajouter">Rajouter contrainte</button>
-      </header>
-      <ul>
-        <li>
-          <p>Je suis une contrainte</p>
-        </li>
-        <li>
-          <p>Je suis une contrainte</p>
-        </li>
-      </ul>
     </article>
   </section>
 </main>
