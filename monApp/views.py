@@ -55,14 +55,13 @@ def repartition():
         nombre_groupes = session.get("nb_groupes", 0)
         nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
         groupes = algo.creer_groupe(liste_eleve, [], session.get("dico_importance"), nombre_groupes)
-        session["liste_groupe"] = groupes
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes)
     except:
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=0,nombre_groupes=0,groupes=[[]])
 
 @app.route("/exporter")
 def exporter():
-    liste_groupe = session.get("liste_groupe", None)
+    liste_groupe = ...
     if not liste_groupe:
         ...
     with open("static/uploads/groupes.csv", "w", newline="") as fichier_csv:
@@ -82,5 +81,4 @@ def exporter():
                 for un_critere in liste_critere:
                     fichier_csv.write(str(eleve.critere[un_critere]))
                 fichier_csv.write(str(i))
-    print("yes")
     return send_from_directory(directory="static/uploads", path="groupes.csv", as_attachment=True)
