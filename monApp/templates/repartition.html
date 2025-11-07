@@ -13,13 +13,13 @@
       <h1>graph 1</h1>
     </article>
     <article>
-      <h1>graph 1</h1>
+      <h1>graph 2</h1>
     </article>
     <article>
-      <h1>graph 1</h1>
+      <h1>graph 3</h1>
     </article>
     <article>
-      <h1>graph 1</h1>
+      <h1>graph 4</h1>
     </article>
   </section>
 </header>
@@ -42,27 +42,50 @@
               <h2>voir configuration Groupe {{ i + 1 }}</h2>
             </header>
           </summary>
-          <ul class="liste-eleves">
-            {% for jj in liste_critere %} {% if jj.groupe == i+1 %}
-            <li class="eleve">
-              <span>{{jj.nom_critere}}, {{jj.condition}}</span>
-              <button class="supprimer" aria-label="Supprimer">croix</button>
-            </li>
-            {% endif %} {% endfor %}
-          </ul>
+          <table class="table-criteres">
+            <thead>
+              <tr>
+                <th>Critère</th>
+                <th>Condition</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for jj in liste_critere %} {% if jj.groupe == i+1 %}
+              <tr>
+                <td>{{jj.nom_critere}}</td>
+                <td>{{jj.condition}}</td>
+                <td>
+                  <button class="supprimer" aria-label="Supprimer">×</button>
+                </td>
+              </tr>
+              {% endif %} {% endfor %}
+            </tbody>
+          </table>
         </details>
-
-        <ul class="liste-eleves" data-group="{{ i + 1 }}-classe">
-          {% for eleve in groupes[i] %}
-          <li draggable="true" class="eleve">
-            <span>{{ eleve.num }}</span>
-            <span>{{ eleve.prenom }}</span>
-            <span>{{ eleve.nom }}</span>
-            <button aria-label="Rechercher">loupe</button>
-            <button class="supprimer" aria-label="Supprimer">croix</button>
-          </li>
-          {% endfor %}
-        </ul>
+        <table class="liste-eleves" data-group="{{ i + 1 }}-classe">
+          <thead>
+            <tr>
+              <th>Num</th>
+              <th>Prénom</th>
+              <th>Nom</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for eleve in groupes[i] %}
+            <tr draggable="true" class="eleve">
+              <td>{{ eleve.num }}</td>
+              <td>{{ eleve.prenom }}</td>
+              <td>{{ eleve.nom }}</td>
+              <td class="actions">
+                <button class="btn-loupe" aria-label="Rechercher">🔍</button>
+                <button class="supprimer" aria-label="Supprimer">×</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </details>
     </article>
     {% endfor %}
@@ -78,16 +101,34 @@
             <span class="count">{{ nb_eleve_groupe[-1] }} élèves</span>
           </header>
         </summary>
-        <ul class="liste-eleves" data-group="restant">
-          {% for eleve in groupes[-1] %}
-          <li draggable="true" class="eleve">
-            <span>{{ eleve.num }}</span>
-            <span>{{ eleve.prenom }}</span>
-            <span>{{ eleve.nom }}</span>
-            <button aria-label="Rechercher">loupe</button>
-          </li>
-          {% endfor %}
-        </ul>
+        <table class="liste-eleves" data-group="restants">
+          <thead>
+            <tr>
+              <th>Num</th>
+              <th>Prénom</th>
+              <th>Nom</th>
+              {% for chiffre in eleve.critere.keys %}
+              <td>{{ chiffre }}</td>
+              {% endfor %}
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for eleve in groupes[-1] %}
+            <tr draggable="true" class="eleve">
+              <td>{{ eleve.num }}</td>
+              <td>{{ eleve.prenom }}</td>
+              <td>{{ eleve.nom }}</td>
+              {% for chiffre in eleve.critere.values %}
+              <td>{{ chiffre }}</td>
+              {% endfor %}
+              <td class="actions">
+                <button class="btn-loupe" aria-label="Rechercher">🔍</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </details>
     </article>
   </section>
