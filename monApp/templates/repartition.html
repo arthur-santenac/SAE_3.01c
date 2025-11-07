@@ -5,23 +5,6 @@
 </head>
 
 <header class="header_score">
-  <section>
-    <h1>score</h1>
-  </section>
-  <section class="score">
-    <article>
-      <h1>graph 1</h1>
-    </article>
-    <article>
-      <h1>graph 1</h1>
-    </article>
-    <article>
-      <h1>graph 1</h1>
-    </article>
-    <article>
-      <h1>graph 1</h1>
-    </article>
-  </section>
 </header>
 
 <main class="main_repartition">
@@ -42,25 +25,56 @@
               <h2>voir configuration Groupe {{ i + 1 }}</h2>
             </header>
           </summary>
-          <ul class="liste-eleves">
-            <li class="eleve">
-              <span>vfvfvfvf</span>
-              <button class="supprimer" aria-label="Supprimer">croix</button>
-            </li>
-          </ul>
+          <table class="table-criteres">
+            <thead>
+              <tr>
+                <th>Critère</th>
+                <th>Condition</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for jj in liste_critere %} {% if jj.groupe == i+1 %}
+              <tr>
+                <td>{{jj.nom_critere}}</td>
+                <td>{{jj.condition}}</td>
+                <td>
+                  <button class="supprimer_critere" aria-label="Supprimer">×</button>
+                </td>
+              </tr>
+              {% endif %} {% endfor %}
+            </tbody>
+          </table>
         </details>
-
-        <ul class="liste-eleves" data-group="{{ i + 1 }}-classe">
-          {% for eleve in groupes[i] %}
-          <li draggable="true" class="eleve">
-            <span>{{ eleve.num }}</span>
-            <span>{{ eleve.prenom }}</span>
-            <span>{{ eleve.nom }}</span>
-            <button aria-label="Rechercher">loupe</button>
-            <button class="supprimer" aria-label="Supprimer">croix</button>
-          </li>
-          {% endfor %}
-        </ul>
+        <table class="liste-eleves" data-group="{{ i + 1 }}-classe">
+          <thead>
+            <tr>
+              <th>Num</th>
+              <th>Prénom</th>
+              <th>Nom</th>
+              {% for chiffre in liste_critere_base %}
+              <td>{{ chiffre }}</td>
+              {% endfor %}
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for eleve in groupes[i] %}
+            <tr draggable="true" class="eleve">
+              <td>{{ eleve.num }}</td>
+              <td>{{ eleve.prenom }}</td>
+              <td>{{ eleve.nom }}</td>
+              {% for critere_nom in liste_critere_base %}
+              <td>{{ eleve.critere[critere_nom] }}</td>
+              {% endfor %}
+              <td class="actions">
+                <button class="btn-loupe" aria-label="Rechercher">loupe</button>
+                <button class="supprimer" aria-label="Supprimer">×</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </details>
     </article>
     {% endfor %}
@@ -76,36 +90,35 @@
             <span class="count">{{ nb_eleve_groupe[-1] }} élèves</span>
           </header>
         </summary>
-        <ul class="liste-eleves" data-group="restant">
-          {% for eleve in groupes[-1] %}
-          <li draggable="true" class="eleve">
-            <span>{{ eleve.num }}</span>
-            <span>{{ eleve.prenom }}</span>
-            <span>{{ eleve.nom }}</span>
-            <button aria-label="Rechercher">loupe</button>
-          </li>
-          {% endfor %}
-        </ul>
+        <table class="liste-eleves" data-group="restants">
+          <thead>
+            <tr>
+              <th>Num</th>
+              <th>Prénom</th>
+              <th>Nom</th>
+              {% for chiffre in liste_critere_base %}
+              <td>{{ chiffre }}</td>
+              {% endfor %}
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for eleve in groupes[-1] %}
+            <tr draggable="true" class="eleve">
+              <td>{{ eleve.num }}</td>
+              <td>{{ eleve.prenom }}</td>
+              <td>{{ eleve.nom }}</td>
+              {% for critere_nom in liste_critere_base %}
+              <td>{{ eleve.critere[critere_nom] }}</td>
+              {% endfor %}
+              <td class="actions">
+                <button class="btn-loupe" aria-label="Rechercher">loupe</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </details>
-    </article>
-  </section>
-
-  <section id="contraintes">
-    <h1>Contraintes</h1>
-
-    <article>
-      <header>
-        <h2>Contrainte globale</h2>
-        <button aria-label="rajouter">Rajouter contrainte</button>
-      </header>
-      <ul>
-        <li>
-          <p>Je suis une contrainte</p>
-        </li>
-        <li>
-          <p>Je suis une contrainte</p>
-        </li>
-      </ul>
     </article>
   </section>
 </main>

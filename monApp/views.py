@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, session
-from monApp.app import app  # Point-virgule inutile supprimé
+from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory
+from monApp.app import app;
+from monApp.static.util import algo
 import os
-from monApp.static.util import algo 
+
 
 # SUPPRIMÉE: La ligne ci-dessous causait l'erreur, car 'groupes' et 'nb_eleve_groupe'
 # ne sont créés que DANS la route 'configuration', pas au démarrage.
@@ -42,43 +43,19 @@ def configuration():
             if not nb_groupes_str:
                 return render_template("configuration.html", title="COHORT App", error="Nombre de groupes requis.")
             nb_groupes = int(nb_groupes_str)
-
+            session["nb_groupes"] = nb_groupes
             dico_importance = {
                 "genre": int(request.form.get('importance_genre', 0)),
                 "niveau Français": int(request.form.get('importance_francais', 0)),
                 "niveau Maths": int(request.form.get('importance_maths', 0)),
                 "Pénibilité": int(request.form.get('importance_penibilite', 0))
             }
-
-            liste_critere_constraints = []
+            session["dico_importance"] = dico_importance
 
             csv_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
             if not os.path.exists(csv_path):
                 return redirect(url_for('index')) 
-            liste_eleve = algo.lire_fichier(csv_path)
-            groupes_obj = algo.creer_groupe(liste_eleve, liste_critere_constraints, dico_importance, nb_groupes)
 
-            score = algo.score_totale(liste_eleve, groupes_obj, dico_importance)
-            nb_eleve_groupe = [len(g) for g in groupes_obj]
-            
-            groupes_serialisables = []
-            for groupe in groupes_obj:
-                groupe_serial = []
-                for elev in groupe:
-                    groupe_serial.append({
-                        "num": elev.num,  
-                        "nom": elev.nom,
-                        "prenom": elev.prenom,
-                        "critere": elev.critere
-                    })
-                groupes_serialisables.append(groupe_serial)
-
-            session['results'] = {
-                'groupes': groupes_serialisables,
-                'nb_eleve_groupe': nb_eleve_groupe,
-                'nombre_groupes': len(nb_eleve_groupe), 
-                'score': score
-            }
             return redirect(url_for('repartition'))
 
         except ValueError:
@@ -88,31 +65,20 @@ def configuration():
             return render_template("configuration.html", title="COHORT App", error=f"Une erreur est survenue: {e}")
     return render_template("configuration.html", title="COHORT App")
 
-
 @app.route('/repartition/')
 def repartition():
-    results = session.get('results', None)
-    
-    if not results:
-        return redirect(url_for('configuration'))
-
-    return render_template("repartition.html", title="COHORT App - Répartition", nb_eleve_groupe=results['nb_eleve_groupe'],nombre_groupes=results['nombre_groupes'],
-                           groupes=results['groupes'],
-                           score=results.get('score', 0))
-
-
-
-# Le code suivant était en double et utilisait des variables
-# globales qui n'existent plus.
-#
-# nombre_groupes = len(nb_eleve_groupe)
-#
-# @app.route('/repartition/')
-# def repartition():
-#     return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes)
-#
-
+    try:
+        liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
+        nombre_groupes = session.get("nb_groupes", 0)
+        nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
+        groupes = algo.creer_groupe(liste_eleve, [], algo.init_dico_importance(liste_eleve), nombre_groupes)
+        return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes)
+    except:
+        print("test")
+        return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=0,nombre_groupes=0,groupes=[[]])
 
 @app.route('/exporter/')
 def exporter():
     return render_template("exporter.html",title ="COHORT App")
+
+

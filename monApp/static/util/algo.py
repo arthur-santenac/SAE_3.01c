@@ -251,7 +251,7 @@ def score_totale(liste_eleve, groupes, dico_importance):
 
 # liste_critere, dico_importance = [], {"genre" : 1, "niveau Français" : 0}
 liste_critere, dico_importance = lire_config("monApp/static/exemple/config.json")
-# liste_critere = [critere.Critere(2, [4, 5, 6], "niveau Maths"), critere.Critere(2, [5, 6], "niveau Français"), critere.Critere(3, [4, 5, 6], "niveau Maths")]
+liste_critere = [critere.Critere(2, [4, 5, 6], "niveau Maths"), critere.Critere(2, [5, 6], "niveau Français"), critere.Critere(3, [4, 5, 6], "niveau Maths")]
 # dico_importance = {"genre" : 3, "niveau Français" : 0, "niveau Maths" : 0, "Pénibilité" : 3}
 
 groupes = creer_groupe(liste_eleve, liste_critere, dico_importance, 3)
@@ -264,7 +264,7 @@ for groupe in groupes:
         print(elev)
     print()
 
-print(f"Score : {score}%")
+print(f"Score : {score}%")"""
 
-print(recup_critere("monApp/static/exemple/exemple.csv")) """
+liste_critere_base=recup_critere("monApp/static/exemple/exemple.csv")
 
