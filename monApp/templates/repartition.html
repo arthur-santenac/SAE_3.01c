@@ -56,7 +56,7 @@
                 <td>{{jj.nom_critere}}</td>
                 <td>{{jj.condition}}</td>
                 <td>
-                  <button class="supprimer" aria-label="Supprimer">×</button>
+                  <button class="supprimer_critere" aria-label="Supprimer">×</button>
                 </td>
               </tr>
               {% endif %} {% endfor %}
@@ -69,6 +69,9 @@
               <th>Num</th>
               <th>Prénom</th>
               <th>Nom</th>
+              {% for chiffre in liste_critere_base %}
+              <td>{{ chiffre }}</td>
+              {% endfor %}
               <th>Actions</th>
             </tr>
           </thead>
@@ -78,8 +81,11 @@
               <td>{{ eleve.num }}</td>
               <td>{{ eleve.prenom }}</td>
               <td>{{ eleve.nom }}</td>
+              {% for critere_nom in liste_critere_base %}
+              <td>{{ eleve.critere[critere_nom] }}</td>
+              {% endfor %}
               <td class="actions">
-                <button class="btn-loupe" aria-label="Rechercher">🔍</button>
+                <button class="btn-loupe" aria-label="Rechercher">loupe</button>
                 <button class="supprimer" aria-label="Supprimer">×</button>
               </td>
             </tr>
@@ -107,7 +113,7 @@
               <th>Num</th>
               <th>Prénom</th>
               <th>Nom</th>
-              {% for chiffre in eleve.critere.keys %}
+              {% for chiffre in liste_critere_base %}
               <td>{{ chiffre }}</td>
               {% endfor %}
               <th>Actions</th>
@@ -119,11 +125,11 @@
               <td>{{ eleve.num }}</td>
               <td>{{ eleve.prenom }}</td>
               <td>{{ eleve.nom }}</td>
-              {% for chiffre in eleve.critere.values %}
-              <td>{{ chiffre }}</td>
+              {% for critere_nom in liste_critere_base %}
+              <td>{{ eleve.critere[critere_nom] }}</td>
               {% endfor %}
               <td class="actions">
-                <button class="btn-loupe" aria-label="Rechercher">🔍</button>
+                <button class="btn-loupe" aria-label="Rechercher">loupe</button>
               </td>
             </tr>
             {% endfor %}

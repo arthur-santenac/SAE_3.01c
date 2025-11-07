@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from monApp.app import app;
-from monApp.static.util.algo import groupes,nb_eleve_groupe
+from monApp.static.util.algo import groupes,nb_eleve_groupe,liste_critere_base,liste_critere
 import os
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
@@ -29,4 +29,4 @@ nombre_groupes = len(nb_eleve_groupe)
 
 @app.route('/repartition/')
 def repartition():
-    return render_template("repartition.html",title ="R3.01 Dev Web avec yannnis ",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes,liste_critere=liste_critere)
+    return render_template("repartition.html",title ="R3.01 Dev Web avec yannnis ",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes,liste_critere=liste_critere,liste_critere_base=liste_critere_base)

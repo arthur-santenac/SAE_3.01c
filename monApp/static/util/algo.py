@@ -266,5 +266,5 @@ for groupe in groupes:
 
 print(f"Score : {score}%")
 
-print(recup_critere("monApp/static/exemple/exemple.csv"))
+liste_critere_base=recup_critere("monApp/static/exemple/exemple.csv")
 

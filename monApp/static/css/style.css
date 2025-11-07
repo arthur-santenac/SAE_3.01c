@@ -2,20 +2,18 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Inter";
 }
 
 body {
   background: #f5f6fa;
   color: #333;
-  line-height: 1.6;
 }
 
 h1 {
   color: #2c3e50;
   font-size: 1.8rem;
   font-weight: 600;
-  margin-bottom: 1rem;
   text-align: center;
 }
 
@@ -26,11 +24,11 @@ h2 {
 }
 
 .main_repartition {
-  margin: 20px;
+  margin: 10px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 30px;
+  gap: 10px;
   flex-wrap: nowrap;
   min-height: 100vh;
 }
@@ -41,7 +39,7 @@ h2 {
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  padding: 20px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -79,20 +77,6 @@ h2 {
   color: #2c3e50;
 }
 
-.main_repartition article header button {
-  background: #3498db;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.main_repartition article header button:hover {
-  background: #2980b9;
-}
-
 .count {
   background: #dfe6e9;
   color: #2d3436;
@@ -104,11 +88,9 @@ h2 {
 /* Styles pour les tableaux d'élèves */
 .liste-eleves {
   width: 100%;
-  border-collapse: separate;
   border-spacing: 0;
   background: #ffffff;
   border-radius: 8px;
-  overflow: hidden;
   margin: 10px 0;
   border: 2px dashed #dcdde1;
   transition: all 0.3s ease;
@@ -118,8 +100,6 @@ h2 {
 .liste-eleves.over {
   border-color: #3498db;
   background: #eaf4ff;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-  transform: scale(1.01);
 }
 
 .liste-eleves thead {
@@ -127,7 +107,7 @@ h2 {
 }
 
 .liste-eleves thead th {
-  padding: 10px 12px;
+  padding: 2px 2px;
   text-align: left;
   font-weight: 600;
   color: #2c3e50;
@@ -165,7 +145,6 @@ h2 {
   background: #f4f6f8;
   border-bottom: 1px solid #e9ecef;
   cursor: grab;
-  transition: background 0.2s, transform 0.1s;
 }
 
 .liste-eleves tr.eleve:last-child {
@@ -178,11 +157,10 @@ h2 {
 
 .liste-eleves tr.eleve.dragging {
   opacity: 0.6;
-  transform: scale(0.98);
 }
 
 .liste-eleves tr.eleve td {
-  padding: 8px 12px;
+  padding: 2px 2px;
   font-size: 0.95rem;
   white-space: nowrap;
 }
@@ -198,7 +176,7 @@ h2 {
   color: #636e72;
   cursor: pointer;
   font-size: 1.1rem;
-  padding: 4px 8px;
+  padding: 2px 2px;
   margin-left: 4px;
   transition: color 0.2s;
 }
@@ -215,6 +193,20 @@ h2 {
 
 .liste-eleves tr.eleve button.supprimer:hover {
   color: #ff4757;
+}
+
+
+.table-criteres .supprimer_critere {
+  color: #d63031;
+  font-size: 1.3rem;
+  font-weight: bold;
+  border: none;
+  background: none;
+}
+
+.table-criteres .supprimer_critere:hover {
+  color: #ff4757;
+
 }
 
 /* Largeurs spécifiques pour certaines colonnes */
@@ -234,7 +226,6 @@ h2 {
   border-collapse: collapse;
   background: #ffffff;
   border-radius: 8px;
-  overflow: hidden;
   margin: 10px 0;
   table-layout: auto;
 }
@@ -244,7 +235,7 @@ h2 {
 }
 
 .table-criteres thead th {
-  padding: 10px 12px;
+  padding: 2px 2px;
   text-align: left;
   font-weight: 600;
   color: #2c3e50;
@@ -267,25 +258,12 @@ h2 {
 }
 
 .table-criteres tbody td {
-  padding: 10px 12px;
+  padding: 2px 2px;
   font-size: 0.95rem;
   white-space: nowrap;
 }
 
-.table-criteres button.supprimer {
-  background: none;
-  border: none;
-  color: #d63031;
-  cursor: pointer;
-  font-size: 1.3rem;
-  font-weight: bold;
-  padding: 4px 8px;
-  transition: color 0.2s;
-}
 
-.table-criteres button.supprimer:hover {
-  color: #ff4757;
-}
 
 .table-criteres th:last-child,
 .table-criteres td:last-child {
@@ -303,7 +281,7 @@ h2 {
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  padding: 20px;
+  padding: 2px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -315,7 +293,6 @@ h2 {
 /* Details/Summary styling */
 details summary {
   cursor: pointer;
-  list-style: none;
 }
 
 details summary::-webkit-details-marker {

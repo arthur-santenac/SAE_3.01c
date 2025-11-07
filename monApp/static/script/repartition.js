@@ -111,5 +111,24 @@ document.getElementById('eleves_classes').addEventListener('click', function(e) 
   }
 });
 
+
+// Gestion du clic sur le bouton supprimer des contraintes (retour aux élèves restants)
+document.getElementById('eleves_classes').addEventListener('click', function(e) {
+  if (e.target.classList.contains('supprimer_critere')) {
+    const row = e.target.closest('tr');
+    if (!row) return;
+
+    // Trouver le tbody des élèves restants
+    const tbodyRestants = document.querySelector('#eleves_restants .liste-eleves tbody');
+    if (!tbodyRestants) return;
+
+    // Trouver la cellule <tr> qui contient le bouton et la supprimer
+    const tr = e.target.closest('tr');
+    if (tr) {
+      tr.remove();
+    }
+  }
+});
+
 // Initialisation des compteurs au chargement
 updateCounts();
