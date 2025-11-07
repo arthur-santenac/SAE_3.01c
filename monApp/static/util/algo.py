@@ -32,6 +32,12 @@ def lire_fichier(nom_fichier):
             liste_eleve.append(new_eleve)
     return liste_eleve
 
+def recup_critere(nom_fichier):
+    with open(nom_fichier) as fichier_csv:
+        reader = csv.reader(fichier_csv, delimiter=',')
+        liste_critere = next(reader)[3:]
+    return liste_critere
+
 def exporter_fichier():
     ...
 
@@ -259,4 +265,6 @@ for groupe in groupes:
     print()
 
 print(f"Score : {score}%")
+
+print(recup_critere("monApp/static/exemple/exemple.csv"))
 
