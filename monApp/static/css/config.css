@@ -19,7 +19,7 @@ h4{
     background-color: #e6f3ff;
     border: 1px solid #b0c4de;
     border-radius: 8px;
-    padding: 20px;
+    padding: 1%;
     margin-bottom: 1%;
     margin-top: 1%;
 }
@@ -80,9 +80,9 @@ h4{
 
 .config-base , .config-groupe {
     background-color: #cbd5e1;
-    border: solid #cbd5e1;
     border-radius: 10px;
     margin: 1%;
+    padding : 2%
 }
 
 /*############## La configuration de base #############*/
@@ -113,7 +113,8 @@ h4{
 .section-importance{
     background-color: #a6cfff;
     padding: 1%;
-    border-radius: 20px;
+    border-radius: 15px;
+    margin : 1%;
 }  
 
 .section-importance > div {

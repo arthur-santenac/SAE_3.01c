@@ -247,7 +247,7 @@ def score_totale(liste_eleve, groupes, dico_importance):
         cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
     return int((cout_totale - cout_grp) / cout_totale * 100) 
 
-liste_eleve = lire_fichier("monApp/static/exemple/exemple.csv")
+""" liste_eleve = lire_fichier("monApp/static/exemple/exemple.csv")
 
 # liste_critere, dico_importance = [], {"genre" : 1, "niveau Français" : 0}
 liste_critere, dico_importance = lire_config("monApp/static/exemple/config.json")
@@ -266,5 +266,5 @@ for groupe in groupes:
 
 print(f"Score : {score}%")
 
-print(recup_critere("monApp/static/exemple/exemple.csv"))
+print(recup_critere("monApp/static/exemple/exemple.csv")) """
 
