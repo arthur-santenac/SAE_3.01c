@@ -1,8 +1,15 @@
+/*############## Global #############*/
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f4f8;
     padding: 20px;
 }
+
+h4{
+    text-align: center;
+}
+
+/*############## La configuration des groupes #############*/
 
 .config-section {
     background-color: #e6f3ff;
@@ -12,14 +19,7 @@ body {
     margin-bottom: 1%;
     margin-top: 1%;
 }
-
-.config-section legend {
-    font-weight: bold;
-    font-size: 1.2em;
-    padding: 0 10px;
-    color: #333;
-}
-        
+  
 .group-box {
     padding-top: 15px;
     margin-top: 15px;
@@ -38,7 +38,7 @@ body {
     flex-wrap: wrap; /* Permet de passer à la ligne sur petits écrans */
 }
 
-        /* Styles pour les inputs et selects */
+/* Styles pour les inputs et selects */
 .constraint-row select, .constraint-row input[type="text"] {
     padding: 8px;
     border: 1px solid #ccc;
@@ -81,6 +81,8 @@ body {
     margin: 1%;
 }
 
+/*############## La configuration de base #############*/
+
 .div-base{
     display: flex;
     flex-wrap: nowrap;
@@ -102,22 +104,27 @@ body {
     width: 3vw;
 }
 
+/*############## Les critères d'importance ci-dessous #############*/
+
 .section-importance{
     background-color: #a6cfff;
     padding: 1%;
+    border-radius: 0px 0px 10px 10px;
 }  
 
-
-.genre{
+.section-importance > div {
     display: flex;
     flex-wrap: nowrap;
     background-color: #ebf4ff;
     padding: 1%;
+    margin: 1% 0 0 0;
 }
+
 
 .genre h4{
     flex-grow: 0;
     flex-basis: 10%;
+    margin: 0;
 }
 
 .genre input{
@@ -125,7 +132,22 @@ body {
     flex-basis: 25%;
 }
 
+.score-importance{
+    flex-grow: 1;
+    flex-basis: 22%;
+}
+
+.score-genre{
+    margin-left: 1vw;
+}
+
 .niv-genre{
-    margin-left: 1%;
+    margin-left: 2%;
     width: 3vw;
 }
+
+.section-importance > div > div {
+    
+}
+
+/*############## L'importance du francais #############*/
