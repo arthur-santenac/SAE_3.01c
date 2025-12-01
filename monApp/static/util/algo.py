@@ -267,3 +267,5 @@ for groupe in groupes:
 print(f"Score : {score}%")
 
 liste_critere_base=recup_critere("monApp/static/exemple/exemple.csv")
+
+print(groupes)

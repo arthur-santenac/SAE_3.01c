@@ -133,3 +133,16 @@ document.getElementById('eleves_classes').addEventListener('click', function(e) 
 // Initialisation des compteurs au chargement
 updateCounts();
 
+document.getElementById("exporter").addEventListener("click", () => {
+  fetch("/exporter_groupes", {
+    method: "POST",
+    headers: { "Content-Type": "text/html" },
+    body: document.documentElement.outerHTML,  // envoie tout le HTML
+  })
+    .then(res => res.json())
+    .then(result => {
+      alert("Groupes exportés avec succès !");
+      console.log(result);
+    })
+    .catch(err => console.error(err));
+});

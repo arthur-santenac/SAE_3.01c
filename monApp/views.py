@@ -2,6 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for
 from monApp.app import app;
 from monApp.static.util.algo import groupes,nb_eleve_groupe,liste_critere_base,liste_critere
 import os
+try:    
+    from . import critere
+    from . import eleve
+except:
+    import critere
+    import eleve
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
 
@@ -30,3 +36,47 @@ nombre_groupes = len(nb_eleve_groupe)
 @app.route('/repartition/')
 def repartition():
     return render_template("repartition.html",title ="R3.01 Dev Web avec yannnis ",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes,liste_critere=liste_critere,liste_critere_base=liste_critere_base)
+
+from flask import request, jsonify
+from bs4 import BeautifulSoup
+
+@app.route('/exporter_groupes', methods=['POST'])
+def exporter_groupes():
+    html_content = request.data.decode('utf-8')
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    groupes = {}
+    for idx, table in enumerate(soup.select('#eleves_classes .liste-eleves')):
+        groupe_nom = f"groupe_{idx + 1}"
+        eleves = []
+        for row in table.select('tr.eleve'):
+            cells = [td.get_text(strip=True) for td in row.find_all('td')]
+            if len(cells) >= 2:
+                eleve = {
+                    "prenom": cells[0],
+                    "nom": cells[1],
+                    "criteres": cells[2:-1],  # les critères
+                }
+                eleves.append(eleve)
+        groupes[groupe_nom] = eleves
+
+    restants = []
+    for row in soup.select('#eleves_restants .liste-eleves tr.eleve'):
+        cells = [td.get_text(strip=True) for td in row.find_all('td')]
+        if len(cells) >= 2:
+            restants.append({
+                "prenom": cells[0],
+                "nom": cells[1],
+                "criteres": cells[2:-1],
+            })
+
+    groupes["restants"] = restants
+
+    print("Groupes mis à jour :", groupes)
+
+    # Optionnel : stocker dans une variable globale ou un fichier
+    global groupes_modifies
+    groupes_modifies = groupes
+
+    return jsonify({"status": "ok", "nb_groupes": len(groupes)})
