@@ -32,6 +32,12 @@ def lire_fichier(nom_fichier):
             liste_eleve.append(new_eleve)
     return liste_eleve
 
+def recup_critere(nom_fichier):
+    with open(nom_fichier) as fichier_csv:
+        reader = csv.reader(fichier_csv, delimiter=',')
+        liste_critere = next(reader)[3:]
+    return liste_critere
+
 def exporter_fichier():
     ...
 
@@ -241,22 +247,5 @@ def score_totale(liste_eleve, groupes, dico_importance):
         cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
     return int((cout_totale - cout_grp) / cout_totale * 100) 
 
-liste_eleve = lire_fichier("monApp/static/exemple/exemple.csv")
 
-# liste_critere, dico_importance = [], {"genre" : 1, "niveau Français" : 0}
-liste_critere, dico_importance = lire_config("monApp/static/exemple/config.json")
-# liste_critere = [critere.Critere(2, [4, 5, 6], "niveau Maths"), critere.Critere(2, [5, 6], "niveau Français"), critere.Critere(3, [4, 5, 6], "niveau Maths")]
-# dico_importance = {"genre" : 3, "niveau Français" : 0, "niveau Maths" : 0, "Pénibilité" : 3}
-
-groupes = creer_groupe(liste_eleve, liste_critere, dico_importance, 3)
-score = score_totale(liste_eleve, groupes, dico_importance)
-
-nb_eleve_groupe=[]
-for groupe in groupes:
-    nb_eleve_groupe.append(len(groupe))
-    for elev in groupe:
-        print(elev)
-    print()
-
-print(f"Score : {score}%")
-
+liste_critere_base=recup_critere("monApp/static/exemple/exemple.csv")
