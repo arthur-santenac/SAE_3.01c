@@ -64,9 +64,7 @@ def repartition():
 @app.route('/exporter_groupes', methods=['POST'])
 def exporter_groupes():
     html_content = request.data.decode('utf-8')
-
     soup = BeautifulSoup(html_content, 'html.parser')
-
     groupes = {}
     for idx, table in enumerate(soup.select('#eleves_classes .liste-eleves')):
         groupe_nom = f"groupe_{idx + 1}"
@@ -81,7 +79,6 @@ def exporter_groupes():
                 }
                 eleves.append(eleve)
         groupes[groupe_nom] = eleves
-
     restants = []
     for row in soup.select('#eleves_restants .liste-eleves tr.eleve'):
         cells = [td.get_text(strip=True) for td in row.find_all('td')]
@@ -91,31 +88,23 @@ def exporter_groupes():
                 "nom": cells[1],
                 "criteres": cells[2:-1],
             })
-
     groupes["restants"] = restants
-
-    return groupes
-      
-@app.route("/exporter")
-def exporter():
-    liste_groupe = ...
-    if not liste_groupe:
-        ...
-    with open("static/uploads/groupes.csv", "w", newline="") as fichier_csv:
-        fichier_csv.write("num,nom,prenom")
-        liste_critere = []
-        for groupe in liste_groupe:
-            if len(groupe) > 0:
-                for critere in groupe[0].critere:
-                    liste_critere.append(critere)
-                    fichier_csv.write("," + critere)
-                break
-        fichier_csv.write(",groupe")
-        for i in range(liste_groupe):
-            for eleve in groupe:
-                fichier_csv.write("\n")
-                fichier_csv.write(str(eleve.num), eleve.nom, eleve.prenom)
-                for un_critere in liste_critere:
-                    fichier_csv.write(str(eleve.critere[un_critere]))
-                fichier_csv.write(str(i))
-    return send_from_directory(directory="static/uploads", path="groupes.csv", as_attachment=True)
+    if groupes:
+        with open("static/uploads/groupes.csv", "w", newline="") as fichier_csv:
+            fichier_csv.write("num,nom,prenom")
+            liste_critere = []
+            for groupe in groupes:
+                if len(groupe) > 0:
+                    for critere in groupe[0].critere:
+                        liste_critere.append(critere)
+                        fichier_csv.write("," + critere)
+                    break
+            fichier_csv.write(",groupe")
+            for i in range(groupes):
+                for eleve in groupe:
+                    fichier_csv.write("\n")
+                    fichier_csv.write(str(eleve.num), eleve.nom, eleve.prenom)
+                    for un_critere in liste_critere:
+                        fichier_csv.write(str(eleve.critere[un_critere]))
+                    fichier_csv.write(str(i))
+        return send_from_directory(directory="static/uploads", path="groupes.csv", as_attachment=True)

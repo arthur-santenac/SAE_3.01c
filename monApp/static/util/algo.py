@@ -246,8 +246,3 @@ def score_totale(liste_eleve, groupes, dico_importance):
     for critere in dico_pourc_elv:
         cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
     return int((cout_totale - cout_grp) / cout_totale * 100) 
-
-
-liste_critere_base=recup_critere("monApp/static/exemple/exemple.csv")
-
-print(groupes)
