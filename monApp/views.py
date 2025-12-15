@@ -14,15 +14,16 @@ def index():
 
 @app.route("/importer/", methods=["POST"])
 def importer():
-    if "csv_file" not in request.files:
-        return "Aucun fichier sélectionné", 400
-    file = request.files["csv_file"]
-    if file.filename == "":
-        return "Nom de fichier vide", 400
+    if "file" not in request.files:
+        return "Aucun fichier", 400
+    file = request.files.get("file")
     if file and file.filename.endswith(".csv"):
-        file.save(os.path.join(UPLOAD_FOLDER, "groupes.csv"))
-        return redirect(url_for("configuration"))
-    return "Format de fichier non supporté", 400
+        save_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
+        file.save(save_path)
+    
+        return render_template("configuration.html",title ="COHORT App")
+        
+    return "Format invalide", 400
 
 
 
