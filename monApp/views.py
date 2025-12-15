@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, session, s
 from monApp.app import app;
 from monApp.static.util import algo
 import os
+from flask import request
+from bs4 import BeautifulSoup
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
 
@@ -59,6 +61,41 @@ def repartition():
     except:
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=0,nombre_groupes=0,groupes=[[]])
 
+@app.route('/exporter_groupes', methods=['POST'])
+def exporter_groupes():
+    html_content = request.data.decode('utf-8')
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    groupes = {}
+    for idx, table in enumerate(soup.select('#eleves_classes .liste-eleves')):
+        groupe_nom = f"groupe_{idx + 1}"
+        eleves = []
+        for row in table.select('tr.eleve'):
+            cells = [td.get_text(strip=True) for td in row.find_all('td')]
+            if len(cells) >= 2:
+                eleve = {
+                    "prenom": cells[0],
+                    "nom": cells[1],
+                    "criteres": cells[2:-1],
+                }
+                eleves.append(eleve)
+        groupes[groupe_nom] = eleves
+
+    restants = []
+    for row in soup.select('#eleves_restants .liste-eleves tr.eleve'):
+        cells = [td.get_text(strip=True) for td in row.find_all('td')]
+        if len(cells) >= 2:
+            restants.append({
+                "prenom": cells[0],
+                "nom": cells[1],
+                "criteres": cells[2:-1],
+            })
+
+    groupes["restants"] = restants
+
+    return groupes
+      
 @app.route("/exporter")
 def exporter():
     liste_groupe = ...
