@@ -1,7 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, send_file
 from monApp.app import app;
 from monApp.static.util import algo
 import os
+from flask import request
+from bs4 import BeautifulSoup
+import csv
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
 
@@ -72,26 +75,60 @@ def repartition():
     except:
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=0,nombre_groupes=0,groupes=[[]])
 
-@app.route("/exporter")
-def exporter():
-    liste_groupe = ...
-    if not liste_groupe:
-        ...
-    with open("static/uploads/groupes.csv", "w", newline="") as fichier_csv:
-        fichier_csv.write("num,nom,prenom")
-        liste_critere = []
-        for groupe in liste_groupe:
-            if len(groupe) > 0:
-                for critere in groupe[0].critere:
-                    liste_critere.append(critere)
-                    fichier_csv.write("," + critere)
-                break
-        fichier_csv.write(",groupe")
-        for i in range(liste_groupe):
-            for eleve in groupe:
-                fichier_csv.write("\n")
-                fichier_csv.write(str(eleve.num), eleve.nom, eleve.prenom)
-                for un_critere in liste_critere:
-                    fichier_csv.write(str(eleve.critere[un_critere]))
-                fichier_csv.write(str(i))
-    return send_from_directory(directory="static/uploads", path="groupes.csv", as_attachment=True)
+@app.route('/exporter_groupes', methods=['POST'])
+def exporter_groupes():
+    html_content = request.data.decode('utf-8')
+    soup = BeautifulSoup(html_content, 'html.parser')
+    groupes = {}
+    for idx, table in enumerate(soup.select('#eleves_classes .liste-eleves')):
+        groupe_nom = f"groupe_{idx + 1}"
+        eleves = []
+        for row in table.select('tr.eleve'):
+            cells = [td.get_text(strip=True) for td in row.find_all('td')]
+            if len(cells) >= 2:
+                eleve = {
+                    "prenom": cells[0],
+                    "nom": cells[1],
+                    "criteres": cells[2:-1],
+                }
+                eleves.append(eleve)
+        groupes[groupe_nom] = eleves
+    restants = []
+    for row in soup.select('#eleves_restants .liste-eleves tr.eleve'):
+        cells = [td.get_text(strip=True) for td in row.find_all('td')]
+        if len(cells) >= 2:
+            restants.append({
+                "prenom": cells[0],
+                "nom": cells[1],
+                "criteres": cells[2:-1],
+            })
+    groupes["restants"] = restants
+    if groupes:
+        with open("monApp/static/uploads/groupes_finaux.csv", "w+", newline="") as fichier_csv:
+            writer = csv.writer(fichier_csv)
+            liste_critere = []
+            for groupe in groupes.values():
+                if len(groupe) > 0:
+                    liste_critere = groupe[0].get("criteres", []) 
+                    break
+            header = ["num", "nom", "prenom"] + liste_critere + ["groupe"]
+            writer.writerow(header)
+            groupe_id = 1
+            for groupe in groupes.values():
+                for eleve in groupe:
+                    ligne = []
+                    ligne.append(1) 
+                    ligne.append(eleve.get("nom", ""))
+                    ligne.append(eleve.get("prenom", ""))
+                    criteres_eleve = eleve.get("criteres", eleve.get("critere", []))
+                    for val in criteres_eleve:
+                        ligne.append(val)
+                    ligne.append(groupe_id)
+                    writer.writerow(ligne)
+                groupe_id += 1
+        csv_path = os.path.join(app.root_path, 'static', 'uploads', 'groupes_finaux.csv')
+        if not os.path.exists(csv_path):
+            return "Fichier non trouvé", 404
+        return send_file(csv_path, mimetype="text/csv", as_attachment=True, download_name="liste_groupes.csv")
+
+
