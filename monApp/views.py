@@ -114,6 +114,8 @@ def exporter_groupes():
                     writer.writerow(ligne)
                 groupe_id += 1
         csv_path = os.path.join(app.root_path, 'static', 'uploads', 'groupes_finaux.csv')
+        if not os.path.exists(csv_path):
+            return "Fichier non trouvé", 404
         return send_file(csv_path, mimetype="text/csv", as_attachment=True, download_name="liste_groupes.csv")
 
 

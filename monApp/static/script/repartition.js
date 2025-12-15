@@ -90,19 +90,30 @@ document.getElementById('eleves_classes').addEventListener('click', function (e)
   }
 }
 );
-updateCounts();
 document.getElementById("exporter").addEventListener("click", () => {
   fetch("/exporter_groupes", {
-    method: "POST", headers: { "Content-Type": "text/html" }
-    , body: document.documentElement.outerHTML,
-  }
-  )
-    .then(res => res.json())
-    .then(result => {
-      alert("Groupes exportés avec succès !");
-      console.log(result);
+    method: "POST",
+    headers: { "Content-Type": "text/html" },
+    body: document.documentElement.outerHTML,
+  })
+  .then(res => {
+    if (res.ok) {
+      return res.blob();
     }
-    )
-    .catch(err => console.error(err));
-}
-);
+    throw new Error("Erreur lors de la génération du fichier");
+  })
+  .then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "groupes_finaux.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Une erreur est survenue lors du téléchargement.");
+  });
+});
