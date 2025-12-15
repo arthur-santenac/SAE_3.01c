@@ -72,7 +72,21 @@ def repartition():
         nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
         dico_importance = session["dico_importance"]
         groupes = algo.creer_groupe(liste_eleve, [], dico_importance, nombre_groupes)
-        return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes)
+        score = algo.score_totale(liste_eleve, groupes, session["dico_importance"])
+        place = str(len(liste_eleve) - len(groupes[-1])) + "/" + str(len(liste_eleve))
+        prc_place = str((len(liste_eleve) - len(groupes[-1])) / len(liste_eleve) * 100)
+        restants = str(len(groupes[-1]))
+        prc_restants = str(len(groupes[-1]) / len(liste_eleve) * 100)
+        grp_genere = str(len(groupes) - 1)
+        if (len(groupes[-1]) > 0):
+            vert= False
+            grp_genere += " + 1"
+        else:
+            vert = True
+            
+        return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,
+                               nombre_groupes=nombre_groupes,groupes=groupes, score=score, place=place, prc_place=prc_place,
+                               restants=restants,prc_restants=prc_restants,grp_genere=grp_genere, vert=vert)
     except:
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=0,nombre_groupes=0,groupes=[[]])
 
