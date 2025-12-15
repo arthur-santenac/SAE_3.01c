@@ -46,7 +46,7 @@ def configuration():
                 crit_propre = crit_brut.lower().replace(" ", "_")
                 form_field_name = "importance_" + crit_propre
                 importance_value = int(request.form.get(form_field_name, 0))
-                dico_importance[crit_propre] = importance_value 
+                dico_importance[crit_brut] = importance_value 
                 critères_pour_template.append(crit_propre)
             session["dico_importance"] = dico_importance
             if not os.path.exists(csv_path):
@@ -70,7 +70,8 @@ def repartition():
         liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
         nombre_groupes = session.get("nb_groupes", 0)
         nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
-        groupes = algo.creer_groupe(liste_eleve, [], session.get("dico_importance"), nombre_groupes)
+        dico_importance = session["dico_importance"]
+        groupes = algo.creer_groupe(liste_eleve, [], dico_importance, nombre_groupes)
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes)
     except:
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=0,nombre_groupes=0,groupes=[[]])

@@ -37,67 +37,75 @@
                         {% set valeur_defaut = 100 // (criteres|length) %}
                         <div class="{{ crit_propre }}">
                             <h4>{{ titre_crit }}</h4>
-                            <input type="range"  min="0" max="100" step="1" class="slider" value="{{ valeur_defaut }}">
+                            <input type="range" name="{{ nom }}" min="0" max="100" step="1" class="slider" value="{{ valeur_defaut }}">
                             <div>
                                 <input type="number" name="{{ nom }}" class="slider-value" min="0" max="100" step="1" value="{{ valeur_defaut }}">
                             </div>
                         </div>
                     {% endfor %}
                 </section>
-
-            </section>
                 
                 <script>
-                    const sliders = document.querySelectorAll(".slider");
-                    const values = document.querySelectorAll(".slider-value");
+                    const sliders = [...document.querySelectorAll(".slider")];
+                    const values = [...document.querySelectorAll(".slider-value")];
                     const totalDisplay = document.getElementById("total");
                     const TOTAL_MAX = 100;
 
-                    function updateTotal() {
-                    let total = 0;
-                    sliders.forEach(s => total += Number(s.value));
-                    totalDisplay.textContent = total;
+                    function clamp(v) {
+                        return Math.max(0, Math.min(100, v));
                     }
 
-                    function adjustSliders(changedIndex) {
-                    let total = 0;
-                    sliders.forEach(s => total += Number(s.value));
-                    if (total === TOTAL_MAX) return;
+                    function updateTotal() {
+                        const total = sliders.reduce((s, el) => s + Number(el.value), 0);
+                        if (totalDisplay) totalDisplay.textContent = total;
+                    }
 
-                    const diff = TOTAL_MAX - total;
-                    const others = [...sliders].filter((_, i) => i !== changedIndex);
-                    const adjust = diff / others.length;
+                    function normalize(changedIndex) {
+                        let total = sliders.reduce((s, el) => s + Number(el.value), 0);
+                        if (total === TOTAL_MAX) return;
 
-                    others.forEach(s => {
-                        let newVal = Number(s.value) + adjust;
-                        if (newVal < 0) newVal = 0;
-                        if (newVal > 100) newVal = 100;
-                        s.value = newVal.toFixed(0);
-                    });
+                        let diff = TOTAL_MAX - total;
+                        const others = sliders
+                            .map((s, i) => ({ s, i }))
+                            .filter(o => o.i !== changedIndex);
 
-                    sliders.forEach((s, i) => values[i].value = s.value);
-                    updateTotal();
+                        for (const o of others) {
+                            if (diff === 0) break;
+                            let delta = diff > 0 ? 1 : -1;
+                            let newVal = clamp(Number(o.s.value) + delta);
+                            if (newVal !== Number(o.s.value)) {
+                                o.s.value = newVal;
+                                diff -= delta;
+                            }
+                        }
+
+                        sliders.forEach((s, i) => values[i].value = s.value);
+                        updateTotal();
                     }
 
                     sliders.forEach((slider, i) => {
-                    slider.addEventListener("input", () => {
-                        values[i].value = slider.value;
-                        adjustSliders(i);
-                    });
+                        slider.addEventListener("input", () => {
+                            slider.value = clamp(Number(slider.value));
+                            values[i].value = slider.value;
+                            normalize(i);
+                        });
                     });
 
-                    values.forEach((v, i) => {
-                    v.addEventListener("input", () => {
-                        sliders[i].value = v.value;
-                        adjustSliders(i);
-                    });
+                    values.forEach((input, i) => {
+                        input.addEventListener("input", () => {
+                            let v = clamp(Number(input.value || 0));
+                            sliders[i].value = v;
+                            input.value = v;
+                            normalize(i);
+                        });
                     });
 
                     updateTotal();
                 </script>
             </section>
             <section class="config-groupe">
-                </section>
+
+            </section>
         </section>
 
         <div class="submit-container" style="text-align: center; margin: 20px 0;">
