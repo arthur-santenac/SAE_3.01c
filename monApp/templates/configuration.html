@@ -51,37 +51,47 @@
                     const totalDisplay = document.getElementById("total");
                     const TOTAL_MAX = 100;
 
+                    const previousValues = sliders.map(s => Number(s.value));
+
                     function clamp(v) {
                         return Math.max(0, Math.min(100, v));
                     }
 
                     function updateTotal() {
                         const total = sliders.reduce((s, el) => s + Number(el.value), 0);
-                        if (totalDisplay) totalDisplay.textContent = total;
+                        
+                        if (totalDisplay) {
+                            totalDisplay.textContent = total;
+                            totalDisplay.style.color = (total === TOTAL_MAX) ? 'green' : 'red';
+                        }
+                        return total;
                     }
 
                     function normalize(changedIndex) {
-                        let total = sliders.reduce((s, el) => s + Number(el.value), 0);
-                        if (total === TOTAL_MAX) return;
-
-                        let diff = TOTAL_MAX - total;
-                        const others = sliders
-                            .map((s, i) => ({ s, i }))
-                            .filter(o => o.i !== changedIndex);
-
-                        for (const o of others) {
-                            if (diff === 0) break;
-                            let delta = diff > 0 ? 1 : -1;
-                            let newVal = clamp(Number(o.s.value) + delta);
-                            if (newVal !== Number(o.s.value)) {
-                                o.s.value = newVal;
-                                diff -= delta;
-                            }
+                        let currentTotal = sliders.reduce((s, el) => s + Number(el.value), 0);
+                        if (currentTotal === TOTAL_MAX) {
+                            updateTotal();
+                            return;
                         }
+
+                        const slider = sliders[changedIndex];
+                        const inputValue = values[changedIndex];
+                        
+                        let newValue = Number(slider.value);
+                        const difference = currentTotal - TOTAL_MAX; 
+
+                        if (difference > 0) {
+                            newValue = clamp(newValue - difference); 
+                            slider.value = newValue;
+                            inputValue.value = newValue;
+                        } 
 
                         sliders.forEach((s, i) => values[i].value = s.value);
                         updateTotal();
+
+                        previousValues[changedIndex] = newValue;
                     }
+
 
                     sliders.forEach((slider, i) => {
                         slider.addEventListener("input", () => {
@@ -101,6 +111,10 @@
                     });
 
                     updateTotal();
+                    
+                    if (totalDisplay === null) {
+                        console.error("L'élément avec l'ID 'total' est manquant. Veuillez l'ajouter au HTML.");
+                    }
                 </script>
             </section>
             <section class="config-groupe">
