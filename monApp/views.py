@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, send_file
 from monApp.app import app;
 from monApp.static.util import algo
 import os
 from flask import request
 from bs4 import BeautifulSoup
+import csv
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
 
@@ -90,21 +91,29 @@ def exporter_groupes():
             })
     groupes["restants"] = restants
     if groupes:
-        with open("static/uploads/groupes.csv", "w", newline="") as fichier_csv:
-            fichier_csv.write("num,nom,prenom")
+        with open("monApp/static/uploads/groupes_finaux.csv", "w+", newline="") as fichier_csv:
+            writer = csv.writer(fichier_csv)
             liste_critere = []
-            for groupe in groupes:
+            for groupe in groupes.values():
                 if len(groupe) > 0:
-                    for critere in groupe[0].critere:
-                        liste_critere.append(critere)
-                        fichier_csv.write("," + critere)
+                    liste_critere = groupe[0].get("criteres", []) 
                     break
-            fichier_csv.write(",groupe")
-            for i in range(groupes):
+            header = ["num", "nom", "prenom"] + liste_critere + ["groupe"]
+            writer.writerow(header)
+            groupe_id = 1
+            for groupe in groupes.values():
                 for eleve in groupe:
-                    fichier_csv.write("\n")
-                    fichier_csv.write(str(eleve.num), eleve.nom, eleve.prenom)
-                    for un_critere in liste_critere:
-                        fichier_csv.write(str(eleve.critere[un_critere]))
-                    fichier_csv.write(str(i))
-        return send_from_directory(directory="static/uploads", path="groupes.csv", as_attachment=True)
+                    ligne = []
+                    ligne.append(1) 
+                    ligne.append(eleve.get("nom", ""))
+                    ligne.append(eleve.get("prenom", ""))
+                    criteres_eleve = eleve.get("criteres", eleve.get("critere", []))
+                    for val in criteres_eleve:
+                        ligne.append(val)
+                    ligne.append(groupe_id)
+                    writer.writerow(ligne)
+                groupe_id += 1
+        csv_path = os.path.join(app.root_path, 'static', 'uploads', 'groupes_finaux.csv')
+        return send_file(csv_path, mimetype="text/csv", as_attachment=True, download_name="liste_groupes.csv")
+
+
