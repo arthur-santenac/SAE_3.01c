@@ -74,9 +74,10 @@ def exporter_groupes():
             cells = [td.get_text(strip=True) for td in row.find_all('td')]
             if len(cells) >= 2:
                 eleve = {
-                    "prenom": cells[0],
-                    "nom": cells[1],
-                    "criteres": cells[2:-1],
+                    "num": cells[0],
+                    "prenom": cells[1],
+                    "nom": cells[2],
+                    "criteres": cells[3:-1],
                 }
                 eleves.append(eleve)
         groupes[groupe_nom] = eleves
@@ -85,9 +86,10 @@ def exporter_groupes():
         cells = [td.get_text(strip=True) for td in row.find_all('td')]
         if len(cells) >= 2:
             restants.append({
-                "prenom": cells[0],
-                "nom": cells[1],
-                "criteres": cells[2:-1],
+                "num": cells[0],
+                "prenom": cells[1],
+                "nom": cells[2],
+                "criteres": cells[3:-1],
             })
     groupes["restants"] = restants
     if groupes:
@@ -104,7 +106,7 @@ def exporter_groupes():
             for groupe in groupes.values():
                 for eleve in groupe:
                     ligne = []
-                    ligne.append(1) 
+                    ligne.append(eleve.get("num", "")) 
                     ligne.append(eleve.get("nom", ""))
                     ligne.append(eleve.get("prenom", ""))
                     criteres_eleve = eleve.get("criteres", eleve.get("critere", []))
