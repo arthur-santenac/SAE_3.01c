@@ -4,44 +4,33 @@
 {% block main %}
 <link rel="stylesheet" href="../static/css/style.css" />
 
-<header class="header_score">
-  <div class="dashboard-container">
-    <h1 class="main-title">score</h1>
-    <section class="stats-row">
-      <div class="stat-item">
-        <span class="stat-label">Respect des critères</span>
-        <span class="stat-value">{{ score }}%</span>
-        <div class="progress-bar">
-          <div class="fill green" style="width: {{ score }}%"></div>
+<div class="top_row">
+  <header class="header_score">
+    <div class="dashboard-container">
+      <h1 class="main-title">score</h1>
+      <section class="stats-row">
+        <div class="stat-item">
+          <span class="stat-label">Respect des critères</span>
+          <span class="stat-value">{{ score }}%</span>
+          <div class="progress-bar">
+            <div class="fill green" style="width: {{ score }}%"></div>
+          </div>
         </div>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">élèves placés</span>
-        <span class="stat-value">{{ place }}</span> <div class="progress-bar">
-          <div class="fill blue" style="width: {{ prc_place }}%"></div>
+        <div class="stat-item">
+          <span class="stat-label">élèves placés</span>
+          <span class="stat-value">{{ place }}</span>
+          <div class="progress-bar">
+            <div class="fill blue" style="width: {{ prc_place }}%"></div>
+          </div>
         </div>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">élèves restants</span>
-        <span class="stat-value">{{ restants }}</span>
-        <div class="progress-bar">
-          <div class="fill red" style="width: {{ prc_restants }}%"></div>
-        </div>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">groupes générés</span>
-        <span class="stat-value">{{ grp_genere }}</span>
-        <div class="progress-bar">
-          {% if vert %}
-          <div class="fill green" style="width: 100%"></div>
-          {% else %}
-          <div class="fill red" style="width: 100%"></div>
-          {% endif %}
-        </div>
-      </div>
-    </section>
-  </div>
-</header>
+      </section>
+    </div>
+  </header>
+
+  <section class="empty_space">
+    <h1>dico importance</h1> 
+  </section>
+</div>
 
 <main class="main_repartition">
   <section id="eleves_classes">
