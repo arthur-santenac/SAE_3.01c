@@ -185,3 +185,74 @@ button {
 }
 
 
+
+details[open] summary {
+	margin-bottom: 10px;
+}
+
+.dashboard-container {
+  padding: 20px;
+  border-radius: 8px;
+  font-family: sans-serif;
+  color: #000;
+}
+
+.main-title {
+  margin: 0 0 15px 0;
+  font-size: 24px;
+  font-weight: 800;
+  text-transform: lowercase;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #b0b0b0;
+  border-radius: 0px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  display: block;
+}
+
+.fill.green {
+  background-color: #004d40;
+}
+
+.fill.blue {
+  background-color: #0d47a1;
+}
+
+.fill.red {
+  background-color: #b71c1c;
+}

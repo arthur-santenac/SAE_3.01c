@@ -1,17 +1,38 @@
 {% extends "base.html" %}
-{% block title %}Test{% endblock %}
+{% block title %}Importer{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/importer.css') }}">
+{% endblock %}
+
 {% block main %}
-<head>
-  <link rel="stylesheet" href="../static/css/importer.css" />
-</head>
-<div class="container mt-5 pt-2">
+<div class="mise-en-page">
     <section>
-        <h2>Importer un fichier CSV</h2>
-        <form id="uploadForm" action="{{ url_for('importer') }}" method="post" enctype="multipart/form-data">
-            <input type="file" accept=".csv" name="csv_file" required>
-            <button type="reset">Supprimer le fichier</button>
-        </form> 
+        <h2 class="text-center mb-4">Importer un fichier CSV</h2>
+        
+        <form action="{{ url_for('importer') }}" class="dropzone" id="myDropzone" method="post" enctype="multipart/form-data">
+             <div class="dz-message" data-dz-message>
+                <span>Déposez votre fichier CSV ici ou cliquez pour choisir</span>
+            </div>
+        </form>
+
+        <div class="button-container">
+            <button type="button" id="reset_btn">Supprimer le fichier</button>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('configuration') }}" class="btn-valider">Valider</a>
+        </div>
     </section>
-    <button class="importer" type="submit" form="uploadForm">Importer</button>
 </div>
+
+{{ dropzone.load_js() }}
+{{ dropzone.config() }}
+
+<script>
+    document.getElementById("reset_btn").addEventListener("click", function() {
+        var dz = Dropzone.forElement("#myDropzone");
+        if (dz) { dz.removeAllFiles(true); }
+    });
+</script>
 {% endblock %}
