@@ -124,6 +124,7 @@ h4{
     padding: 1%;
     margin: 1% 0 0 0;
     justify-content: start;
+    border-radius: 10px;
 }
 
 
@@ -151,3 +152,49 @@ h4{
 }
 
 
+/*############## Critères par groupes ci-dessous #############*/
+
+
+.liste-grp-crit{
+    list-style-type: none;
+}
+
+.liste-grp-crit li{
+    background-color: #a6cfff;
+    padding: 2%;
+    border-radius: 15px;
+}
+
+
+.entete-grp-crit{
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.entete-grp-crit h4{
+    flex-basis: 15%;
+    flex-grow: 0;
+} 
+
+.entete-grp-crit button{
+    flex-basis: 35%;
+    flex-grow: 0;
+} 
+
+.liste-crit{
+    list-style-type: none;
+    margin-top: 1%;
+    padding-left: 0%;
+}
+
+.liste-crit li{
+    background-color: #e6f3ff;
+    padding: 2%;
+    border-radius: 10px;
+}
+
+
+.container-crit{
+    display: flex;
+    flex-wrap: nowrap;
+}

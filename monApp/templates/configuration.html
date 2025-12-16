@@ -120,11 +120,38 @@
                 </script>
             </section>
             <section class="config-groupe">
+                <h2>Configuration par groupe</h2>
                 {% if valide %}
                     {% for grp in liste_grp%}
-                        <div>
-                            <h4>Groupe {{ grp }}</h4>
-                        </div>
+                        <ul class="liste-grp-crit">
+                            <li>
+                                <div>
+                                    <div class="entete-grp-crit">
+                                        <h4>Groupe {{ grp }}</h4>
+                                        <button type="submit" name="btn" value="btn-add-crit" class="btn btn-primary">Ajouter critère +</button>
+                                    </div>
+                                    <ul class="liste-crit">
+                                        <li class="critere">
+                                            <div class="container-crit">
+                                                <p></p>
+                                                <div>
+                                                    <input type="text">
+                                                </div>
+                                                <div>
+                                                    <input type="text">
+                                                </div>
+                                                <div>
+                                                    <button type="submit" name="btn" value="btn-supp-crit"   class="supp-crit" aria-label="Supprimer">X</button>
+                                                </div>
+                                                
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    
+                                </div>
+                            </li>
+                        </ul>
+                        
                     {% endfor %}
                 {% endif %}
             </section>

@@ -38,6 +38,17 @@ def recup_critere(nom_fichier):
         liste_critere = next(reader)[3:]
     return liste_critere
 
+def recup_ensemble_val_critere(critere: str, nom_fichier: str):
+    valeurs = set()
+    with open(nom_fichier, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for ligne in reader:
+            valeurs.add(ligne[critere])
+    valeurs = list(valeurs)
+    valeurs = sorted(valeurs)
+    return valeurs
+
+
 def exporter_fichier():
     ...
 

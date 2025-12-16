@@ -54,14 +54,17 @@ def configuration():
                 return redirect(url_for("index"))
             liste_crit_brut = algo.recup_critere(csv_path)
             critères_pour_template = []
+            liste_val_crit = dict()
             dico_importance = {}
             for crit_brut in liste_crit_brut:
+                liste_val_crit[crit_brut] = algo.recup_ensemble_val_critere(crit_brut, csv_path)
                 crit_propre = crit_brut.lower().replace(" ", "_")
                 form_field_name = "importance_" + crit_propre
                 importance_value = int(request.form.get(form_field_name, 0))
-                dico_importance[crit_brut] = importance_value 
+                dico_importance[crit_brut] = importance_value
                 critères_pour_template.append(crit_propre)
             session["dico_importance"] = dico_importance
+            session["liste_val_crit"] = liste_val_crit
             if not os.path.exists(csv_path):
                 return redirect(url_for("index")) 
         except ValueError:
@@ -71,6 +74,10 @@ def configuration():
             return render_template("configuration.html", title="COHORT App", error=f"Une erreur est survenue: {e}", criteres=critères_pour_template)
         if action == "btn-repartition":
             return redirect(url_for("repartition"))
+        if action == "btn-add-crit":
+            
+        if action == "btn-supp-crit":
+
     if os.path.exists(csv_path):
         liste_crit_brut = algo.recup_critere(csv_path)
         criteres_pour_template = []
@@ -109,10 +116,8 @@ def repartition():
             grp_genere += " + 1"
         else:
             vert = True
-            
-        return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,
-                               nombre_groupes=nombre_groupes,groupes=groupes, score=score, place=place, prc_place=prc_place,
-                               restants=restants,prc_restants=prc_restants,grp_genere=grp_genere, vert=vert)
+        return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes, 
+                               score=score, place=place, prc_place=prc_place, restants=restants,prc_restants=prc_restants,grp_genere=grp_genere, vert=vert)
     except:
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=0,nombre_groupes=0,groupes=[[]])
 
