@@ -1,4 +1,4 @@
-const tables = document.querySelectorAll(".liste-eleves tbody");
+const tables = document.querySelectorAll(".liste-eleves");
 const rows = document.querySelectorAll(".liste-eleves tr.eleve");
 function updateCounts() {
   document.querySelectorAll("article").forEach(article => {
@@ -43,7 +43,7 @@ tables.forEach(tbody => {
     if (!dragged) return;
     const isInClassesSection = tbody.closest('#eleves_classes') !== null;
     const isInRestantsSection = tbody.closest('#eleves_restants') !== null;
-    tbody.appendChild(dragged);
+    tbody.querySelector("tbody").appendChild(dragged);
     const actionsCell = dragged.querySelector('td.actions');
     if (actionsCell) {
       const btnSupprimer = actionsCell.querySelector('.supprimer');
