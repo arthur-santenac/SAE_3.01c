@@ -36,6 +36,7 @@ def recup_critere(nom_fichier):
     with open(nom_fichier) as fichier_csv:
         reader = csv.reader(fichier_csv, delimiter=',')
         liste_critere = next(reader)[3:]
+
     return liste_critere
 
 def exporter_fichier():
@@ -245,4 +246,4 @@ def score_totale(liste_eleve, groupes, dico_importance):
     cout_totale = 0
     for critere in dico_pourc_elv:
         cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
-    return int((cout_totale - cout_grp) / cout_totale * 100) 
+    return int((cout_totale - cout_grp) / cout_totale * 100)

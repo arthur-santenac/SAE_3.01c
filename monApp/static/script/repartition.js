@@ -117,3 +117,36 @@ document.getElementById("exporter").addEventListener("click", () => {
     alert("Une erreur est survenue lors du téléchargement.");
   });
 });
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+
+
+    const boutonsOuvrir = document.querySelectorAll('.btn-popup');
+    
+    boutonsOuvrir.forEach(bouton => {
+        bouton.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const modale = document.getElementById(targetId);
+            modale.style.display = "block";
+
+        });
+    });
+
+    const boutonsFermer = document.querySelectorAll('.btn-valider');
+
+    boutonsFermer.forEach(bouton => {
+        bouton.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const modale = document.getElementById(targetId);
+
+            modale.style.display = "none";
+  
+
+        });
+    });
+
+
+});
+
