@@ -1,4 +1,4 @@
-const tables = document.querySelectorAll(".liste-eleves tbody");
+const tables = document.querySelectorAll(".liste-eleves");
 const rows = document.querySelectorAll(".liste-eleves tr.eleve");
 function updateCounts() {
   document.querySelectorAll("article").forEach(article => {
