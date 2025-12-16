@@ -1,10 +1,46 @@
-{% extends "base.html" %} {% block title %}Test{% endblock %} {% block main %}
+{% extends "base.html" %} 
+{% block title %}Test{% endblock %} 
 
-<head>
-  <link rel="stylesheet" href="../static/css/style.css" />
-</head>
+{% block main %}
+<link rel="stylesheet" href="../static/css/style.css" />
 
 <header class="header_score">
+  <div class="dashboard-container">
+    <h1 class="main-title">score</h1>
+    <section class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">Respect des critères</span>
+        <span class="stat-value">{{ score }}%</span>
+        <div class="progress-bar">
+          <div class="fill green" style="width: {{ score }}%"></div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">élèves placés</span>
+        <span class="stat-value">{{ place }}</span> <div class="progress-bar">
+          <div class="fill blue" style="width: {{ prc_place }}%"></div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">élèves restants</span>
+        <span class="stat-value">{{ restants }}</span>
+        <div class="progress-bar">
+          <div class="fill red" style="width: {{ prc_restants }}%"></div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">groupes générés</span>
+        <span class="stat-value">{{ grp_genere }}</span>
+        <div class="progress-bar">
+          {% if vert %}
+          <div class="fill green" style="width: 100%"></div>
+          {% else %}
+          <div class="fill red" style="width: 100%"></div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+  </div>
 </header>
 
 <main class="main_repartition">
@@ -14,16 +50,16 @@
     <article>
       <details open>
         <summary>
-          <header>
-            <h2>Groupe {{ i + 1 }}</h2>
-            <span class="count">{{ nb_eleve_groupe[i] }} élèves</span>
-          </header>
+          <h2>Groupe {{ i + 1 }}</h2>
+          <span class="count">{{ nb_eleve_groupe[i] }} élèves</span>
         </summary>
+        
         <details open>
-          <summary>
-            <header>
-              <h2>voir configuration Groupe {{ i + 1 }}</h2>
-            </header>
+          <summary class="test">
+             <h2>voir configuration Groupe {{ i + 1 }}</h2>
+              <button class="supprimer_critere" aria-label="Supprimer">
+                ajouter critere
+              </button>
           </summary>
           <table class="table-criteres">
             <thead>
@@ -34,23 +70,27 @@
               </tr>
             </thead>
             <tbody>
-              {% for jj in liste_critere %} {% if jj.groupe == i+1 %}
-              <tr>
-                <td>{{jj.nom_critere}}</td>
-                <td>{{jj.condition}}</td>
-                <td>
-                  <button class="supprimer_critere" aria-label="Supprimer">
-                    ×
-                  </button>
-                </td>
-              </tr>
-              {% endif %} {% endfor %}
+              {% for jj in liste_critere %} 
+                {% if jj.groupe == i+1 %}
+                <tr>
+                  <td>{{jj.nom_critere}}</td>
+                  <td>{{jj.condition}}</td>
+                  <td>
+                    <button class="supprimer_critere" aria-label="Supprimer">
+                      ×
+                    </button>
+                  </td>
+                </tr>
+                {% endif %} 
+              {% endfor %}
             </tbody>
           </table>
         </details>
+        
         <table class="liste-eleves" data-group="{{ i + 1 }}-classe">
           <thead>
             <tr>
+              <th class="effacer">Num</th>
               <th>Prénom</th>
               <th>Nom</th>
               {% for chiffre in liste_critere_base %}
@@ -62,6 +102,7 @@
           <tbody>
             {% for eleve in groupes[i] %}
             <tr draggable="true" class="eleve">
+              <td class="effacer">{{ eleve.num }}</td>
               <td>{{ eleve.prenom }}</td>
               <td>{{ eleve.nom }}</td>
               {% for critere_nom in liste_critere_base %}
@@ -85,14 +126,13 @@
     <article>
       <details open>
         <summary>
-          <header>
             <h2>Élèves non classés</h2>
             <span class="count">{{ nb_eleve_groupe[-1] }} élèves</span>
-          </header>
         </summary>
         <table class="liste-eleves" data-group="restants">
           <thead>
             <tr>
+              <th class="effacer">Num</th>
               <th>Prénom</th>
               <th>Nom</th>
               {% for chiffre in liste_critere_base %}
@@ -104,6 +144,7 @@
           <tbody>
             {% for eleve in groupes[-1] %}
             <tr draggable="true" class="eleve">
+              <td class="effacer">{{ eleve.num }}</td>
               <td>{{ eleve.prenom }}</td>
               <td>{{ eleve.nom }}</td>
               {% for critere_nom in liste_critere_base %}

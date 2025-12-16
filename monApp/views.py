@@ -14,15 +14,16 @@ def index():
 
 @app.route("/importer/", methods=["POST"])
 def importer():
-    if "csv_file" not in request.files:
-        return "Aucun fichier sélectionné", 400
-    file = request.files["csv_file"]
-    if file.filename == "":
-        return "Nom de fichier vide", 400
+    if "file" not in request.files:
+        return "Aucun fichier", 400
+    file = request.files.get("file")
     if file and file.filename.endswith(".csv"):
-        file.save(os.path.join(UPLOAD_FOLDER, "groupes.csv"))
-        return redirect(url_for("configuration"))
-    return "Format de fichier non supporté", 400
+        save_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
+        file.save(save_path)
+    
+        return render_template("configuration.html",title ="COHORT App")
+        
+    return "Format invalide", 400
 
 
 
@@ -97,7 +98,21 @@ def repartition():
         nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
         dico_importance = session["dico_importance"]
         groupes = algo.creer_groupe(liste_eleve, [], dico_importance, nombre_groupes)
-        return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes)
+        score = algo.score_totale(liste_eleve, groupes, session["dico_importance"])
+        place = str(len(liste_eleve) - len(groupes[-1])) + "/" + str(len(liste_eleve))
+        prc_place = str((len(liste_eleve) - len(groupes[-1])) / len(liste_eleve) * 100)
+        restants = str(len(groupes[-1]))
+        prc_restants = str(len(groupes[-1]) / len(liste_eleve) * 100)
+        grp_genere = str(len(groupes) - 1)
+        if (len(groupes[-1]) > 0):
+            vert= False
+            grp_genere += " + 1"
+        else:
+            vert = True
+            
+        return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,
+                               nombre_groupes=nombre_groupes,groupes=groupes, score=score, place=place, prc_place=prc_place,
+                               restants=restants,prc_restants=prc_restants,grp_genere=grp_genere, vert=vert)
     except:
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=0,nombre_groupes=0,groupes=[[]])
 
@@ -113,9 +128,10 @@ def exporter_groupes():
             cells = [td.get_text(strip=True) for td in row.find_all('td')]
             if len(cells) >= 2:
                 eleve = {
-                    "prenom": cells[0],
-                    "nom": cells[1],
-                    "criteres": cells[2:-1],
+                    "num": cells[0],
+                    "prenom": cells[1],
+                    "nom": cells[2],
+                    "criteres": cells[3:-1],
                 }
                 eleves.append(eleve)
         groupes[groupe_nom] = eleves
@@ -124,9 +140,10 @@ def exporter_groupes():
         cells = [td.get_text(strip=True) for td in row.find_all('td')]
         if len(cells) >= 2:
             restants.append({
-                "prenom": cells[0],
-                "nom": cells[1],
-                "criteres": cells[2:-1],
+                "num": cells[0],
+                "prenom": cells[1],
+                "nom": cells[2],
+                "criteres": cells[3:-1],
             })
     groupes["restants"] = restants
     if groupes:
@@ -143,7 +160,7 @@ def exporter_groupes():
             for groupe in groupes.values():
                 for eleve in groupe:
                     ligne = []
-                    ligne.append(1) 
+                    ligne.append(eleve.get("num", "")) 
                     ligne.append(eleve.get("nom", ""))
                     ligne.append(eleve.get("prenom", ""))
                     criteres_eleve = eleve.get("criteres", eleve.get("critere", []))
