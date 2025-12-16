@@ -247,3 +247,20 @@ def score_totale(liste_eleve, groupes, dico_importance):
     for critere in dico_pourc_elv:
         cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
     return int((cout_totale - cout_grp) / cout_totale * 100)
+
+def test_creation_liste_critere():
+    liste = []
+
+
+    liste.append(critere.Critere(1, ["1", "2", "3", "6", "7"], "niveau francais"))
+    liste.append(critere.Critere(1, ["1", "4", "5", "6", "7"], "niveau maths"))
+    liste.append(critere.Critere(1, ["M", "F"], "genre"))
+    liste.append(critere.Critere(2, ["1", "4", "5", "6", "7"], "niveau francais"))
+    liste.append(critere.Critere(2, ["F"], "genre"))
+    liste.append(critere.Critere(2, ["1", "2", "3", "4", "5", "6", "7"], "niveau maths"))
+    liste.append(critere.Critere(3, ["2", "3", "4", "5", "6"], "niveau maths"))
+    liste.append(critere.Critere(3, ["1", "4", "5", "6", "7"], "niveau francais"))
+    liste.append(critere.Critere(3, ["M"], "genre"))
+
+    return liste
+    
