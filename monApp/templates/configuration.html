@@ -2,13 +2,11 @@
 
 {% block title %}Page de configuration{% endblock %}
 
-{# Ce bloc place le CSS dans le <head> du base.html #}
 {% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/config.css') }}">
 {% endblock %}
 
 
-{# Ce bloc remplit le <main> du base.html #}
 {% block main %}
 
 <form action="{{ url_for('configuration') }}" method="POST">
@@ -25,7 +23,11 @@
                 <div class="div-base">
                     <h4>Nombre de groupe</h4>
                     <div>
-                        <input type="number" class="level-input" name="nb-grp" min="1" required>
+                        
+                        <input type="number" class="level-input" name="nb-grp" min="1"  value="{{ request.form.get('nb-grp', nb_grp ) }}" required>
+                    </div>
+                    <div class="submit-container" style="text-align: center; margin: 20px 0;">
+                        <button type="submit" name="btn" value="btn-valide" class="btn btn-primary">Valider</button>
                     </div>
                 </div>
                 <h2>Configuration de base</h2>
@@ -118,12 +120,24 @@
                 </script>
             </section>
             <section class="config-groupe">
-
+                {% if valide %}
+                    {% for grp in liste_grp%}
+                        <div>
+                            <h4>Groupe {{ grp }}</h4>
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </section>
         </section>
-
         <div class="submit-container" style="text-align: center; margin: 20px 0;">
-            <button type="submit" class="btn btn-primary btn-lg">Lancer la répartition</button>
+            <button type="submit" name="btn" value="btn-repartition"  class="btn btn-primary btn-lg" 
+                {% if valide != True %} 
+                    disabled
+                    style="background-color: gray; border: 2px solid black ;"
+                {% endif %}>
+                Lancer la répartition
+                
+            </button>
         </div>
 
     </div>
