@@ -38,9 +38,6 @@ def recup_critere(nom_fichier):
         liste_critere = next(reader)[3:]
     return liste_critere
 
-def exporter_fichier():
-    ...
-
 def lire_config(nom_fichier):
     with open(nom_fichier) as fichier_json:
         config = json.load(fichier_json)
@@ -49,9 +46,6 @@ def lire_config(nom_fichier):
         liste_critere.append(critere.Critere(un_critere["groupe"], un_critere["appartient"], un_critere["nom"]))
     dico_importance = config["dico_importance"]
     return liste_critere, dico_importance
-
-def exporter_config(liste_critere, dico_importance):
-    ...
 
 def init_dico_importance(liste_eleve):
     dico_importance = {}
@@ -196,18 +190,23 @@ def max_aleatoire(liste_cout):
             liste_index.append(i)
     return random.choice(liste_index)
 
+def cout_optimise(dico_compteur, nb_eleve_grp, dico_pourc_elv, dico_importance):
+    cout_res = 0
+    if nb_eleve_grp == 0:
+        return float('inf')
+    for critere in dico_pourc_elv:
+        dico_valeurs = dico_compteur.get(critere, {})
+        cout_critere = 0
+        for valeur, pct_cible in dico_pourc_elv[critere].items():
+            nb = dico_valeurs.get(valeur, 0)
+            pct_actuel = (nb / nb_eleve_grp) * 100
+            cout_critere += abs(pct_actuel - pct_cible)
+        cout_res += dico_importance[critere] * cout_critere
+    return cout_res
+
 def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
-    """ creer des groupes d'élève en répartissant les critères
-
-    Args: 
-        liste_eleve (list): liste des élèves importer d'un fichier csv
-        dico_importance (dict): dictionnaire contenant les coefficient d'importance des critères
-        nb_groupe (int): nombre de groupes a créer
-
-    Returns:
-        list: liste des groupes finis
-    """
     liste_max = None
+    cout_min_global = float('inf')
     debut, actuel = time.time(), time.time()
     dico_pourc_elv = dico_poucentage(liste_eleve)
     cpt = 0
@@ -216,26 +215,55 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
         actuel = time.time()
         random.shuffle(liste_eleve)
         liste_groupes = []
+        liste_compteurs = []
         for _ in range(nb_groupe + 1):
             liste_groupes.append([])
+            liste_compteurs.append({})
         for eleve in liste_eleve:
             liste_groupes_possibles = groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe)
             if len(liste_groupes_possibles) > 0:
                 liste_cout = []
                 for ind_groupe in liste_groupes_possibles:
-                    if len(liste_groupes[ind_groupe]) == 0:
-                        liste_cout.append(float('inf'))
+                    nb_actuel = len(liste_groupes[ind_groupe])
+                    cout_actuel = cout_optimise(liste_compteurs[ind_groupe], nb_actuel, dico_pourc_elv, dico_importance)
+                    nb_futur = nb_actuel + 1
+                    cout_futur = 0
+                    for critere, importance in dico_importance.items():
+                        val_eleve = eleve.critere[critere]
+                        dico_val = liste_compteurs[ind_groupe].get(critere, {})
+                        cout_crit = 0
+                        for val, pct_cible in dico_pourc_elv[critere].items():
+                            nb = dico_val.get(val, 0)
+                            if val == val_eleve:
+                                nb += 1
+                            pct_futur = (nb / nb_futur) * 100
+                            cout_crit += abs(pct_futur - pct_cible)
+                        cout_futur += importance * cout_crit
+                    if cout_actuel == float('inf'):
+                        liste_cout.append(10000)
                     else:
-                        groupe_simul = copy.deepcopy(liste_groupes[ind_groupe])
-                        ancien_cout = diff_cout_groupe(dico_pourc_elv, dico_poucentage(groupe_simul), dico_importance)
-                        groupe_simul.append(eleve)
-                        nouveau_cout = diff_cout_groupe(dico_pourc_elv, dico_poucentage(groupe_simul), dico_importance)
-                        liste_cout.append(ancien_cout - nouveau_cout)
-                liste_groupes[liste_groupes_possibles[max_aleatoire(liste_cout)]].append(eleve)
+                        liste_cout.append(cout_actuel - cout_futur)
+                choix = liste_groupes_possibles[max_aleatoire(liste_cout)]
+                liste_groupes[choix].append(eleve)
+                for critere, val in eleve.critere.items():
+                    if critere not in liste_compteurs[choix]:
+                        liste_compteurs[choix][critere] = {}
+                    if val not in liste_compteurs[choix][critere]:
+                        liste_compteurs[choix][critere][val] = 0
+                    liste_compteurs[choix][critere][val] += 1
             else:
                 liste_groupes[-1].append(eleve)
-        if liste_max is None or len(liste_groupes[-1]) < len(liste_max[-1]) or cout_tot(dico_pourc_elv, liste_groupes, dico_importance) < cout_tot(dico_pourc_elv, liste_max, dico_importance):
+        cout_final = cout_tot(dico_pourc_elv, liste_groupes[:-1], dico_importance)
+        if liste_max is None:
             liste_max = copy.deepcopy(liste_groupes)
+            cout_min_global = cout_final
+        else:
+            if len(liste_groupes[-1]) < len(liste_max[-1]):
+                    liste_max = copy.deepcopy(liste_groupes)
+                    cout_min_global = cout_final
+            elif len(liste_groupes[-1]) == len(liste_max[-1]) and cout_final < cout_min_global:
+                    liste_max = copy.deepcopy(liste_groupes)
+                    cout_min_global = cout_final
     print(cpt)
     return liste_max
 
