@@ -29,74 +29,76 @@
 
  <section class="empty_space">
     <h2>Configuration d'importance</h2>
-    <div class="sliders-container">
-      {% for nom_critere, valeur in dico_importance.items() %}
-      <div class="slider-row">
-        <span class="slider-label">{{ nom_critere }}</span>
-        <input type="range" min="0" max="100" value="{{ valeur }}" class="slider small-slider">
-        <div>
-            <input type="number" name="{{ nom }}" class="slider-value" min="0" max="100" step="1" value="{{ valeur_defaut }}">
+    <form id="form-repartition" action="{{ url_for('repartition') }}" method="POST">
+        <div class="sliders-container">
+            {% for nom_critere, valeur in dico_importance.items() %}
+            <div class="slider-row">
+                <span class="slider-label">{{ nom_critere }}</span>
+                <input type="range" min="0" max="100" value="{{ valeur }}" class="slider small-slider">
+                <div>
+                    <input type="number" name="{{ nom_critere }}" class="slider-value small-input" min="0" max="100" step="1" value="{{ valeur }}">
+                </div>
+            </div>
+            {% endfor %}
         </div>
-      </div>
-      {% endfor %}
-    </div>
+    </form>
 
-      <script>
-        const sliders = [...document.querySelectorAll(".slider")];
-        const values = [...document.querySelectorAll(".slider-value")];
-        const totalDisplay = document.getElementById("total");
-        const TOTAL_MAX = 100;
+    <script>
+      const sliders = [...document.querySelectorAll(".slider")];
+      const values = [...document.querySelectorAll(".slider-value")];
+      const totalDisplay = document.getElementById("total");
+      const TOTAL_MAX = 100;
 
-        function clamp(v) {
-            return Math.max(0, Math.min(100, v));
-        }
+      function clamp(v) {
+          return Math.max(0, Math.min(100, v));
+      }
 
-        function updateTotal() {
-            const total = sliders.reduce((s, el) => s + Number(el.value), 0);
-            if (totalDisplay) totalDisplay.textContent = total;
-        }
+      function updateTotal() {
+          const total = sliders.reduce((s, el) => s + Number(el.value), 0);
+          if (totalDisplay) totalDisplay.textContent = total;
+      }
 
-        function normalize(changedIndex) {
-            let total = sliders.reduce((s, el) => s + Number(el.value), 0);
-            if (total === TOTAL_MAX) return;
+      function normalize(changedIndex) {
+          let total = sliders.reduce((s, el) => s + Number(el.value), 0);
+          if (total === TOTAL_MAX) return;
 
-            let diff = TOTAL_MAX - total;
-            const others = sliders
-                .map((s, i) => ({ s, i }))
-                .filter(o => o.i !== changedIndex);
+          let diff = TOTAL_MAX - total;
+          const others = sliders
+              .map((s, i) => ({ s, i }))
+              .filter(o => o.i !== changedIndex);
 
-            for (const o of others) {
-                if (diff === 0) break;
-                let delta = diff > 0 ? 1 : -1;
-                let newVal = clamp(Number(o.s.value) + delta);
-                if (newVal !== Number(o.s.value)) {
-                    o.s.value = newVal;
-                    diff -= delta;
-                }
-            }
+          for (const o of others) {
+              if (diff === 0) break;
+              let delta = diff > 0 ? 1 : -1;
+              let newVal = clamp(Number(o.s.value) + delta);
+              if (newVal !== Number(o.s.value)) {
+                  o.s.value = newVal;
+                  diff -= delta;
+              }
+          }
 
-            sliders.forEach((s, i) => values[i].value = s.value);
-            updateTotal();
-        }
+          sliders.forEach((s, i) => values[i].value = s.value);
+          updateTotal();
+      }
 
-        sliders.forEach((slider, i) => {
-            slider.addEventListener("input", () => {
-                slider.value = clamp(Number(slider.value));
-                values[i].value = slider.value;
-                normalize(i);
-            });
-        });
+      sliders.forEach((slider, i) => {
+          slider.addEventListener("input", () => {
+              slider.value = clamp(Number(slider.value));
+              values[i].value = slider.value;
+              normalize(i);
+          });
+      });
 
-        values.forEach((input, i) => {
-            input.addEventListener("input", () => {
-                let v = clamp(Number(input.value || 0));
-                sliders[i].value = v;
-                input.value = v;
-                normalize(i);
-            });
-        });
+      values.forEach((input, i) => {
+          input.addEventListener("input", () => {
+              let v = clamp(Number(input.value || 0));
+              sliders[i].value = v;
+              input.value = v;
+              normalize(i);
+          });
+      });
 
-        updateTotal();
+      updateTotal();
     </script>
   </section>
 </div>
@@ -217,7 +219,16 @@
         </table>
       </details>
     </article>
+    <div class="submit-container" style="text-align: center; margin: 20px 0;">
+      <button type="button" 
+              onclick="document.getElementById('form-repartition').submit();" 
+              class="btn btn-primary btn-lg" 
+              style="background-color: gray; border: 2px solid black;">
+          Relancer la répartition
+      </button>
+    </div>
   </section>
+  
 </main>
 
 <footer class="header_score">
