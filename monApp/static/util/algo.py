@@ -148,15 +148,20 @@ def nb_max_eleve_par_groupe(liste_eleve, nb_groupes):
         return len(liste_eleve) // nb_groupes + 1
 
 def groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupes):
+
     """Renvoie une liste d'index qui sont les index des groupes dans lesquels on peut ajouter des élèves.
 
     Args:
         liste_groupes (list): une liste de listes qui represente la liste de groupes.
-        nb_elv_grp (int): nombre d'eleve max par grp
+        liste_eleve (list): liste des élèves 
+        eleve (eleve): eleve que l'on voudrait ajouter
+        liste_critere (list): liste des critères
+        nb_groupes (int): nombre de groupes
 
     Returns:
         list: Une liste d'index.
     """
+
     nb_elv_grp = nb_max_eleve_par_groupe(liste_eleve, nb_groupes)
     res = []
     for i in range(len(liste_groupes) - 1):
