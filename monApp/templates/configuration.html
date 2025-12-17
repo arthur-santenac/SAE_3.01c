@@ -137,17 +137,29 @@
                                     {% for crit in criteres_choisis %}
                                         {% if crit.grp == grp %}
                                         <div class="critere-box card m-2 p-2">
-                                            <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <strong>{{ crit.nom }}</strong>
-                                                <div>
-                                                    <button type="submit" name="btn" value="btn-edit-{{ loop.index0 }}" class="btn btn-sm btn-outline-secondary">Modifier</button>
-                                                </div>
                                             </div>
-                                            <div class="valeurs-container mt-2">
-                                                <small>Valeurs acceptées :</small><br>
-                                                {% for val in crit.valeurs %}
-                                                    <span class="badge bg-primary m-1">{{ val }}</span>
-                                                {% endfor %}
+                                            <div class="valeurs-container">
+                                                <small class="text-muted">Valeurs acceptées :</small><br>
+                                                {% set toutes_valeurs = session['liste_val_crit'][crit.nom] %}
+                                                <div class="d-flex flex-wrap gap-2 mt-1">
+                                                    {% for val in toutes_valeurs %}
+                                                        <div class="form-check form-check-inline wrapper-checkbox-badge">
+                                                            <input class="form-check-input" 
+                                                                type="checkbox" 
+                                                                name="chk_{{ grp }}_{{ crit.nom }}" 
+                                                                value="{{ val }}" 
+                                                                id="chk_{{ grp }}_{{ crit.nom }}_{{ val }}"
+                                                                {% if val in crit.valeurs %}checked{% endif %}>
+                                                            
+                                                            <label class="form-check-label badge" 
+                                                                for="chk_{{ grp }}_{{ crit.nom }}_{{ val }}">
+                                                                {{ val }}
+                                                            </label>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
                                             </div>
                                         </div>
                                         {% endif %}
