@@ -20,9 +20,10 @@ def importer():
     if file and file.filename.endswith(".csv"):
         save_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
         file.save(save_path)
-        session["criteres_groupes"] = []
-        session["dico_importance"] = {}   
+        liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
+        session["criteres_groupes"] = [] 
         session["valide"] = False
+        session["dico_importance"] = algo.init_dico_importance(liste_eleve)
         return render_template("configuration.html",title ="COHORT App")
     return "Format invalide", 400
 
@@ -40,10 +41,9 @@ def configuration():
         if action == "btn-valide":
             nb_groupes_str = request.form.get("nb-grp")
             if nb_groupes_str:
-                nb_groupes = int(nb_groupes_str)
-                session["nb_groupes"] = nb_groupes
+                session["nb_groupes"] = int(nb_groupes_str)
                 session["valide"] = True
-                session["liste_ind_groupes"] = list(range(1, nb_groupes + 1))
+                session["liste_ind_groupes"] = list(range(1, int(nb_groupes_str) + 1))
 
         if any(key.startswith("importance_") for key in request.form.keys()):
             liste_crit_brut = algo.recup_critere(csv_path)
@@ -58,30 +58,33 @@ def configuration():
         if action and action.startswith("btn-add-crit"):
             grp_id = action.replace("btn-add-crit", "")
             return redirect(url_for("ajout_crit_grp", grp_id=grp_id))
+
         elif action and action.startswith("btn-supp-"):
-            id_a_supp = int(action.split("-")[-1])
+            idx_to_supp = int(action.split("-")[-1])
             temp_list = session.get("criteres_groupes", [])
-            if 0 <= id_a_supp < len(temp_list):
-                temp_list.pop(id_a_supp)
+            if 0 <= idx_to_supp < len(temp_list):
+                temp_list.pop(idx_to_supp)
             session["criteres_groupes"] = temp_list
 
         elif action == "btn-repartition":
             return redirect(url_for("repartition"))
 
+    liste_crit_brut = algo.recup_critere(csv_path) if os.path.exists(csv_path) else []
+    session["criteres_groupes"] = [c for c in session.get("criteres_groupes", []) if c['nom'] in liste_crit_brut]
+    
+    criteres_pour_template = [c.lower().replace(" ", "_") for c in liste_crit_brut]
     if os.path.exists(csv_path):
-        liste_crit_brut = algo.recup_critere(csv_path)
-        criteres_pour_template = []
-        for crit in liste_crit_brut:
-            criteres_pour_template.append(crit.lower().replace(" ", "_"))
-        liste_val_crit = {}
-        for crit in liste_crit_brut:
-            liste_val_crit[crit] = algo.recup_ensemble_val_critere(crit, csv_path)
-        session["liste_val_crit"] = liste_val_crit
-    else:
-        criteres_pour_template = []
+        session["liste_val_crit"] = {crit: algo.recup_ensemble_val_critere(crit, csv_path) for crit in liste_crit_brut}
 
-    return render_template("configuration.html", title="COHORT App", criteres=criteres_pour_template, valide=session.get("valide"), liste_grp=session.get("liste_ind_groupes", []),
-        criteres_choisis=session.get("criteres_groupes", []), nb_grp=session.get("nb_groupes", 1))
+    return render_template(
+        "configuration.html", 
+        title="COHORT App", 
+        criteres=criteres_pour_template, 
+        valide=session.get("valide"), 
+        liste_grp=session.get("liste_ind_groupes", []),
+        criteres_choisis=session.get("criteres_groupes", []),
+        nb_grp=session.get("nb_groupes", 1)
+    )
 
 @app.route("/configuration/add_crit/<int:grp_id>", methods=["GET", "POST"])
 def ajout_crit_grp(grp_id):
