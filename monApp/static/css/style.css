@@ -66,22 +66,16 @@ h2 {
 }
 
 .header_score {
-  margin: 80px 20px 0 20px;
   display: flex;
   flex-flow: column;
   text-align: center;
   background-color: #ffffff;
   border-radius: 12px;
+  flex: 1;
+  display: flex;
+  flex-flow: column;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  padding: 2px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-.header_score:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-}
-
 
 .effacer {
   display: none;
@@ -255,4 +249,25 @@ details[open] summary {
 
 .fill.red {
   background-color: #b71c1c;
+}
+
+
+.top_row {
+  margin: 80px 10px 10px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.empty_space {
+  flex: 1;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
