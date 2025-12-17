@@ -96,14 +96,15 @@ def repartition():
         liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
         nombre_groupes = session.get("nb_groupes", 0)
         nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
-        dico_importance = session["dico_importance"]
+        dico_importance = session.get("dico_importance", dict())
         groupes = algo.creer_groupe(liste_eleve, [], dico_importance, nombre_groupes)
-        score = algo.score_totale(liste_eleve, groupes, session["dico_importance"])
+        score = algo.score_totale(liste_eleve, groupes, dico_importance)
         place = str(len(liste_eleve) - len(groupes[-1])) + "/" + str(len(liste_eleve))
         prc_place = str((len(liste_eleve) - len(groupes[-1])) / len(liste_eleve) * 100)
         
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,
-                               nombre_groupes=nombre_groupes,groupes=groupes, score=score, place=place, prc_place=prc_place)
+                               nombre_groupes=nombre_groupes,groupes=groupes, score=score, place=place, prc_place=prc_place,
+                               dico_importance=dico_importance)
     except:
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=0,nombre_groupes=0,groupes=[[]])
 
