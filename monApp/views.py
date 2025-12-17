@@ -90,13 +90,24 @@ def configuration_critere():
 
 
 
-@app.route("/repartition/")
+@app.route("/repartition/", methods=["POST", "GET"])
 def repartition():
     try:
+        if request.method == "POST":
+            dico_actuel = session.get("dico_importance", {})
+            for critere in dico_actuel:
+                if critere in request.form:
+                    try:
+                        dico_actuel[critere] = int(request.form[critere])
+                    except ValueError:
+                        pass
+            session["dico_importance"] = dico_actuel
+            session.modified = True
+        print(session.get("dico_importance", {}))
         liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
         nombre_groupes = session.get("nb_groupes", 0)
         nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
-        dico_importance = session.get("dico_importance", dict())
+        dico_importance = session.get("dico_importance", {})
         groupes = algo.creer_groupe(liste_eleve, [], dico_importance, nombre_groupes)
         score = algo.score_totale(liste_eleve, groupes, dico_importance)
         place = str(len(liste_eleve) - len(groupes[-1])) + "/" + str(len(liste_eleve))
