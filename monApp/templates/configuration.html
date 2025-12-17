@@ -54,75 +54,106 @@
                     </section>
                 {% endif %}
                 <script>
-                    const sliders = [...document.querySelectorAll(".slider")];
-                    const values = [...document.querySelectorAll(".slider-value")];
-                    const totalDisplay = document.getElementById("total");
-                    const TOTAL_MAX = 100;
-
-                    const previousValues = sliders.map(s => Number(s.value));
-
-                    function clamp(v) {
-                        return Math.max(0, Math.min(100, v));
-                    }
-
-                    function updateTotal() {
-                        const total = sliders.reduce((s, el) => s + Number(el.value), 0);
+                    document.addEventListener("DOMContentLoaded", () => {
                         
-                        if (totalDisplay) {
-                            totalDisplay.textContent = total;
-                            totalDisplay.style.color = (total === TOTAL_MAX) ? 'green' : 'red';
-                        }
-                        return total;
-                    }
-
-                    function normalize(changedIndex) {
-                        let currentTotal = sliders.reduce((s, el) => s + Number(el.value), 0);
-                        if (currentTotal === TOTAL_MAX) {
-                            updateTotal();
-                            return;
+                        const groups = [];
+                        const container = document.querySelector(".section-importance");
+                        
+                        
+                        if(container) {
+                            const divs = container.querySelectorAll("div[class^='importance_']"); 
+                            const sliders = document.querySelectorAll(".slider");
+                            const values = document.querySelectorAll(".slider-value");
+                            
+                            sliders.forEach((slider, index) => {
+                                groups.push({
+                                    slider: slider,
+                                    number: values[index],
+                                    index: index
+                                });
+                            });
                         }
 
-                        const slider = sliders[changedIndex];
-                        const inputValue = values[changedIndex];
-                        
-                        let newValue = Number(slider.value);
-                        const difference = currentTotal - TOTAL_MAX; 
+                        const TOTAL_TARGET = 100;
 
-                        if (difference > 0) {
-                            newValue = clamp(newValue - difference); 
-                            slider.value = newValue;
-                            inputValue.value = newValue;
-                        } 
+                        function updateSliders(activeIndex, newVal) {
+                            newVal = Math.max(0, Math.min(TOTAL_TARGET, newVal));
+                            
+                            groups[activeIndex].slider.value = newVal;
+                            groups[activeIndex].number.value = newVal;
 
-                        sliders.forEach((s, i) => values[i].value = s.value);
-                        updateTotal();
+                            let currentSum = 0;
+                            groups.forEach(g => currentSum += parseInt(g.slider.value));
+                            
+                            let difference = currentSum - TOTAL_TARGET;
 
-                        previousValues[changedIndex] = newValue;
-                    }
+                            while (difference !== 0) {
+                                
+                                if (difference > 0) {
+                                    let candidate = null;
+                                    let maxVal = -1;
+                                    groups.forEach((g, i) => {
+                                        if (i !== activeIndex) {
+                                            let val = parseInt(g.slider.value);
+                                            if (val > 0 && val > maxVal) {
+                                                maxVal = val;
+                                                candidate = g;
+                                            }
+                                        }
+                                    });
+                                    if (candidate) {
+                                        let v = parseInt(candidate.slider.value) - 1;
+                                        candidate.slider.value = v;
+                                        candidate.number.value = v;
+                                        difference--; 
+                                    } else {
+                                        newVal--;
+                                        groups[activeIndex].slider.value = newVal;
+                                        groups[activeIndex].number.value = newVal;
+                                        difference--;
+                                    }
+                                } 
+                                
+                                else if (difference < 0) {
+                                    let candidate = null;
+                                    let minVal = 101;
 
+                                    groups.forEach((g, i) => {
+                                        if (i !== activeIndex) {
+                                            let val = parseInt(g.slider.value);
+                                            if (val < 100 && val < minVal) {
+                                                minVal = val;
+                                                candidate = g;
+                                            }
+                                        }
+                                    });
 
-                    sliders.forEach((slider, i) => {
-                        slider.addEventListener("input", () => {
-                            slider.value = clamp(Number(slider.value));
-                            values[i].value = slider.value;
-                            normalize(i);
+                                    if (candidate) {
+                                        let v = parseInt(candidate.slider.value) + 1;
+                                        candidate.slider.value = v;
+                                        candidate.number.value = v;
+                                        difference++;
+                                    } else {
+                                        difference++;
+                                    }
+                                }
+                            }
+                        }
+
+                        groups.forEach((group) => {
+                            group.slider.addEventListener('input', (e) => {
+                                updateSliders(group.index, parseInt(e.target.value));
+                            });
+                            group.number.addEventListener('input', (e) => {
+                                let val = parseInt(e.target.value);
+                                if (isNaN(val)) val = 0;
+                                updateSliders(group.index, val);
+                            });
+                            group.slider.addEventListener('change', (e) => {
+                                updateSliders(group.index, parseInt(e.target.value));
+                            });
                         });
                     });
-
-                    values.forEach((input, i) => {
-                        input.addEventListener("input", () => {
-                            let v = clamp(Number(input.value || 0));
-                            sliders[i].value = v;
-                            input.value = v;
-                            normalize(i);
-                        });
-                    });
-
-                    updateTotal();
-                    
-                    if (totalDisplay === null) {
-                        console.error("L'élément avec l'ID 'total' est manquant. Veuillez l'ajouter au HTML.");
-                    }
                 </script>
             </section>
             {% if valide %}
