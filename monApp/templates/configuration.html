@@ -4,6 +4,7 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/config.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 {% endblock %}
 
 
@@ -15,200 +16,196 @@
 </div>
 
 <form action="{{ url_for('configuration') }}" method="POST">
-    <div class="container mt-5 pt-2">
+    <div class="container mt-5 pt-4 mb-5">
         
         {% if error %}
-            <div class="alert alert-danger" role="alert">
+            <div class="alert alert-danger shadow-sm border-0" role="alert">
                 {{ error }}
             </div>
         {% endif %}
 
-        <section class="config-section">
-            <section class="config-base">
-                <div class="div-base">
-                    <h4>Nombre de groupe</h4>
-                    <div>
-                        
-                        <input type="number" class="level-input" name="nb-grp" min="1"  value="{{ request.form.get('nb-grp', nb_grp ) }}" required>
-                    </div>
-                    <div class="submit-container" style="text-align: center; margin: 20px 0;">
-                        <button type="submit" name="btn" value="btn-valide" class="btn btn-primary">Valider</button>
+        <div class="config-card">
+            <div class="card-header-custom">
+                <h3>Initialisation</h3>
+            </div>
+            <div class="card-body-custom">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-md-6 text-center">
+                        <label for="nb-grp" class="form-label fw-bold">Nombre de groupes souhaités</label>
+                        <div class="input-group mb-3">
+                            <input type="number" class="form-control form-control-lg text-center fw-bold" id="nb-grp" name="nb-grp" min="1" value="{{ request.form.get('nb-grp', nb_grp ) }}" required>
+                            <button type="submit" name="btn" value="btn-valide" class="btn btn-primary btn-lg">
+                                Valider
+                            </button>
+                        </div>
                     </div>
                 </div>
-                {% if valide %}
-                    <h2>Configuration de base</h2>
-                    <section class="section-importance">
-                        <h4>Répartion d'importance </h4>
-                        {% for crit_propre in criteres %}
-                            {% set nom = "importance_" + crit_propre %}
-                            {% set titre_crit = crit_propre.replace('_', ' ').capitalize() %}
-                            {% set valeur_defaut = 100 // (criteres|length) %}
-                            <div class="{{ crit_propre }}">
-                                <h4>{{ titre_crit }}</h4>
-                                <input type="range" name="{{ nom }}" min="0" max="100" step="1" class="slider" value="{{ valeur_defaut }}">
-                                <div>
-                                    <input type="number" name="{{ nom }}" class="slider-value" min="0" max="100" step="1" value="{{ valeur_defaut }}">
-                                </div>
+            </div>
+        </div>
+
+        {% if valide %}
+            <div class="config-card mt-4">
+                <div class="card-header-custom">
+                    <h3>Répartition d'importance</h3>
+                    <p class="text-muted mb-0">Total : <span id="total-display">100</span>%</p>
+                </div>
+                
+                <section class="section-importance">
+                    {% for crit_propre in criteres %}
+                        {% set nom = "importance_" + crit_propre %}
+                        {% set titre_crit = crit_propre.replace('_', ' ').capitalize() %}
+                        {% set valeur_defaut = 100 // (criteres|length) %}
+                        <div class="{{ crit_propre }}">
+                            <h4>{{ titre_crit }}</h4>
+                            <input type="range" name="{{ nom }}" min="0" max="100" step="1" class="slider" value="{{ valeur_defaut }}">
+                            <div>
+                                <input type="number" name="{{ nom }}" class="slider-value" min="0" max="100" step="1" value="{{ valeur_defaut }}">
                             </div>
-                        {% endfor %}
-                    </section>
-                {% endif %}
-                <script>
-                    document.addEventListener("DOMContentLoaded", () => {
+                        </div>
+                    {% endfor %}
+                </section>
+            </div>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                    const groups = [];
+                    const container = document.querySelector(".section-importance");
+                    
+                    if(container) {
+                        const sliders = container.querySelectorAll(".slider");
+                        const values = container.querySelectorAll(".slider-value");
                         
-                        const groups = [];
-                        const container = document.querySelector(".section-importance");
-                        
-                        
-                        if(container) {
-                            const divs = container.querySelectorAll("div[class^='importance_']"); 
-                            const sliders = document.querySelectorAll(".slider");
-                            const values = document.querySelectorAll(".slider-value");
-                            
-                            sliders.forEach((slider, index) => {
-                                groups.push({
-                                    slider: slider,
-                                    number: values[index],
-                                    index: index
-                                });
+                        sliders.forEach((slider, index) => {
+                            groups.push({
+                                slider: slider,
+                                number: values[index],
+                                index: index
                             });
-                        }
+                        });
+                    }
 
-                        const TOTAL_TARGET = 100;
+                    const TOTAL_TARGET = 100;
 
-                        function updateSliders(activeIndex, newVal) {
-                            newVal = Math.max(0, Math.min(TOTAL_TARGET, newVal));
-                            
-                            groups[activeIndex].slider.value = newVal;
-                            groups[activeIndex].number.value = newVal;
+                    function updateSliders(activeIndex, newVal) {
+                        newVal = Math.max(0, Math.min(TOTAL_TARGET, newVal));
+                        
+                        groups[activeIndex].slider.value = newVal;
+                        groups[activeIndex].number.value = newVal;
 
-                            let currentSum = 0;
-                            groups.forEach(g => currentSum += parseInt(g.slider.value));
-                            
-                            let difference = currentSum - TOTAL_TARGET;
+                        let currentSum = 0;
+                        groups.forEach(g => currentSum += parseInt(g.slider.value));
+                        
+                        let difference = currentSum - TOTAL_TARGET;
 
-                            while (difference !== 0) {
-                                
-                                if (difference > 0) {
-                                    let candidate = null;
-                                    let maxVal = -1;
-                                    groups.forEach((g, i) => {
-                                        if (i !== activeIndex) {
-                                            let val = parseInt(g.slider.value);
-                                            if (val > 0 && val > maxVal) {
-                                                maxVal = val;
-                                                candidate = g;
-                                            }
+                        while (difference !== 0) {
+                            if (difference > 0) {
+                                let candidate = null;
+                                let maxVal = -1;
+                                groups.forEach((g, i) => {
+                                    if (i !== activeIndex) {
+                                        let val = parseInt(g.slider.value);
+                                        if (val > 0 && val > maxVal) {
+                                            maxVal = val;
+                                            candidate = g;
                                         }
-                                    });
-                                    if (candidate) {
-                                        let v = parseInt(candidate.slider.value) - 1;
-                                        candidate.slider.value = v;
-                                        candidate.number.value = v;
-                                        difference--; 
-                                    } else {
-                                        newVal--;
-                                        groups[activeIndex].slider.value = newVal;
-                                        groups[activeIndex].number.value = newVal;
-                                        difference--;
                                     }
-                                } 
-                                
-                                else if (difference < 0) {
-                                    let candidate = null;
-                                    let minVal = 101;
-
-                                    groups.forEach((g, i) => {
-                                        if (i !== activeIndex) {
-                                            let val = parseInt(g.slider.value);
-                                            if (val < 100 && val < minVal) {
-                                                minVal = val;
-                                                candidate = g;
-                                            }
+                                });
+                                if (candidate) {
+                                    let v = parseInt(candidate.slider.value) - 1;
+                                    candidate.slider.value = v;
+                                    candidate.number.value = v;
+                                    difference--; 
+                                } else {
+                                    newVal--;
+                                    groups[activeIndex].slider.value = newVal;
+                                    groups[activeIndex].number.value = newVal;
+                                    difference--;
+                                }
+                            } else if (difference < 0) {
+                                let candidate = null;
+                                let minVal = 101;
+                                groups.forEach((g, i) => {
+                                    if (i !== activeIndex) {
+                                        let val = parseInt(g.slider.value);
+                                        if (val < 100 && val < minVal) {
+                                            minVal = val;
+                                            candidate = g;
                                         }
-                                    });
-
-                                    if (candidate) {
-                                        let v = parseInt(candidate.slider.value) + 1;
-                                        candidate.slider.value = v;
-                                        candidate.number.value = v;
-                                        difference++;
-                                    } else {
-                                        difference++;
                                     }
+                                });
+                                if (candidate) {
+                                    let v = parseInt(candidate.slider.value) + 1;
+                                    candidate.slider.value = v;
+                                    candidate.number.value = v;
+                                    difference++;
+                                } else {
+                                    difference++;
                                 }
                             }
                         }
+                    }
 
-                        groups.forEach((group) => {
-                            group.slider.addEventListener('input', (e) => {
-                                updateSliders(group.index, parseInt(e.target.value));
-                            });
-                            group.number.addEventListener('input', (e) => {
-                                let val = parseInt(e.target.value);
-                                if (isNaN(val)) val = 0;
-                                updateSliders(group.index, val);
-                            });
-                            group.slider.addEventListener('change', (e) => {
-                                updateSliders(group.index, parseInt(e.target.value));
-                            });
+                    groups.forEach((group) => {
+                        group.slider.addEventListener('input', (e) => {
+                            updateSliders(group.index, parseInt(e.target.value));
+                        });
+                        group.number.addEventListener('input', (e) => {
+                            let val = parseInt(e.target.value);
+                            if (isNaN(val)) val = 0;
+                            updateSliders(group.index, val);
+                        });
+                        group.slider.addEventListener('change', (e) => {
+                            updateSliders(group.index, parseInt(e.target.value));
                         });
                     });
-                </script>
-            </section>
-            {% if valide %}
-                <section class="config-groupe">
-                    <h2>Configuration par groupe</h2>
-                        {% for grp in liste_grp %}
-                            <div class="groupe-container">
-                                <div class="entete-grp-crit">
-                                    <h4>Groupe {{ grp }}</h4>
-                                </div>
-                                <div class="liste-crit-active">
-                                    {% for crit in criteres_choisis %}
-                                        {% if crit.grp == grp %}
-                                        <div class="critere-box card m-2 p-2">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <strong>{{ crit.nom }}</strong>
-                                            </div>
-                                            <div class="valeurs-container">
-                                                <small class="text-muted">Valeurs acceptées :</small><br>
-                                                {% set toutes_valeurs = session['liste_val_crit'][crit.nom] %}
-                                                <div class="d-flex flex-wrap gap-2 mt-1">
-                                                    {% for val in toutes_valeurs %}
-                                                        <div class="form-check form-check-inline wrapper-checkbox-badge">
-                                                            <input class="form-check-input" 
-                                                                type="checkbox" 
-                                                                name="chk_{{ grp }}_{{ crit.nom }}" 
-                                                                value="{{ val }}" 
-                                                                id="chk_{{ grp }}_{{ crit.nom }}_{{ val }}"
-                                                                {% if val in crit.valeurs %}checked{% endif %}>
-                                                            
-                                                            <label class="form-check-label badge" 
-                                                                for="chk_{{ grp }}_{{ crit.nom }}_{{ val }}">
-                                                                {{ val }}
-                                                            </label>
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
+                });
+            </script>
+
+            <div class="config-card mt-4">
+                <div class="card-header-custom">
+                    <h3>Configuration détaillée par groupe</h3>
+                </div>
+                <div class="card-body-custom config-groupe-stack">
+                    {% for grp in liste_grp %}
+                        <div class="groupe-item">
+                            <div class="groupe-header">
+                                <h4>Groupe {{ grp }}</h4>
                             </div>
-                        {% endfor %}
-                </section>
-            {% endif %}
-        </section>
-        <div class="submit-container" style="text-align: center; margin: 20px 0;">
-            <button type="submit" onclick="submitWithLoader()" name="btn" value="btn-repartition"  class="btn btn-primary btn-lg" 
-                {% if valide != True %} 
-                    disabled
-                    style="background-color: gray; border: 2px solid black ;"
-                {% endif %}>
-                Lancer la répartition
-                
+                            <div class="groupe-content">
+                                {% for crit in criteres_choisis %}
+                                    {% if crit.grp == grp %}
+                                    <div class="critere-sub-box">
+                                        <div class="critere-title">{{ crit.nom }}</div>
+                                        <div class="checkbox-wrapper">
+                                            {% set toutes_valeurs = session['liste_val_crit'][crit.nom] %}
+                                            {% for val in toutes_valeurs %}
+                                                <div class="checkbox-badge-item">
+                                                    <input type="checkbox" 
+                                                           id="chk_{{ grp }}_{{ crit.nom }}_{{ val }}"
+                                                           name="chk_{{ grp }}_{{ crit.nom }}" 
+                                                           value="{{ val }}" 
+                                                           {% if val in crit.valeurs %}checked{% endif %}>
+                                                    <label for="chk_{{ grp }}_{{ crit.nom }}_{{ val }}">
+                                                        {{ val }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="submit-area mt-5 mb-5">
+            <button type="submit" onclick="submitWithLoader()" name="btn" value="btn-repartition"  
+                class="btn-cta {% if valide != True %}disabled{% endif %}"
+                {% if valide != True %}disabled{% endif %}>
+                <span>Lancer la répartition</span>
             </button>
         </div>
 
