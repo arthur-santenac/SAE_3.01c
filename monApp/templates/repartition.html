@@ -4,6 +4,11 @@
 {% block main %}
 <link rel="stylesheet" href="../static/css/style.css" />
 
+<div id="loader-overlay">
+  <span class="loader"></span>
+  <div class="loading-text">Création des groupes en cours...</div>
+</div>
+
 <div class="top_row">
   <header class="header_score">
     <div class="dashboard-container">
@@ -221,12 +226,12 @@
     </article>
     <div class="submit-container" style="text-align: center; margin: 20px 0;">
       <button type="button" 
-              onclick="document.getElementById('form-repartition').submit();" 
+              onclick="submitWithLoader()" 
               class="btn btn-primary btn-lg" 
               style="background-color: gray; border: 2px solid black;">
           Relancer la répartition
       </button>
-    </div>
+</div>
   </section>
   
 </main>
