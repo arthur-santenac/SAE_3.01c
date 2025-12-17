@@ -198,8 +198,8 @@ def dico_poucentage(liste_eleves):
     return dico_res
 
 def max_aleatoire(liste_cout):
-    """ Renvoie l'indice de l'élément le plus petit de la liste,
-        si il y en a plusieurs renvoie un indice aléatoire parmis ceux des élément les plus petits
+    """ Renvoie l'indice de l'élément le plus grand de la liste,
+        si il y en a plusieurs renvoie un indice aléatoire parmis ceux des élément les plus grands
 
     Args:
         liste_cout (list): liste de cout d'insertion d'un élève dans un groupe
