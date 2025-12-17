@@ -229,7 +229,7 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
     debut, actuel = time.time(), time.time()
     dico_pourc_elv = dico_poucentage(liste_eleve)
     cpt = 0
-    while actuel - debut < 3:
+    while actuel - debut < 4:
         cpt += 1
         actuel = time.time()
         random.shuffle(liste_eleve)
