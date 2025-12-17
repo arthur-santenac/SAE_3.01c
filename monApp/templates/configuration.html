@@ -2,14 +2,17 @@
 
 {% block title %}Page de configuration{% endblock %}
 
-{# Ce bloc place le CSS dans le <head> du base.html #}
 {% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/config.css') }}">
 {% endblock %}
 
 
-{# Ce bloc remplit le <main> du base.html #}
 {% block main %}
+
+<div id="loader-overlay">
+  <span class="loader"></span>
+  <div class="loading-text">Création des groupes en cours...</div>
+</div>
 
 <form action="{{ url_for('configuration') }}" method="POST">
     <div class="container mt-5 pt-2">
@@ -25,7 +28,11 @@
                 <div class="div-base">
                     <h4>Nombre de groupe</h4>
                     <div>
-                        <input type="number" class="level-input" name="nb-grp" min="1" required>
+                        
+                        <input type="number" class="level-input" name="nb-grp" min="1"  value="{{ request.form.get('nb-grp', nb_grp ) }}" required>
+                    </div>
+                    <div class="submit-container" style="text-align: center; margin: 20px 0;">
+                        <button type="submit" name="btn" value="btn-valide" class="btn btn-primary">Valider</button>
                     </div>
                 </div>
                 <h2>Configuration de base</h2>
@@ -51,37 +58,47 @@
                     const totalDisplay = document.getElementById("total");
                     const TOTAL_MAX = 100;
 
+                    const previousValues = sliders.map(s => Number(s.value));
+
                     function clamp(v) {
                         return Math.max(0, Math.min(100, v));
                     }
 
                     function updateTotal() {
                         const total = sliders.reduce((s, el) => s + Number(el.value), 0);
-                        if (totalDisplay) totalDisplay.textContent = total;
+                        
+                        if (totalDisplay) {
+                            totalDisplay.textContent = total;
+                            totalDisplay.style.color = (total === TOTAL_MAX) ? 'green' : 'red';
+                        }
+                        return total;
                     }
 
                     function normalize(changedIndex) {
-                        let total = sliders.reduce((s, el) => s + Number(el.value), 0);
-                        if (total === TOTAL_MAX) return;
-
-                        let diff = TOTAL_MAX - total;
-                        const others = sliders
-                            .map((s, i) => ({ s, i }))
-                            .filter(o => o.i !== changedIndex);
-
-                        for (const o of others) {
-                            if (diff === 0) break;
-                            let delta = diff > 0 ? 1 : -1;
-                            let newVal = clamp(Number(o.s.value) + delta);
-                            if (newVal !== Number(o.s.value)) {
-                                o.s.value = newVal;
-                                diff -= delta;
-                            }
+                        let currentTotal = sliders.reduce((s, el) => s + Number(el.value), 0);
+                        if (currentTotal === TOTAL_MAX) {
+                            updateTotal();
+                            return;
                         }
+
+                        const slider = sliders[changedIndex];
+                        const inputValue = values[changedIndex];
+                        
+                        let newValue = Number(slider.value);
+                        const difference = currentTotal - TOTAL_MAX; 
+
+                        if (difference > 0) {
+                            newValue = clamp(newValue - difference); 
+                            slider.value = newValue;
+                            inputValue.value = newValue;
+                        } 
 
                         sliders.forEach((s, i) => values[i].value = s.value);
                         updateTotal();
+
+                        previousValues[changedIndex] = newValue;
                     }
+
 
                     sliders.forEach((slider, i) => {
                         slider.addEventListener("input", () => {
@@ -101,16 +118,36 @@
                     });
 
                     updateTotal();
+                    
+                    if (totalDisplay === null) {
+                        console.error("L'élément avec l'ID 'total' est manquant. Veuillez l'ajouter au HTML.");
+                    }
                 </script>
             </section>
             <section class="config-groupe">
-
+                {% if valide %}
+                    {% for grp in liste_grp%}
+                        <div>
+                            <h4>Groupe {{ grp }}</h4>
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </section>
         </section>
-
         <div class="submit-container" style="text-align: center; margin: 20px 0;">
-            <button type="submit" class="btn btn-primary btn-lg">Lancer la répartition</button>
+            <button type="submit" onclick="submitWithLoader()" name="btn" value="btn-repartition"  class="btn btn-primary btn-lg" 
+                {% if valide != True %} 
+                    disabled
+                    style="background-color: gray; border: 2px solid black ;"
+                {% endif %}>
+                Lancer la répartition
+                
+            </button>
         </div>
 
     </div>
-</form> {% endblock main %}
+</form> 
+
+<script src="../static/script/repartition.js"></script>
+
+{% endblock main %}

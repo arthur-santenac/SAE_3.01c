@@ -30,14 +30,26 @@ def importer():
 @app.route("/configuration/", methods=["GET", "POST"])
 def configuration():
     csv_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
-    critères_pour_template = [] 
+    critères_pour_template = []
+    nb_grp_valide = False
+    session["valide"] = nb_grp_valide
+    
     if request.method == "POST":
         try:
+            action = request.form.get("btn")
             nb_groupes_str = request.form.get("nb-grp")
-            if not nb_groupes_str:
-                return render_template("configuration.html", title="COHORT App", error="Nombre de groupes requis.", critères=[])
-            nb_groupes = int(nb_groupes_str)
-            session["nb_groupes"] = nb_groupes
+            if action == "btn-valide":
+                if not nb_groupes_str:
+                    nb_grp_valide = False
+                    return render_template("configuration.html", title="COHORT App", error="Nombre de groupes requis.", critères=[])
+                nb_groupes = int(nb_groupes_str)
+                session["nb_groupes"] = nb_groupes
+                session["valide"] = True
+                liste_ind_groupes = []
+                for i in range(nb_groupes):
+                    liste_ind_groupes.append(i+1)
+                session["liste_ind_groupes"] = liste_ind_groupes
+            
             if not os.path.exists(csv_path):
                 return redirect(url_for("index"))
             liste_crit_brut = algo.recup_critere(csv_path)
@@ -52,42 +64,58 @@ def configuration():
             session["dico_importance"] = dico_importance
             if not os.path.exists(csv_path):
                 return redirect(url_for("index")) 
-            return redirect(url_for("repartition"))
         except ValueError:
             return render_template("configuration.html", title="COHORT App", error="Le nombre de groupes ou une des importances doit être un entier.", critères=critères_pour_template)
         except Exception as e:
             print(f"Une erreur est survenue: {e}") 
             return render_template("configuration.html", title="COHORT App", error=f"Une erreur est survenue: {e}", criteres=critères_pour_template)
+        if action == "btn-repartition":
+            return redirect(url_for("repartition"))
     if os.path.exists(csv_path):
         liste_crit_brut = algo.recup_critere(csv_path)
         criteres_pour_template = []
         for critere in liste_crit_brut:
             criteres_pour_template.append(critere.lower().replace(" ", "_"))
-    return render_template("configuration.html", title="COHORT App", criteres=criteres_pour_template)
+    return redirect(url_for("configuration_critere", liste_crit = criteres_pour_template, valide = nb_grp_valide))
+    
 
-@app.route("/repartition/")
+
+@app.route("/configuration/criteres", methods=["GET", "POST"])
+def configuration_critere():
+    liste_crit= request.args.getlist("liste_crit")
+    est_valide = session.get("valide", False) 
+    ind_grp = session.get("liste_ind_groupes", [])
+    nb_groupes = session.get("nb_groupes",1)
+    return render_template("configuration.html", title="COHORT App", criteres= liste_crit, valide = est_valide, liste_grp = ind_grp, nb_grp = nb_groupes)
+
+
+
+@app.route("/repartition/", methods=["POST", "GET"])
 def repartition():
     try:
+        if request.method == "POST":
+            dico_actuel = session.get("dico_importance", {})
+            for critere in dico_actuel:
+                if critere in request.form:
+                    try:
+                        dico_actuel[critere] = int(request.form[critere])
+                    except ValueError:
+                        pass
+            session["dico_importance"] = dico_actuel
+            session.modified = True
+        print(session.get("dico_importance", {}))
         liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
         nombre_groupes = session.get("nb_groupes", 0)
         nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
-        dico_importance = session["dico_importance"]
+        dico_importance = session.get("dico_importance", {})
         groupes = algo.creer_groupe(liste_eleve, [], dico_importance, nombre_groupes)
-        score = algo.score_totale(liste_eleve, groupes, session["dico_importance"])
+        score = algo.score_totale(liste_eleve, groupes, dico_importance)
         place = str(len(liste_eleve) - len(groupes[-1])) + "/" + str(len(liste_eleve))
         prc_place = str((len(liste_eleve) - len(groupes[-1])) / len(liste_eleve) * 100)
-        restants = str(len(groupes[-1]))
-        prc_restants = str(len(groupes[-1]) / len(liste_eleve) * 100)
-        grp_genere = str(len(groupes) - 1)
-        if (len(groupes[-1]) > 0):
-            vert= False
-            grp_genere += " + 1"
-        else:
-            vert = True
-            
+        
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,
                                nombre_groupes=nombre_groupes,groupes=groupes, score=score, place=place, prc_place=prc_place,
-                               restants=restants,prc_restants=prc_restants,grp_genere=grp_genere, vert=vert)
+                               dico_importance=dico_importance)
     except:
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=0,nombre_groupes=0,groupes=[[]])
 
