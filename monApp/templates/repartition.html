@@ -1,45 +1,105 @@
 {% extends "base.html" %} {% block title %}Test{% endblock %} {% block main %}
 <link rel="stylesheet" href="../static/css/style.css" />
 
-<header class="header_score">
-  <div class="dashboard-container">
-    <h1 class="main-title">score</h1>
-    <section class="stats-row">
-      <div class="stat-item">
-        <span class="stat-label">Respect des critères</span>
-        <span class="stat-value">{{ score }}%</span>
-        <div class="progress-bar">
-          <div class="fill green" style="width: {{ score }}%"></div>
+<div class="top_row">
+  
+  <header class="header_score">
+    <div class="dashboard-container">
+      <h1 class="main-title">score</h1>
+      <section class="stats-row">
+        <div class="stat-item">
+          <span class="stat-label">Respect des critères</span>
+          <span class="stat-value">{{ score }}%</span>
+          <div class="progress-bar">
+            <div class="fill green" style="width: {{ score }}%"></div>
+          </div>
         </div>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">élèves placés</span>
-        <span class="stat-value">{{ place }}</span>
-        <div class="progress-bar">
-          <div class="fill blue" style="width: {{ prc_place }}%"></div>
+        <div class="stat-item">
+          <span class="stat-label">élèves placés</span>
+          <span class="stat-value">{{ place }}</span>
+          <div class="progress-bar">
+            <div class="fill blue" style="width: {{ prc_place }}%"></div>
+          </div>
         </div>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">élèves restants</span>
-        <span class="stat-value">{{ restants }}</span>
-        <div class="progress-bar">
-          <div class="fill red" style="width: {{ prc_restants }}%"></div>
+      </section>
+    </div>
+  </header>
+
+ <section class="empty_space">
+    <h2>Configuration d'importance</h2>
+    <form id="form-repartition" action="{{ url_for('repartition') }}" method="POST">
+        <div class="sliders-container">
+            {% for nom_critere, valeur in dico_importance.items() %}
+            <div class="slider-row">
+                <span class="slider-label">{{ nom_critere }}</span>
+                <input class="slider small-slider" type="range" min="0" max="100" value="{{ valeur }}" >
+                <div>
+                    <input type="number" name="{{ nom_critere }}" class="slider-value small-input" min="0" max="100" step="1" value="{{ valeur }}">
+                </div>
+            </div>
+            {% endfor %}
         </div>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">groupes générés</span>
-        <span class="stat-value">{{ grp_genere }}</span>
-        <div class="progress-bar">
-          {% if vert %}
-          <div class="fill green" style="width: 100%"></div>
-          {% else %}
-          <div class="fill red" style="width: 100%"></div>
-          {% endif %}
-        </div>
-      </div>
-    </section>
-  </div>
-</header>
+    </form>
+
+    <script>
+      const sliders = [...document.querySelectorAll(".slider")];
+      const values = [...document.querySelectorAll(".slider-value")];
+      const totalDisplay = document.getElementById("total");
+      const TOTAL_MAX = 100;
+
+      function clamp(v) {
+          return Math.max(0, Math.min(100, v));
+      }
+
+      function updateTotal() {
+          const total = sliders.reduce((s, el) => s + Number(el.value), 0);
+          if (totalDisplay) totalDisplay.textContent = total;
+      }
+
+      function normalize(changedIndex) {
+          let total = sliders.reduce((s, el) => s + Number(el.value), 0);
+          if (total === TOTAL_MAX) return;
+
+          let diff = TOTAL_MAX - total;
+          const others = sliders
+              .map((s, i) => ({ s, i }))
+              .filter(o => o.i !== changedIndex);
+
+          for (const o of others) {
+              if (diff === 0) break;
+              let delta = diff > 0 ? 1 : -1;
+              let newVal = clamp(Number(o.s.value) + delta);
+              if (newVal !== Number(o.s.value)) {
+                  o.s.value = newVal;
+                  diff -= delta;
+              }
+          }
+
+          sliders.forEach((s, i) => values[i].value = s.value);
+          updateTotal();
+      }
+
+      sliders.forEach((slider, i) => {
+          slider.addEventListener("input", () => {
+              slider.value = clamp(Number(slider.value));
+              values[i].value = slider.value;
+              normalize(i);
+          });
+      });
+
+      values.forEach((input, i) => {
+          input.addEventListener("input", () => {
+              let v = clamp(Number(input.value || 0));
+              sliders[i].value = v;
+              input.value = v;
+              normalize(i);
+          });
+      });
+
+      updateTotal();
+    </script>
+  </section>
+</div>
 
 <main class="main_repartition">
   <section id="eleves_classes">
@@ -202,11 +262,19 @@
         </table>
       </details>
     </article>
+    <div class="submit-container" style="text-align: center; margin: 20px 0;">
+<button type="button" 
+        id="btn-relancer"
+        class="btn btn-primary btn-lg" 
+        style="background-color: gray; border: 2px solid black;">
+    Relancer la répartition
+</button>
+    </div>
   </section>
+  
 </main>
 
 <footer class="header_score">
-  <button id="recharger" aria-label="recharger">recharger</button>
   <button id="exporter" aria-label="Rechercher">Exporter</button>
 </footer>
 <script src="../static/script/repartition.js"></script>

@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     // Gestion de l'affichage du nombre d'élèves
-    const tables = document.querySelectorAll(".liste-eleves tbody");
+    const tables = document.querySelectorAll(".liste-eleves");
     const rows = document.querySelectorAll(".liste-eleves tr.eleve");
 
     function updateCounts() {
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!dragged) return;
             const isInClassesSection = tbody.closest('#eleves_classes') !== null;
             const isInRestantsSection = tbody.closest('#eleves_restants') !== null;
-            tbody.appendChild(dragged);
+            table.querySelector("tbody").appendChild(dragged);
             const actionsCell = dragged.querySelector('td.actions');
             if (actionsCell) {
                 const btnSupprimer = actionsCell.querySelector('.supprimer');
@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+
     // Gestion des Pop-up
     const boutonsOuvrir = document.querySelectorAll('.btn-popup');
     boutonsOuvrir.forEach(bouton => {
@@ -102,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (modale) modale.style.display = "none";
         });
     });
-
     // gestion du bouton exporter
     const btnExporter = document.getElementById("exporter");
     if (btnExporter) {
@@ -136,10 +136,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // gestion du bouton recharger
-    const btnRecharger = document.getElementById("recharger");
-    if (btnRecharger) {
-        btnRecharger.addEventListener("click", () => {
+// Gestion du bouton "Relancer la répartition" (fusionné avec la logique de rechargement)
+    const btnRelancer = document.getElementById("btn-relancer"); // On cible le nouvel ID
+    
+    if (btnRelancer) {
+        btnRelancer.addEventListener("click", () => {
 
+            // 1. On "fixe" l'état des checkboxes dans le HTML
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             checkboxes.forEach(input => {
                 if (input.checked) {
@@ -149,6 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
+            // 2. On envoie la page entière (HTML) au serveur pour traitement
             fetch("/repartition/", {
                     method: "POST",
                     headers: {

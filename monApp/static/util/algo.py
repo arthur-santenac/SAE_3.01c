@@ -33,16 +33,29 @@ def lire_fichier(nom_fichier):
     return liste_eleve
 
 def recup_critere(nom_fichier):
+    """Retourne la liste des critères contenus dans un fichier csv
+
+    Args:
+        nom_fichier (str): chemin vers le fichier csv
+
+    Returns:
+        list: liste des noms des critères du fichier csv
+    """    
     with open(nom_fichier) as fichier_csv:
         reader = csv.reader(fichier_csv, delimiter=',')
         liste_critere = next(reader)[3:]
 
     return liste_critere
 
-def exporter_fichier():
-    ...
-
 def lire_config(nom_fichier):
+    """Lis les critères avec les valeurs associées d'un fichier json 
+
+    Args:
+        nom_fichier (str): chemin vers le fichier json
+
+    Returns:
+        tuple: Tuple contenant la liste des critères et le dictionnaire d'importance associé
+    """    
     with open(nom_fichier) as fichier_json:
         config = json.load(fichier_json)
     liste_critere = []
@@ -51,10 +64,15 @@ def lire_config(nom_fichier):
     dico_importance = config["dico_importance"]
     return liste_critere, dico_importance
 
-def exporter_config(liste_critere, dico_importance):
-    ...
-
 def init_dico_importance(liste_eleve):
+    """Initialise le dictionnaire d'importance à partir d'une liste d'élèves
+
+    Args:
+        liste_eleve (list): liste contenant des instances de eleve.py
+
+    Returns:
+        dict: dictionnaire d'importance des critères
+    """    
     dico_importance = {}
     if len(liste_eleve) > 0:
         for critere in liste_eleve[0].critere:
@@ -183,8 +201,8 @@ def dico_poucentage(liste_eleves):
     return dico_res
 
 def max_aleatoire(liste_cout):
-    """ Renvoie l'indice de l'élément le plus petit de la liste,
-        si il y en a plusieurs renvoie un indice aléatoire parmis ceux des élément les plus petits
+    """ Renvoie l'indice de l'élément le plus grand de la liste,
+        si il y en a plusieurs renvoie un indice aléatoire parmis ceux des élément les plus grands
 
     Args:
         liste_cout (list): liste de cout d'insertion d'un élève dans un groupe
@@ -243,6 +261,16 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
     return liste_max
 
 def score_totale(liste_eleve, groupes, dico_importance):
+    """Calcule le score de qualité global de la répartition des groupes
+
+    Args:
+        liste_eleve (list): liste d'élèves
+        groupes (list): liste de listes représentant les groupes
+        dico_importance (dict): dictionnaire contenant les coefficients d'importance des critères
+
+    Returns:
+        int: score compris entre 0 et 100
+    """
     dico_pourc_elv = dico_poucentage(liste_eleve)
     cout_grp = cout_tot(dico_pourc_elv, groupes, dico_importance)
     cout_totale = 0
