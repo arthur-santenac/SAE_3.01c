@@ -39,6 +39,15 @@ def recup_critere(nom_fichier):
     return liste_critere
 
 def recup_ensemble_val_critere(critere: str, nom_fichier: str):
+    """
+
+    Args:
+        critere (str): le nom du critere exemple "genre" ou "niveau Français
+        nom_fichier (str): le chemin vers le fichier csv.
+
+    Returns:
+        list: retourne la liste triée de l'ensemble des valeurs du critere donné en parametre
+    """    
     valeurs = set()
     with open(nom_fichier, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -158,7 +167,7 @@ def groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe
             ajouter = False
         for critere in liste_critere:
             if critere.groupe == i + 1:
-                if int(eleve.critere[critere.nom_critere]) not in critere.condition:
+                if eleve.critere[critere.nom_critere] not in critere.condition:
                     ajouter = False
         if ajouter:
             res.append(i)

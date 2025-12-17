@@ -122,36 +122,26 @@
             <section class="config-groupe">
                 <h2>Configuration par groupe</h2>
                 {% if valide %}
-                    {% for grp in liste_grp%}
-                        <ul class="liste-grp-crit">
-                            <li>
-                                <div>
-                                    <div class="entete-grp-crit">
-                                        <h4>Groupe {{ grp }}</h4>
-                                        <button type="submit" name="btn" value="btn-add-crit" class="btn btn-primary">Ajouter critère +</button>
-                                    </div>
-                                    <ul class="liste-crit">
-                                        <li class="critere">
-                                            <div class="container-crit">
-                                                <p></p>
-                                                <div>
-                                                    <input type="text">
-                                                </div>
-                                                <div>
-                                                    <input type="text">
-                                                </div>
-                                                <div>
-                                                    <button type="submit" name="btn" value="btn-supp-crit"   class="supp-crit" aria-label="Supprimer">X</button>
-                                                </div>
-                                                
-                                            </div>
-                                        </li>
-                                    </ul>
-                                    
-                                </div>
-                            </li>
-                        </ul>
-                        
+                    {% for grp in liste_grp %}
+                        <div class="groupe-container">
+                            <div class="entete-grp-crit">
+                                <h4>Groupe {{ grp }}</h4>
+                                <button type="submit" name="btn" value="btn-add-crit{{ grp }}" class="btn btn-primary">Ajouter critère +</button>
+                            </div>
+                            
+                            <ul class="liste-crit">
+                                {% for crit in criteres_choisis %}
+                                    {% if crit.grp == grp %}
+                                    <li class="critere">
+                                        <div class="container-crit">
+                                            <p>En <strong>{{ crit.nom }}</strong>, uniquement : {{ crit.valeurs|join(', ') }}</p>
+                                            <button type="submit" name="btn" value="btn-supp-{{ loop.index0 }}" class="supp-crit">X</button>
+                                        </div>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
                     {% endfor %}
                 {% endif %}
             </section>
