@@ -117,3 +117,10 @@ document.getElementById("exporter").addEventListener("click", () => {
     alert("Une erreur est survenue lors du téléchargement.");
   });
 });
+
+function submitWithLoader() {
+    document.getElementById('loader-overlay').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('form-repartition').submit();
+    }, 10);
+}

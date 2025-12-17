@@ -33,6 +33,14 @@ def lire_fichier(nom_fichier):
     return liste_eleve
 
 def recup_critere(nom_fichier):
+    """Retourne la liste des critères contenus dans un fichier csv
+
+    Args:
+        nom_fichier (str): chemin vers le fichier csv
+
+    Returns:
+        list: liste des noms des critères du fichier csv
+    """    
     with open(nom_fichier) as fichier_csv:
         reader = csv.reader(fichier_csv, delimiter=',')
         liste_critere = next(reader)[3:]
@@ -62,6 +70,14 @@ def exporter_fichier():
     ...
 
 def lire_config(nom_fichier):
+    """Lis les critères avec les valeurs associées d'un fichier json 
+
+    Args:
+        nom_fichier (str): chemin vers le fichier json
+
+    Returns:
+        tuple: Tuple contenant la liste des critères et le dictionnaire d'importance associé
+    """    
     with open(nom_fichier) as fichier_json:
         config = json.load(fichier_json)
     liste_critere = []
@@ -70,10 +86,15 @@ def lire_config(nom_fichier):
     dico_importance = config["dico_importance"]
     return liste_critere, dico_importance
 
-def exporter_config(liste_critere, dico_importance):
-    ...
-
 def init_dico_importance(liste_eleve):
+    """Initialise le dictionnaire d'importance à partir d'une liste d'élèves
+
+    Args:
+        liste_eleve (list): liste contenant des instances de eleve.py
+
+    Returns:
+        dict: dictionnaire d'importance des critères
+    """    
     dico_importance = {}
     if len(liste_eleve) > 0:
         for critere in liste_eleve[0].critere:
@@ -150,15 +171,20 @@ def nb_max_eleve_par_groupe(liste_eleve, nb_groupes):
         return len(liste_eleve) // nb_groupes + 1
 
 def groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupes):
+
     """Renvoie une liste d'index qui sont les index des groupes dans lesquels on peut ajouter des élèves.
 
     Args:
         liste_groupes (list): une liste de listes qui represente la liste de groupes.
-        nb_elv_grp (int): nombre d'eleve max par grp
+        liste_eleve (list): liste des élèves 
+        eleve (eleve): eleve que l'on voudrait ajouter
+        liste_critere (list): liste des critères
+        nb_groupes (int): nombre de groupes
 
     Returns:
         list: Une liste d'index.
     """
+
     nb_elv_grp = nb_max_eleve_par_groupe(liste_eleve, nb_groupes)
     res = []
     for i in range(len(liste_groupes) - 1):
@@ -200,8 +226,8 @@ def dico_poucentage(liste_eleves):
     return dico_res
 
 def max_aleatoire(liste_cout):
-    """ Renvoie l'indice de l'élément le plus petit de la liste,
-        si il y en a plusieurs renvoie un indice aléatoire parmis ceux des élément les plus petits
+    """ Renvoie l'indice de l'élément le plus grand de la liste,
+        si il y en a plusieurs renvoie un indice aléatoire parmis ceux des élément les plus grands
 
     Args:
         liste_cout (list): liste de cout d'insertion d'un élève dans un groupe
@@ -231,7 +257,7 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
     debut, actuel = time.time(), time.time()
     dico_pourc_elv = dico_poucentage(liste_eleve)
     cpt = 0
-    while actuel - debut < 3:
+    while actuel - debut < 4:
         cpt += 1
         actuel = time.time()
         random.shuffle(liste_eleve)
@@ -260,6 +286,16 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
     return liste_max
 
 def score_totale(liste_eleve, groupes, dico_importance):
+    """Calcule le score de qualité global de la répartition des groupes
+
+    Args:
+        liste_eleve (list): liste d'élèves
+        groupes (list): liste de listes représentant les groupes
+        dico_importance (dict): dictionnaire contenant les coefficients d'importance des critères
+
+    Returns:
+        int: score compris entre 0 et 100
+    """
     dico_pourc_elv = dico_poucentage(liste_eleve)
     cout_grp = cout_tot(dico_pourc_elv, groupes, dico_importance)
     cout_totale = 0
