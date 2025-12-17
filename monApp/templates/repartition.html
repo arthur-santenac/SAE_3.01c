@@ -55,53 +55,75 @@
         <details open>
           <summary class="test">
             <h2>voir critere Groupe {{ i + 1 }}</h2>
-<!--################################################################################-->
             <button class="btn-popup" data-target="modale-{{ i + 1 }}">
-                    Noter le groupe {{ i + 1 }}
-                </button>
+              Noter le groupe {{ i + 1 }}
+            </button>
 
-                <div id="modale-{{ i + 1 }}" class="overlay">
-                    <div class="popup-card">
-                        
-                        <h3>Groupe : {{ i + 1 }}</h3>
+            <div id="modale-{{ i + 1 }}" class="overlay">
+              <div class="popup-card">
+                <h3>Groupe : {{ i + 1 }}</h3>
 
-                        {% for critere in criteres %}
-                        
-                        <div class="champ">
-                            <label for="fr-{{ i + 1 }}{{critere}}">Niveau {{critere}} :</label>
-                            <input class="input-critere" type="text" id="fr-{{ i + 1 }}{{critere}}" placeholder="Ex: 1,2,7">
-                        </div>
-                        {% endfor %}
+                {% for idx in range(liste_nom_critere|length) %} {% set
+                nom_du_critere = liste_nom_critere[idx] %} {% set
+                toutes_les_valeurs = liste_criteres_valeur[idx] %}
 
+                <fieldset>
+                  <legend>{{ nom_du_critere }}</legend>
 
+                  <div class="checkbox-container">
+                    {% for valeur in toutes_les_valeurs %} 
+                      {% set ns = namespace(is_checked=false) %} 
+                      {% for critere_actif in test_liste_critere %} 
+                        {% if critere_actif.groupe == i+1 and critere_actif.nom_critere == nom_du_critere %} 
+                          {% if valeur in critere_actif.condition %} 
+                            {% set ns.is_checked = true %}
+                        {% endif %} 
+                      {% endif %} 
+                    {% endfor %} 
 
-                        <div class="actions">
-                            <button class="btn-valider" data-target="modale-{{ i + 1 }}">Valider</button>
-                        </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="chk-{{ i+1 }}-{{ nom_du_critere }}-{{ loop.index }}"
+                        name="{{ nom_du_critere }}"
+                        value="{{ valeur }}"
+                        {% if ns.is_checked %}checked{% endif %}
+                      />
+
+                      <label
+                        for="chk-{{ i+1 }}-{{ nom_du_critere }}-{{ loop.index }}"
+                      >
+                        {{ valeur }}
+                      </label>
                     </div>
+
+                    {% endfor %}
+                  </div>
+                </fieldset>
+
+                {% endfor %}
+
+                <div class="actions">
+                  <button class="btn-valider" data-target="modale-{{ i + 1 }}">
+                    Valider
+                  </button>
                 </div>
-
-<!--################################################################################-->
-
+              </div>
+            </div>
           </summary>
           <table class="table-criteres">
             <thead>
               <tr>
                 <th>Critère</th>
                 <th>Condition</th>
-                <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {% for jj in liste_critere %} {% if jj.groupe == i+1 %}
+              {% for jj in test_liste_critere %} 
+                {% if jj.groupe == i+1 %}
               <tr>
                 <td>{{jj.nom_critere}}</td>
                 <td>{{jj.condition}}</td>
-                <td>
-                  <button class="supprimer_critere" aria-label="Supprimer">
-                    ×
-                  </button>
-                </td>
               </tr>
               {% endif %} {% endfor %}
             </tbody>
@@ -114,7 +136,7 @@
               <th class="effacer">Num</th>
               <th>Prénom</th>
               <th>Nom</th>
-              {% for chiffre in liste_critere_base %}
+              {% for chiffre in liste_nom_critere %}
               <td>{{ chiffre }}</td>
               {% endfor %}
               <th>Actions</th>
@@ -126,7 +148,7 @@
               <td class="effacer">{{ eleve.num }}</td>
               <td>{{ eleve.prenom }}</td>
               <td>{{ eleve.nom }}</td>
-              {% for critere_nom in liste_critere_base %}
+              {% for critere_nom in liste_nom_critere %}
               <td>{{ eleve.critere[critere_nom] }}</td>
               {% endfor %}
               <td class="actions">
@@ -156,8 +178,8 @@
               <th class="effacer">Num</th>
               <th>Prénom</th>
               <th>Nom</th>
-              {% for chiffre in liste_critere_base %}
-              <td>{{ chiffre }}</td>
+              {% for critere_nom in liste_nom_critere %}
+              <td>{{ critere_nom }}</td>
               {% endfor %}
               <th>Actions</th>
             </tr>
@@ -168,7 +190,7 @@
               <td class="effacer">{{ eleve.num }}</td>
               <td>{{ eleve.prenom }}</td>
               <td>{{ eleve.nom }}</td>
-              {% for critere_nom in liste_critere_base %}
+              {% for critere_nom in liste_nom_critere %}
               <td>{{ eleve.critere[critere_nom] }}</td>
               {% endfor %}
               <td class="actions">
@@ -184,6 +206,7 @@
 </main>
 
 <footer class="header_score">
+  <button id="recharger" aria-label="recharger">recharger</button>
   <button id="exporter" aria-label="Rechercher">Exporter</button>
 </footer>
 <script src="../static/script/repartition.js"></script>
