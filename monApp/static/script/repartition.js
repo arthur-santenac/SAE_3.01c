@@ -135,14 +135,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // gestion du bouton recharger
-// Gestion du bouton "Relancer la répartition" (fusionné avec la logique de rechargement)
-    const btnRelancer = document.getElementById("btn-relancer"); // On cible le nouvel ID
+
+    const btnRelancer = document.getElementById("btn-relancer");
     
     if (btnRelancer) {
         btnRelancer.addEventListener("click", () => {
 
-            // 1. On "fixe" l'état des checkboxes dans le HTML
+
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             checkboxes.forEach(input => {
                 if (input.checked) {
@@ -152,7 +151,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            // 2. On envoie la page entière (HTML) au serveur pour traitement
             fetch("/repartition/", {
                     method: "POST",
                     headers: {

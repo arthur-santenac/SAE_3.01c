@@ -1,6 +1,11 @@
 {% extends "base.html" %} {% block title %}Test{% endblock %} {% block main %}
 <link rel="stylesheet" href="../static/css/style.css" />
 
+<div id="loader-overlay">
+  <span class="loader"></span>
+  <div class="loading-text">Création des groupes en cours...</div>
+</div>
+
 <div class="top_row">
   
   <header class="header_score">
