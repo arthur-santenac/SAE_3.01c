@@ -20,6 +20,9 @@ def importer():
     if file and file.filename.endswith(".csv"):
         save_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
         file.save(save_path)
+        session["criteres_groupes"] = []
+        session["dico_importance"] = {}   
+        session["valide"] = False
         return render_template("configuration.html",title ="COHORT App")
     return "Format invalide", 400
 
