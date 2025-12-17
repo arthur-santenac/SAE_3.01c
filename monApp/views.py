@@ -35,56 +35,47 @@ def configuration():
         session["criteres_groupes"] = []
     if "valide" not in session:
         session["valide"] = False
+
+    if request.method == "GET":
+        session["valide"] = False
+        session["nb_groupes"] = 1
+        session["criteres_groupes"] = []
+
+    
     if request.method == "POST":
         action = request.form.get("btn")
-        
         if action == "btn-valide":
             nb_groupes_str = request.form.get("nb-grp")
             if nb_groupes_str:
-                session["nb_groupes"] = int(nb_groupes_str)
+                nb_int = int(nb_groupes_str)
+                session["nb_groupes"] = nb_int
                 session["valide"] = True
-                session["liste_ind_groupes"] = list(range(1, int(nb_groupes_str) + 1))
-
-        if any(key.startswith("importance_") for key in request.form.keys()):
-            liste_crit_brut = algo.recup_critere(csv_path)
-            dico_importance = {}
-            for crit_brut in liste_crit_brut:
-                crit_propre = crit_brut.lower().replace(" ", "_")
-                val = request.form.get("importance_" + crit_propre)
-                if val is not None:
-                    dico_importance[crit_brut] = int(val)
-            session["dico_importance"] = dico_importance
-
-        if action and action.startswith("btn-add-crit"):
-            grp_id = action.replace("btn-add-crit", "")
-            return redirect(url_for("ajout_crit_grp", grp_id=grp_id))
-
-        elif action and action.startswith("btn-supp-"):
-            idx_to_supp = int(action.split("-")[-1])
-            temp_list = session.get("criteres_groupes", [])
-            if 0 <= idx_to_supp < len(temp_list):
-                temp_list.pop(idx_to_supp)
-            session["criteres_groupes"] = temp_list
-
+                session["liste_ind_groupes"] = list(range(1, nb_int + 1))
+                liste_crit_brut = algo.recup_critere(csv_path)
+                tous_les_criteres = []
+                
+                for id_grp in range(1, nb_int + 1):
+                    for nom_crit in liste_crit_brut:
+                        valeurs_possibles = list(algo.recup_ensemble_val_critere(nom_crit, csv_path))
+                        tous_les_criteres.append({'grp': id_grp, 'nom': nom_crit, 'valeurs': valeurs_possibles})
+                session["criteres_groupes"] = tous_les_criteres
         elif action == "btn-repartition":
             return redirect(url_for("repartition"))
 
     liste_crit_brut = algo.recup_critere(csv_path) if os.path.exists(csv_path) else []
-    session["criteres_groupes"] = [c for c in session.get("criteres_groupes", []) if c['nom'] in liste_crit_brut]
-    
-    criteres_pour_template = [c.lower().replace(" ", "_") for c in liste_crit_brut]
+    nouveaux_criteres = []
+    for c in session.get("criteres_groupes", []):
+        if c['nom'] in liste_crit_brut:
+            nouveaux_criteres.append(c)
+    session["criteres_groupes"] = nouveaux_criteres
+    criteres_pour_template = []
+    for c in liste_crit_brut:
+        format_propre = c.lower().replace(" ", "_")
+        criteres_pour_template.append(format_propre)
     if os.path.exists(csv_path):
         session["liste_val_crit"] = {crit: algo.recup_ensemble_val_critere(crit, csv_path) for crit in liste_crit_brut}
-
-    return render_template(
-        "configuration.html", 
-        title="COHORT App", 
-        criteres=criteres_pour_template, 
-        valide=session.get("valide"), 
-        liste_grp=session.get("liste_ind_groupes", []),
-        criteres_choisis=session.get("criteres_groupes", []),
-        nb_grp=session.get("nb_groupes", 1)
-    )
+    return render_template("configuration.html", title="COHORT App", criteres=criteres_pour_template, valide=session.get("valide"), liste_grp=session.get("liste_ind_groupes", []),
+        criteres_choisis=session.get("criteres_groupes", []), nb_grp=session.get("nb_groupes", 1))
 
 @app.route("/configuration/add_crit/<int:grp_id>", methods=["GET", "POST"])
 def ajout_crit_grp(grp_id):
@@ -122,8 +113,6 @@ def repartition():
         liste_objets_criteres = []
         for crit in session.get("criteres_groupes", []):
             liste_objets_criteres.append(algo.critere.Critere(crit['grp'], crit['valeurs'], crit['nom']))
-        print(session.get("liste_val_crit"))
-        print(liste_objets_criteres)
         groupes = algo.creer_groupe(liste_eleve, liste_objets_criteres, dico_importance, nombre_groupes)
         score = algo.score_totale(liste_eleve, groupes, session["dico_importance"])
         place = str(len(liste_eleve) - len(groupes[-1])) + "/" + str(len(liste_eleve))
@@ -136,8 +125,8 @@ def repartition():
             grp_genere += " + 1"
         else:
             vert = True
-        return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes, 
-                               score=score, place=place, prc_place=prc_place, restants=restants,prc_restants=prc_restants,grp_genere=grp_genere, vert=vert)
+        return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe,nombre_groupes=nombre_groupes,groupes=groupes, score=score, 
+                               place=place, prc_place=prc_place, restants=restants,prc_restants=prc_restants,grp_genere=grp_genere, vert=vert)
     except:
         return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=0,nombre_groupes=0,groupes=[[]])
 

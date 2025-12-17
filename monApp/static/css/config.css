@@ -155,12 +155,19 @@ h4{
 /*############## Critères par groupes ci-dessous #############*/
 
 
+.groupe-container{
+    background-color: #a6cfff;
+    border-radius: 15px;
+    padding: 1%;
+    margin: 1em;
+}
+
 .liste-grp-crit{
     list-style-type: none;
 }
 
 .liste-grp-crit li{
-    background-color: #a6cfff;
+    background-color: #ebf4ff;
     padding: 2%;
     border-radius: 15px;
 }
