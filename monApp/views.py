@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, send_file
-from monApp.app import app;
+from monApp.app import app
 from monApp.static.util import algo
 import os
 from flask import request
@@ -8,9 +8,11 @@ import csv
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
 
+
 @app.route("/")
 def index():
     return render_template("importer.html")
+
 
 @app.route("/importer/", methods=["POST"])
 def importer():
@@ -131,30 +133,108 @@ def repartition():
         print(session.get("dico_importance", {}))
         liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
         nombre_groupes = session.get("nb_groupes", 0)
+
+        test_liste_critere = []
+        if request.method == "POST":
+            html_content = request.data.decode("utf-8")
+            soup = BeautifulSoup(html_content, "html.parser")
+
+            modales = soup.find_all(class_="popup-card")
+
+            for modale in modales:
+                h3_tag = modale.find("h3")
+                if not h3_tag:
+                    continue
+
+                titre_groupe = h3_tag.get_text()
+                num_groupe = int("".join(filter(str.isdigit, titre_groupe)))
+
+                criteres_temp = {}
+
+                all_inputs = modale.find_all("input", {"type": "checkbox"})
+
+                for chk in all_inputs:
+                    if chk.has_attr("checked"):
+                        nom_crit = chk.get("name")
+                        valeur = chk.get("value")
+
+                        if nom_crit:
+                            if nom_crit not in criteres_temp:
+                                criteres_temp[nom_crit] = []
+                            criteres_temp[nom_crit].append(valeur)
+
+                for nom, valeurs in criteres_temp.items():
+                    nouveau_critere = algo.critere.Critere(num_groupe, valeurs, nom)
+                    test_liste_critere.append(nouveau_critere)
+
+        else:
+            test_liste_critere = algo.test_creation_liste_critere()
+
         nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
-        dico_importance = session["dico_importance"]
-        liste_objets_criteres = []
-        for crit in session.get("criteres_groupes", []):
-            liste_objets_criteres.append(algo.critere.Critere(crit['grp'], crit['valeurs'], crit['nom']))
-        groupes = algo.creer_groupe(liste_eleve, liste_objets_criteres, dico_importance, nombre_groupes)
-        score = algo.score_totale(liste_eleve, groupes, session["dico_importance"])
+        liste_nom_critere = algo.recup_critere("monApp/static/exemple/exemple2.csv")
+
+        liste_criteres_valeur = []
+        for critere in liste_nom_critere:
+            liste_valeur_critere = algo.recup_ensemble_val_critere(
+                critere, "monApp/static/exemple/exemple2.csv"
+            )
+            liste_criteres_valeur.append(liste_valeur_critere)
+
+        dico_importance = session.get(
+            "dico_importance", algo.init_dico_importance(liste_eleve)
+        )
+
+        groupes = algo.creer_groupe(
+            liste_eleve, test_liste_critere, dico_importance, nombre_groupes
+        )
+
+        score = algo.score_totale(liste_eleve, groupes, dico_importance)
+
         place = str(len(liste_eleve) - len(groupes[-1])) + "/" + str(len(liste_eleve))
         prc_place = str((len(liste_eleve) - len(groupes[-1])) / len(liste_eleve) * 100)
-        return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=nb_eleve_groupe, nombre_groupes=nombre_groupes,groupes=groupes, 
-                               score=score, place=place, prc_place=prc_place, dico_importance=dico_importance)
-    except:
-        return render_template("repartition.html",title ="COHORT App",nb_eleve_groupe=0,nombre_groupes=0,groupes=[[]])
 
-@app.route('/exporter_groupes', methods=['POST'])
+        return render_template(
+            "repartition.html",
+            title="COHORT App",
+            nb_eleve_groupe=nb_eleve_groupe,
+            nombre_groupes=nombre_groupes,
+            groupes=groupes,
+            score=score,
+            place=place,
+            prc_place=prc_place,
+            test_liste_critere=test_liste_critere,
+            liste_criteres_valeur=liste_criteres_valeur,
+            liste_nom_critere=liste_nom_critere,
+            dico_importance=dico_importance
+        )
+
+    except Exception as e:
+        print(f"Erreur dans repartition: {e}")
+        import traceback
+
+        traceback.print_exc()
+        return render_template(
+            "repartition.html",
+            title="Erreur",
+            nb_eleve_groupe=0,
+            nombre_groupes=0,
+            groupes=[[]],
+            test_liste_critere=[],
+            liste_criteres_valeur=[],
+            liste_nom_critere=[],
+        )
+
+
+@app.route("/exporter_groupes", methods=["POST"])
 def exporter_groupes():
-    html_content = request.data.decode('utf-8')
-    soup = BeautifulSoup(html_content, 'html.parser')
+    html_content = request.data.decode("utf-8")
+    soup = BeautifulSoup(html_content, "html.parser")
     groupes = {}
-    for idx, table in enumerate(soup.select('#eleves_classes .liste-eleves')):
+    for idx, table in enumerate(soup.select("#eleves_classes .liste-eleves")):
         groupe_nom = f"groupe_{idx + 1}"
         eleves = []
-        for row in table.select('tr.eleve'):
-            cells = [td.get_text(strip=True) for td in row.find_all('td')]
+        for row in table.select("tr.eleve"):
+            cells = [td.get_text(strip=True) for td in row.find_all("td")]
             if len(cells) >= 2:
                 eleve = {
                     "num": cells[0],
@@ -165,23 +245,27 @@ def exporter_groupes():
                 eleves.append(eleve)
         groupes[groupe_nom] = eleves
     restants = []
-    for row in soup.select('#eleves_restants .liste-eleves tr.eleve'):
-        cells = [td.get_text(strip=True) for td in row.find_all('td')]
+    for row in soup.select("#eleves_restants .liste-eleves tr.eleve"):
+        cells = [td.get_text(strip=True) for td in row.find_all("td")]
         if len(cells) >= 2:
-            restants.append({
-                "num": cells[0],
-                "prenom": cells[1],
-                "nom": cells[2],
-                "criteres": cells[3:-1],
-            })
+            restants.append(
+                {
+                    "num": cells[0],
+                    "prenom": cells[1],
+                    "nom": cells[2],
+                    "criteres": cells[3:-1],
+                }
+            )
     groupes["restants"] = restants
     if groupes:
-        with open("monApp/static/uploads/groupes_finaux.csv", "w+", newline="") as fichier_csv:
+        with open(
+            "monApp/static/uploads/groupes_finaux.csv", "w+", newline=""
+        ) as fichier_csv:
             writer = csv.writer(fichier_csv)
             liste_critere = []
             for groupe in groupes.values():
                 if len(groupe) > 0:
-                    liste_critere = groupe[0].get("criteres", []) 
+                    liste_critere = groupe[0].get("criteres", [])
                     break
             header = ["num", "nom", "prenom"] + liste_critere + ["groupe"]
             writer.writerow(header)
@@ -189,7 +273,7 @@ def exporter_groupes():
             for groupe in groupes.values():
                 for eleve in groupe:
                     ligne = []
-                    ligne.append(eleve.get("num", "")) 
+                    ligne.append(eleve.get("num", ""))
                     ligne.append(eleve.get("nom", ""))
                     ligne.append(eleve.get("prenom", ""))
                     criteres_eleve = eleve.get("criteres", eleve.get("critere", []))
@@ -198,9 +282,14 @@ def exporter_groupes():
                     ligne.append(groupe_id)
                     writer.writerow(ligne)
                 groupe_id += 1
-        csv_path = os.path.join(app.root_path, 'static', 'uploads', 'groupes_finaux.csv')
+        csv_path = os.path.join(
+            app.root_path, "static", "uploads", "groupes_finaux.csv"
+        )
         if not os.path.exists(csv_path):
             return "Fichier non trouvé", 404
-        return send_file(csv_path, mimetype="text/csv", as_attachment=True, download_name="liste_groupes.csv")
-
-
+        return send_file(
+            csv_path,
+            mimetype="text/csv",
+            as_attachment=True,
+            download_name="liste_groupes.csv",
+        )
