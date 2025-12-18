@@ -1,21 +1,26 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_file
+from flask import render_template, request, redirect, url_for, session, send_file
 from monApp.app import app
 from monApp.static.util import algo
 import os
-from flask import request
 from bs4 import BeautifulSoup
 import csv
+import traceback
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
 
 
 @app.route("/")
 def index():
+    if os.path.exists(os.path.join(UPLOAD_FOLDER, "groupes.csv")):
+        os.remove(os.path.join(UPLOAD_FOLDER, "groupes.csv"))
+    if os.path.exists(os.path.join(UPLOAD_FOLDER, "groupes_finaux.csv")):
+        os.remove(os.path.join(UPLOAD_FOLDER, "groupes_finaux.csv"))
+    if os.path.exists(os.path.join(UPLOAD_FOLDER, "configuration.json")):
+        os.remove(os.path.join(UPLOAD_FOLDER, "configuration.json"))
     return render_template("importer.html")
 
-
-@app.route("/importer/", methods=["POST"])
-def importer():
+@app.route("/importerCSV/", methods=["POST"])
+def importerCSV():
     if "file" not in request.files:
         return "Aucun fichier", 400
     file = request.files.get("file")
@@ -29,6 +34,16 @@ def importer():
         return render_template("configuration.html",title ="COHORT App")
     return "Format invalide", 400
 
+@app.route("/importerJSON/", methods=["POST"])
+def importerJSON():
+    if "file" not in request.files:
+        return "Aucun fichier", 400
+    file = request.files.get("file")
+    if file and file.filename.endswith(".json"):
+        save_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
+        file.save(save_path)
+        return render_template("configuration.html",title ="COHORT App")
+    return "Format invalide", 400
 
 @app.route("/configuration/", methods=["GET", "POST"])
 def configuration():
@@ -109,12 +124,16 @@ def ajout_crit_grp(grp_id):
 
 @app.route("/configuration/criteres", methods=["GET", "POST"])
 def configuration_critere():
-    liste_crit= request.args.getlist("liste_crit")
-    est_valide = session.get("valide", False) 
+    liste_crit = request.args.getlist("liste_crit")
+    est_valide = session.get("valide", False)
     ind_grp = session.get("liste_ind_groupes", [])
-    nb_groupes = session.get("nb_groupes",1)
-    return render_template("configuration.html", title="COHORT App", criteres= liste_crit, valide = est_valide, liste_grp = ind_grp, nb_grp = nb_groupes)
-
+    nb_groupes = session.get("nb_groupes", 1)
+    return render_template("configuration.html",
+                           title="COHORT App",
+                           criteres=liste_crit,
+                           valide=est_valide,
+                           liste_grp=ind_grp,
+                           nb_grp=nb_groupes)
 
 
 @app.route("/repartition/", methods=["POST", "GET"])
@@ -164,29 +183,29 @@ def repartition():
                             criteres_temp[nom_crit].append(valeur)
 
                 for nom, valeurs in criteres_temp.items():
-                    nouveau_critere = algo.critere.Critere(num_groupe, valeurs, nom)
+                    nouveau_critere = algo.critere.Critere(
+                        num_groupe, valeurs, nom)
                     test_liste_critere.append(nouveau_critere)
 
         else:
             test_liste_critere = algo.test_creation_liste_critere()
 
-        nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
-        liste_nom_critere = algo.recup_critere("monApp/static/exemple/exemple2.csv")
+        nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve,
+                                                       nombre_groupes)
+        liste_nom_critere = algo.recup_critere(
+            "monApp/static/exemple/exemple2.csv")
 
         liste_criteres_valeur = []
         for critere in liste_nom_critere:
             liste_valeur_critere = algo.recup_ensemble_val_critere(
-                critere, "monApp/static/exemple/exemple2.csv"
-            )
+                critere, "monApp/static/exemple/exemple2.csv")
             liste_criteres_valeur.append(liste_valeur_critere)
 
-        dico_importance = session.get(
-            "dico_importance", algo.init_dico_importance(liste_eleve)
-        )
+        dico_importance = session.get("dico_importance",
+                                      algo.init_dico_importance(liste_eleve))
 
-        groupes = algo.creer_groupe(
-            liste_eleve, test_liste_critere, dico_importance, nombre_groupes
-        )
+        groupes = algo.creer_groupe(liste_eleve, test_liste_critere,
+                                    dico_importance, nombre_groupes)
 
         score = algo.score_totale(liste_eleve, groupes, dico_importance)
 
@@ -210,8 +229,6 @@ def repartition():
 
     except Exception as e:
         print(f"Erreur dans repartition: {e}")
-        import traceback
-
         traceback.print_exc()
         return render_template(
             "repartition.html",
@@ -248,19 +265,16 @@ def exporter_groupes():
     for row in soup.select("#eleves_restants .liste-eleves tr.eleve"):
         cells = [td.get_text(strip=True) for td in row.find_all("td")]
         if len(cells) >= 2:
-            restants.append(
-                {
-                    "num": cells[0],
-                    "prenom": cells[1],
-                    "nom": cells[2],
-                    "criteres": cells[3:-1],
-                }
-            )
+            restants.append({
+                "num": cells[0],
+                "prenom": cells[1],
+                "nom": cells[2],
+                "criteres": cells[3:-1],
+            })
     groupes["restants"] = restants
     if groupes:
-        with open(
-            "monApp/static/uploads/groupes_finaux.csv", "w+", newline=""
-        ) as fichier_csv:
+        with open("monApp/static/uploads/groupes_finaux.csv", "w+",
+                  newline="", encoding="utf-8") as fichier_csv:
             writer = csv.writer(fichier_csv)
             liste_critere = []
             for groupe in groupes.values():
@@ -276,15 +290,15 @@ def exporter_groupes():
                     ligne.append(eleve.get("num", ""))
                     ligne.append(eleve.get("nom", ""))
                     ligne.append(eleve.get("prenom", ""))
-                    criteres_eleve = eleve.get("criteres", eleve.get("critere", []))
+                    criteres_eleve = eleve.get("criteres",
+                                               eleve.get("critere", []))
                     for val in criteres_eleve:
                         ligne.append(val)
                     ligne.append(groupe_id)
                     writer.writerow(ligne)
                 groupe_id += 1
-        csv_path = os.path.join(
-            app.root_path, "static", "uploads", "groupes_finaux.csv"
-        )
+        csv_path = os.path.join(app.root_path, "static", "uploads",
+                                "groupes_finaux.csv")
         if not os.path.exists(csv_path):
             return "Fichier non trouvé", 404
         return send_file(
