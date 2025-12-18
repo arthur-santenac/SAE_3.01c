@@ -140,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (btnRelancer) {
         btnRelancer.addEventListener("click", () => {
+            document.getElementById('loader-overlay').style.display = 'flex';
 
 
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
@@ -177,3 +178,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 });
+
+    // Gestion de l'animation
+function submitWithLoader() {
+
+    const loader = document.getElementById('loader-overlay');
+    if (loader) {
+        loader.style.display = 'flex';
+    }
+
+    setTimeout(() => {
+        const form = document.getElementById('form-repartition');
+        if (form) {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'btn';
+            hiddenInput.value = 'btn-repartition';
+            form.appendChild(hiddenInput);
+
+            form.submit();
+        }
+    }, 50);
+}
