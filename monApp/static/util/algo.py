@@ -220,6 +220,17 @@ def max_aleatoire(liste_cout):
     return random.choice(liste_index)
 
 def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
+    """ creer des groupes d'élève en répartissant les critères
+
+    Args: 
+        liste_eleve (list): liste des élèves importer d'un fichier csv
+        liste_critere (list) : liste des critères à respecter pour les groupes
+        dico_importance (dict): dictionnaire contenant les coefficient d'importance des critères
+        nb_groupe (int): nombre de groupes a créer
+
+    Returns:
+        list: liste des groupes finis
+    """
     liste_max = None
     cout_min_global = float('inf')
     debut, actuel = time.time(), time.time()
