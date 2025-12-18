@@ -10,6 +10,7 @@ Actuellement, l'application permet à l'utilisateur d'importer un fichier dans l
 
 # commande permettant de lancer l'application (linux/mac)
 
+pip freeze>requirements.txt
 source venv/bin/activate
 pip install -r requirements.txt
 flask run
