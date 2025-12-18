@@ -278,4 +278,5 @@ def score_totale(liste_eleve, groupes, dico_importance):
     cout_totale = 0
     for critere in dico_pourc_elv:
         cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
-    return int((cout_totale - cout_grp) / cout_totale * 100) 
+    return int((cout_totale - cout_grp) / cout_totale * 100)
+

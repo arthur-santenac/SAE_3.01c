@@ -18,7 +18,7 @@ app.config.update(
     DROPZONE_ALLOWED_FILE_CUSTOM=True,
     DROPZONE_ALLOWED_FILE_TYPE='.csv',
     DROPZONE_MAX_FILES=1,    
-          
+   
 )
 
 dropzone = Dropzone(app)
