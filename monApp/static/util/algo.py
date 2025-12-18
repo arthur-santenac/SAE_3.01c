@@ -219,20 +219,6 @@ def max_aleatoire(liste_cout):
             liste_index.append(i)
     return random.choice(liste_index)
 
-def cout_optimise(dico_compteur, nb_eleve_grp, dico_pourc_elv, dico_importance):
-    cout_res = 0
-    if nb_eleve_grp == 0:
-        return float('inf')
-    for critere in dico_pourc_elv:
-        dico_valeurs = dico_compteur.get(critere, {})
-        cout_critere = 0
-        for valeur, pct_cible in dico_pourc_elv[critere].items():
-            nb = dico_valeurs.get(valeur, 0)
-            pct_actuel = (nb / nb_eleve_grp) * 100
-            cout_critere += abs(pct_actuel - pct_cible)
-        cout_res += dico_importance[critere] * cout_critere
-    return cout_res
-
 def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
     liste_max = None
     cout_min_global = float('inf')
@@ -254,7 +240,6 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
                 liste_cout = []
                 for ind_groupe in liste_groupes_possibles:
                     nb_actuel = len(liste_groupes[ind_groupe])
-                    cout_actuel = cout_optimise(liste_compteurs[ind_groupe], nb_actuel, dico_pourc_elv, dico_importance)
                     nb_futur = nb_actuel + 1
                     cout_futur = 0
                     for critere, importance in dico_importance.items():
@@ -268,10 +253,7 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
                             pct_futur = (nb / nb_futur) * 100
                             cout_crit += abs(pct_futur - pct_cible)
                         cout_futur += importance * cout_crit
-                    if cout_actuel == float('inf'):
-                        liste_cout.append(10000)
-                    else:
-                        liste_cout.append(cout_actuel - cout_futur)
+                    liste_cout.append(-cout_futur)
                 choix = liste_groupes_possibles[max_aleatoire(liste_cout)]
                 liste_groupes[choix].append(eleve)
                 for critere, val in eleve.critere.items():
