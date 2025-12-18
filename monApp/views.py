@@ -11,22 +11,35 @@ UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
 
 @app.route("/")
 def index():
+    if os.path.exists(os.path.join(UPLOAD_FOLDER, "groupes.csv")):
+        os.remove(os.path.join(UPLOAD_FOLDER, "groupes.csv"))
+    if os.path.exists(os.path.join(UPLOAD_FOLDER, "groupes_finaux.csv")):
+        os.remove(os.path.join(UPLOAD_FOLDER, "groupes_finaux.csv"))
+    if os.path.exists(os.path.join(UPLOAD_FOLDER, "configuration.json")):
+        os.remove(os.path.join(UPLOAD_FOLDER, "configuration.json"))
     return render_template("importer.html")
 
-
-@app.route("/importer/", methods=["POST"])
-def importer():
+@app.route("/importerCSV/", methods=["POST"])
+def importerCSV():
     if "file" not in request.files:
         return "Aucun fichier", 400
     file = request.files.get("file")
     if file and file.filename.endswith(".csv"):
         save_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
         file.save(save_path)
-
-        return render_template("configuration.html", title="COHORT App")
-
+        return render_template("configuration.html",title ="COHORT App")
     return "Format invalide", 400
 
+@app.route("/importerJSON/", methods=["POST"])
+def importerJSON():
+    if "file" not in request.files:
+        return "Aucun fichier", 400
+    file = request.files.get("file")
+    if file and file.filename.endswith(".json"):
+        save_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
+        file.save(save_path)
+        return render_template("configuration.html",title ="COHORT App")
+    return "Format invalide", 400
 
 @app.route("/configuration/", methods=["GET", "POST"])
 def configuration():
