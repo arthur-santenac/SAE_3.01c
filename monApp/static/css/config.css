@@ -1,121 +1,62 @@
-/*############## Global #############*/
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: #f0f4f8;
-    padding: 20px;
+    color: #2c3e50;
+    line-height: 1.6;
 }
 
-h2{
-    font-weight: bold;
+.section-config {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15), 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border: 1px solid white;
 }
 
-h4{
-    text-align: center;
+.section-config-header {
+    background-color: #ffffff;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e9ecef;
 }
 
-/*############## La configuration des groupes #############*/
-
-.config-section {
-    background-color: #e6f3ff;
-    border: 1px solid #b0c4de;
-    border-radius: 8px;
-    padding: 1%;
-    margin-bottom: 1%;
-    margin-top: 1%;
-}
-  
-.group-box {
-    padding-top: 15px;
-    margin-top: 15px;
-}
-
-.group-box h3 {
-    margin: 0 0 15px 0;
+.section-config-header h3 {
+    margin: 0;
     color: #005a9c;
+    font-weight: 700;
+    font-size: 1.5rem;
 }
 
-.constraint-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
+.card-body-custom {
+    padding: 2rem;
 }
 
-
-.constraint-row select, .constraint-row input[type="text"] {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
-}
-        
-.constraint-row .level-input {
-    width: 80px;
+.card-body-custom .input-group {
+    max-width: 250px;
+    margin: 0 auto;
 }
 
-.delete-btn {
-    background: #e6e6e6;
-    border: 1px solid #ccc;
-    color: #555;
-    font-weight: bold;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    cursor: pointer;
-    line-height: 26px; 
-    text-align: center;
-}
-        
-.add-btn {
-    background-color: #f0f0f0;
-    border: 1px dashed #aaa;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    color: #333;
-    margin-top: 10px;
+#total-display {
+    font-weight: 700;
+    color: #2c3e50;
 }
 
-
-.config-base , .config-groupe {
-    background-color: #cbd5e1;
-    border-radius: 10px;
-    margin: 1%;
-    padding : 2%
+.form-control-lg {
+    border: 2px solid #e9ecef;
+    font-size: 1.25rem;
 }
 
-/*############## La configuration de base #############*/
-
-.div-base{
-    display: flex;
-    flex-wrap: nowrap;
-    margin: 1%;
+.form-control-lg:focus {
+    border-color: #a6cfff;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
 }
 
-.div-base h2{
-    flex-grow: 0;
-    flex-basis: 50%;
-}
-
-.div-base div{
-    flex-grow: 1;
-    flex-basis: 45%;
-    margin-left: 1em;
-}
-
-.div-base div input{
-    width: 3vw;
-}
-
-/*############## Les critères d'importance ci-dessous #############*/
-
-.section-importance{
-    background-color: #a6cfff;
+.section-importance {
+    background-color: #005a9c;
     padding: 1%;
     border-radius: 15px;
-    margin : 1%;
-}  
+    margin: 1%;
+}
 
 .section-importance > div {
     display: flex;
@@ -124,128 +65,273 @@ h4{
     padding: 1%;
     margin: 1% 0 0 0;
     justify-content: start;
+    border-radius: 10px;
 }
 
-
-.section-importance > div > h4{
+.section-importance > div > h4 {
     flex-grow: 0;
     flex-basis: 30%;
     margin: 0;
+    font-size: 1.1rem;
+    align-self: center;
 }
 
-.section-importance > div > input{
+.section-importance > div > input.slider {
     flex-grow: 0;
     flex-basis: 40%;
+    align-self: center;
 }
 
-
-
-.section-importance > div > div{
+.section-importance > div > div {
     flex-grow: 1;
     flex-basis: 30%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 
-.section-importance > div > div > input {
+.section-importance > div > div > input.slider-value {
     margin-left: 1vw;
-    width: 3vw;
+    width: 60px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    font-weight: bold;
+}
+
+.config-groupe-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.groupe-item {
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: 0 12px 20px rgba(0, 0, 0, 0.2), 0 6px 8px rgba(0, 0, 0, 0.15);
+    width: 100%;
+}
+
+.groupe-header {
+    background-color: #005a9c;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+
+.groupe-header h4 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.groupe-content {
+    padding: 1.5rem;
+    background-color: #dae4ed; 
+}
+
+.critere-sub-box {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 5px solid #005a9c;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    display: flex;
+}
+
+.critere-title{
+    flex-grow: 0;
+    flex-basis: 25%;
+}
+
+.checkbox-wrapper{
+    flex-grow: 0;
+    flex-basis: 50%;
+}
+
+
+
+.critere-sub-box:last-child {
+    margin-bottom: 0;
+}
+
+.critere-title {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.3rem;
+    display: inline-block;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.checkbox-badge-item input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-badge-item label {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #e9ecef;
+    color: #6c757d;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    font-weight: 500;
+    user-select: none;
+}
+
+.checkbox-badge-item input[type="checkbox"]:checked + label {
+    background-color: #005a9c;
+    color: white;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+}
+
+.checkbox-badge-item label:hover {
+    background-color: #dee2e6;
+}
+
+.checkbox-badge-item input[type="checkbox"]:checked + label:hover {
+    background-color: #0b5ed7;
+}
+
+.submit-area {
+    text-align: center;
+}
+
+.btn-cta {
+    background: linear-gradient(135deg, #0d6efd, #005a9c);
+    color: white;
+    border: none;
+    padding: 1rem 3rem;
+    font-size: 1.3rem;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-cta:hover:not(.disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(13, 110, 253, 0.6);
+}
+
+.btn-cta.disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.7;
 }
 
 #loader-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(255, 255, 255, 0.9);
-  z-index: 9999;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 .loading-text {
-  margin-top: 20px;
-  font-size: 1.2rem;
-  color: #2c3e50;
-  font-weight: 600;
-  font-family: sans-serif;
+    margin-top: 20px;
+    font-size: 1.2rem;
+    color: #2c3e50;
+    font-weight: 600;
+    font-family: sans-serif;
 }
 
 .loader {
-  box-sizing: border-box;
-  display: inline-block;
-  width: 50px;
-  height: 80px;
-  border-top: 5px solid #2c3e50;
-  border-bottom: 5px solid #2c3e50;
-  position: relative;
-  background: linear-gradient(#3498db 30px, transparent 0) no-repeat;
-  background-size: 2px 40px;
-  background-position: 50% 0px;
-  animation: spinx 2.5s linear infinite;
+    box-sizing: border-box;
+    display: inline-block;
+    width: 50px;
+    height: 80px;
+    border-top: 5px solid #2c3e50;
+    border-bottom: 5px solid #2c3e50;
+    position: relative;
+    background: linear-gradient(#005a9c 30px, transparent 0) no-repeat;
+    background-size: 2px 40px;
+    background-position: 50% 0px;
+    animation: spinx 2.5s linear infinite;
 }
 
 .loader:before, .loader:after {
-  content: "";
-  width: 40px;
-  left: 50%;
-  height: 35px;
-  position: absolute;
-  top: 0;
-  transform: translatex(-50%);
-  background: rgba(44, 62, 80, 0.1);
-  border-radius: 0 0 20px 20px;
-  background-size: 100% auto;
-  background-repeat: no-repeat;
-  background-position: 0 0px;
-  animation: lqt 2.5s linear infinite;
+    content: "";
+    width: 40px;
+    left: 50%;
+    height: 35px;
+    position: absolute;
+    top: 0;
+    transform: translatex(-50%);
+    background: rgba(44, 62, 80, 0.1);
+    border-radius: 0 0 20px 20px;
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: 0 0px;
+    animation: lqt 2.5s linear infinite;
 }
 
 .loader:after {
-  top: auto;
-  bottom: 0;
-  border-radius: 20px 20px 0 0;
-  animation: lqb 2.5s linear infinite;
+    top: auto;
+    bottom: 0;
+    border-radius: 20px 20px 0 0;
+    animation: lqb 2.5s linear infinite;
 }
 
 @keyframes lqt {
-  0%, 100% {
-    background-image: linear-gradient(#3498db 40px, transparent 0);
-    background-position: 0% 0px;
-  }
-  50% {
-    background-image: linear-gradient(#3498db 40px, transparent 0);
-    background-position: 0% 40px;
-  }
-  50.1% {
-    background-image: linear-gradient(#3498db 40px, transparent 0);
-    background-position: 0% -40px;
-  }
+    0%, 100% {
+        background-image: linear-gradient(#005a9c 40px, transparent 0);
+        background-position: 0% 0px;
+    }
+    50% {
+        background-image: linear-gradient(#005a9c 40px, transparent 0);
+        background-position: 0% 40px;
+    }
+    50.1% {
+        background-image: linear-gradient(#005a9c 40px, transparent 0);
+        background-position: 0% -40px;
+    }
 }
 
 @keyframes lqb {
-  0% {
-    background-image: linear-gradient(#3498db 40px, transparent 0);
-    background-position: 0 40px;
-  }
-  100% {
-    background-image: linear-gradient(#3498db 40px, transparent 0);
-    background-position: 0 -40px;
-  }
+    0% {
+        background-image: linear-gradient(#005a9c 40px, transparent 0);
+        background-position: 0 40px;
+    }
+    100% {
+        background-image: linear-gradient(#005a9c 40px, transparent 0);
+        background-position: 0 -40px;
+    }
 }
 
 @keyframes spinx {
-  0%, 46% {
-    transform: rotate(0deg);
-    background-position: 50% 36px;
-  }
-  54%, 92% {
-    transform: rotate(180deg);
-    background-position: 50% 4px;
-  }
-  100% {
-    transform: rotate(360deg);
-    background-position: 50% 36px;
-  }
+    0%, 46% {
+        transform: rotate(0deg);
+        background-position: 50% 36px;
+    }
+    54%, 92% {
+        transform: rotate(180deg);
+        background-position: 50% 4px;
+    }
+    100% {
+        transform: rotate(360deg);
+        background-position: 50% 36px;
+    }
 }

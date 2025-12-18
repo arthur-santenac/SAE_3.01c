@@ -27,6 +27,10 @@ def importerCSV():
     if file and file.filename.endswith(".csv"):
         save_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
         file.save(save_path)
+        liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
+        session["criteres_groupes"] = [] 
+        session["valide"] = False
+        session["dico_importance"] = algo.init_dico_importance(liste_eleve)
         return render_template("configuration.html",title ="COHORT App")
     return "Format invalide", 400
 
@@ -44,68 +48,78 @@ def importerJSON():
 @app.route("/configuration/", methods=["GET", "POST"])
 def configuration():
     csv_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
-    criteres_pour_template = []
-    nb_grp_valide = False
-    session["valide"] = nb_grp_valide
+    if "criteres_groupes" not in session:
+        session["criteres_groupes"] = []
+    if "valide" not in session:
+        session["valide"] = False
 
+    if request.method == "GET":
+        session["valide"] = False
+        session["nb_groupes"] = 1
+        session["criteres_groupes"] = []
+
+    
     if request.method == "POST":
-        try:
-            action = request.form.get("btn")
+        action = request.form.get("btn")
+        if action == "btn-valide":
             nb_groupes_str = request.form.get("nb-grp")
-            if action == "btn-valide":
-                if not nb_groupes_str:
-                    nb_grp_valide = False
-                    return render_template("configuration.html",
-                                           title="COHORT App",
-                                           error="Nombre de groupes requis.",
-                                           criteres=[])
-                nb_groupes = int(nb_groupes_str)
-                session["nb_groupes"] = nb_groupes
+            if nb_groupes_str:
+                nb_int = int(nb_groupes_str)
+                session["nb_groupes"] = nb_int
                 session["valide"] = True
-                liste_ind_groupes = []
-                for i in range(nb_groupes):
-                    liste_ind_groupes.append(i + 1)
-                session["liste_ind_groupes"] = liste_ind_groupes
-
-            if not os.path.exists(csv_path):
-                return redirect(url_for("index"))
+                session["liste_ind_groupes"] = list(range(1, nb_int + 1))
+                liste_crit_brut = algo.recup_critere(csv_path)
+                tous_les_criteres = []
+                
+                for id_grp in range(1, nb_int + 1):
+                    for nom_crit in liste_crit_brut:
+                        valeurs_possibles = list(algo.recup_ensemble_val_critere(nom_crit, csv_path))
+                        tous_les_criteres.append({'grp': id_grp, 'nom': nom_crit, 'valeurs': valeurs_possibles})
+                session["criteres_groupes"] = tous_les_criteres
+        elif action == "btn-repartition":
             liste_crit_brut = algo.recup_critere(csv_path)
-            criteres_pour_template = []
-            dico_importance = {}
-            for crit_brut in liste_crit_brut:
-                crit_propre = crit_brut.lower().replace(" ", "_")
-                form_field_name = "importance_" + crit_propre
-                importance_value = int(request.form.get(form_field_name, 0))
-                dico_importance[crit_brut] = importance_value
-                criteres_pour_template.append(crit_propre)
-            session["dico_importance"] = dico_importance
-            if not os.path.exists(csv_path):
-                return redirect(url_for("index"))
-        except ValueError:
-            return render_template(
-                "configuration.html",
-                title="COHORT App",
-                error=
-                "Le nombre de groupes ou une des importances doit être un entier.",
-                criteres=criteres_pour_template,
-            )
-        except Exception as e:
-            print(f"Une erreur est survenue: {e}")
-            return render_template("configuration.html",
-                                   title="COHORT App",
-                                   error=f"Une erreur est survenue: {e}",
-                                   criteres=criteres_pour_template)
-        if action == "btn-repartition":
+            nb_groupes = session.get("nb_groupes", 1)
+            nouveaux_criteres_groupes = []
+            for id_grp in range(1, nb_groupes + 1):
+                for nom_crit in liste_crit_brut:
+                    nom_input = f"chk_{id_grp}_{nom_crit}"
+                    valeurs_cochees = request.form.getlist(nom_input)
+                    nouveaux_criteres_groupes.append({'grp': id_grp, 'nom': nom_crit, 'valeurs': valeurs_cochees})
+            session["criteres_groupes"] = nouveaux_criteres_groupes
+            session.modified = True
             return redirect(url_for("repartition"))
+    liste_crit_brut = algo.recup_critere(csv_path) if os.path.exists(csv_path) else []
+    nouveaux_criteres = []
+    for crit in session.get("criteres_groupes", []):
+        if crit['nom'] in liste_crit_brut:
+            nouveaux_criteres.append(crit)
+    session["criteres_groupes"] = nouveaux_criteres
+    criteres_pour_template = []
+    for crit_brut in liste_crit_brut:
+        format_propre = crit_brut.lower().replace(" ", "_")
+        criteres_pour_template.append(format_propre)
     if os.path.exists(csv_path):
-        liste_crit_brut = algo.recup_critere(csv_path)
-        criteres_pour_template = []
-        for critere in liste_crit_brut:
-            criteres_pour_template.append(critere.lower().replace(" ", "_"))
-    return redirect(
-        url_for("configuration_critere",
-                liste_crit=criteres_pour_template,
-                valide=nb_grp_valide))
+        dico_valeurs = {}
+        for crit in liste_crit_brut:
+            valeurs = algo.recup_ensemble_val_critere(crit, csv_path)
+            dico_valeurs[crit] = valeurs
+        session["liste_val_crit"] = dico_valeurs
+    return render_template("configuration.html", title="COHORT App", criteres=criteres_pour_template, valide=session.get("valide"), liste_grp=session.get("liste_ind_groupes", []),
+        criteres_choisis=session.get("criteres_groupes", []), nb_grp=session.get("nb_groupes", 1))
+
+@app.route("/configuration/add_crit/<int:grp_id>", methods=["GET", "POST"])
+def ajout_crit_grp(grp_id):
+    liste_val_crit = session.get("liste_val_crit", {})
+    crit_selectionne = request.args.get("crit_nom")
+    if request.method == "POST":
+        nom_crit_final = request.form.get("crit_nom")
+        valeurs_choisies = request.form.getlist("valeurs")
+        if nom_crit_final and valeurs_choisies:
+            temp_criteres = session.get("criteres_groupes", [])
+            temp_criteres.append({'grp': grp_id, 'nom': nom_crit_final, 'valeurs': valeurs_choisies})
+            session["criteres_groupes"] = temp_criteres
+            return redirect(url_for("configuration"))
+    return render_template("ajout_critere.html", title="Ajouter un critère", grp_id=grp_id, liste_val_crit=liste_val_crit, crit_selectionne=crit_selectionne)
 
 
 @app.route("/configuration/criteres", methods=["GET", "POST"])
@@ -195,37 +209,23 @@ def repartition():
 
         score = algo.score_totale(liste_eleve, groupes, dico_importance)
 
-        total_eleves = len(liste_eleve)
-        nb_restants = len(groupes[-1])
-        place = str(len(liste_eleve) - len(groupes[-1])) + "/" + str(
-            len(liste_eleve))
-        prc_place = str(
-            (len(liste_eleve) - len(groupes[-1])) / len(liste_eleve) * 100)
-        restants = str(nb_restants)
-        prc_restants = (nb_restants / total_eleves *
-                        100) if total_eleves > 0 else 0
-        grp_genere = str(len(groupes) - 1)
+        place = str(len(liste_eleve) - len(groupes[-1])) + "/" + str(len(liste_eleve))
+        prc_place = str((len(liste_eleve) - len(groupes[-1])) / len(liste_eleve) * 100)
 
-        vert = nb_restants == 0
-        if not vert:
-            grp_genere += " + 1"
-
-        return render_template("repartition.html",
-                               title="COHORT App",
-                               nb_eleve_groupe=nb_eleve_groupe,
-                               nombre_groupes=nombre_groupes,
-                               groupes=groupes,
-                               score=score,
-                               place=place,
-                               prc_place=prc_place,
-                               restants=restants,
-                               prc_restants=prc_restants,
-                               grp_genere=grp_genere,
-                               vert=vert,
-                               test_liste_critere=test_liste_critere,
-                               liste_criteres_valeur=liste_criteres_valeur,
-                               liste_nom_critere=liste_nom_critere,
-                               dico_importance=dico_importance)
+        return render_template(
+            "repartition.html",
+            title="COHORT App",
+            nb_eleve_groupe=nb_eleve_groupe,
+            nombre_groupes=nombre_groupes,
+            groupes=groupes,
+            score=score,
+            place=place,
+            prc_place=prc_place,
+            test_liste_critere=test_liste_critere,
+            liste_criteres_valeur=liste_criteres_valeur,
+            liste_nom_critere=liste_nom_critere,
+            dico_importance=dico_importance
+        )
 
     except Exception as e:
         print(f"Erreur dans repartition: {e}")

@@ -47,6 +47,29 @@ def recup_critere(nom_fichier):
 
     return liste_critere
 
+def recup_ensemble_val_critere(critere: str, nom_fichier: str):
+    """
+
+    Args:
+        critere (str): le nom du critere exemple "genre" ou "niveau Français
+        nom_fichier (str): le chemin vers le fichier csv.
+
+    Returns:
+        list: retourne la liste triée de l'ensemble des valeurs du critere donné en parametre
+    """    
+    valeurs = set()
+    with open(nom_fichier, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for ligne in reader:
+            valeurs.add(ligne[critere])
+    valeurs = list(valeurs)
+    valeurs = sorted(valeurs)
+    return valeurs
+
+
+def exporter_fichier():
+    ...
+
 def lire_config(nom_fichier):
     """Lis les critères avec les valeurs associées d'un fichier json 
 
