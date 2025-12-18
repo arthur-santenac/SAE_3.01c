@@ -17,9 +17,9 @@
     }
   ],
   "dico_importance": {
-    "genre": 1,
+    "genre": 50,
     "niveau Français": 0,
     "niveau Maths": 0,
-    "Pénibilité": 1
+    "Pénibilité": 50
   }
 }
