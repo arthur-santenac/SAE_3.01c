@@ -24,8 +24,8 @@
             </div>
         {% endif %}
 
-        <div class="config-card">
-            <div class="card-header-custom">
+        <section class="section-config">
+            <div class="section-config-header">
                 <h3>Initialisation</h3>
             </div>
             <div class="card-body-custom">
@@ -41,13 +41,12 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         {% if valide %}
-            <div class="config-card mt-4">
-                <div class="card-header-custom">
+            <section class="section-config mt-4">
+                <div class="section-config-header">
                     <h3>Répartition d'importance</h3>
-                    <p class="text-muted mb-0">Total : <span id="total-display">100</span>%</p>
                 </div>
                 
                 <section class="section-importance">
@@ -56,7 +55,7 @@
                         {% set titre_crit = crit_propre.replace('_', ' ').capitalize() %}
                         {% set valeur_defaut = 100 // (criteres|length) %}
                         <div class="{{ crit_propre }}">
-                            <h4>{{ titre_crit }}</h4>
+                            <h4><strong>{{ titre_crit }}</strong></h4>
                             <input type="range" name="{{ nom }}" min="0" max="100" step="1" class="slider" value="{{ valeur_defaut }}">
                             <div>
                                 <input type="number" name="{{ nom }}" class="slider-value" min="0" max="100" step="1" value="{{ valeur_defaut }}">
@@ -64,105 +63,12 @@
                         </div>
                     {% endfor %}
                 </section>
-            </div>
+            </section>
 
-            <script>
-                document.addEventListener("DOMContentLoaded", () => {
-                    const groups = [];
-                    const container = document.querySelector(".section-importance");
-                    
-                    if(container) {
-                        const sliders = container.querySelectorAll(".slider");
-                        const values = container.querySelectorAll(".slider-value");
-                        
-                        sliders.forEach((slider, index) => {
-                            groups.push({
-                                slider: slider,
-                                number: values[index],
-                                index: index
-                            });
-                        });
-                    }
+            <script src="../static/script/sliders.js"></script>
 
-                    const TOTAL_TARGET = 100;
-
-                    function updateSliders(activeIndex, newVal) {
-                        newVal = Math.max(0, Math.min(TOTAL_TARGET, newVal));
-                        
-                        groups[activeIndex].slider.value = newVal;
-                        groups[activeIndex].number.value = newVal;
-
-                        let currentSum = 0;
-                        groups.forEach(g => currentSum += parseInt(g.slider.value));
-                        
-                        let difference = currentSum - TOTAL_TARGET;
-
-                        while (difference !== 0) {
-                            if (difference > 0) {
-                                let candidate = null;
-                                let maxVal = -1;
-                                groups.forEach((g, i) => {
-                                    if (i !== activeIndex) {
-                                        let val = parseInt(g.slider.value);
-                                        if (val > 0 && val > maxVal) {
-                                            maxVal = val;
-                                            candidate = g;
-                                        }
-                                    }
-                                });
-                                if (candidate) {
-                                    let v = parseInt(candidate.slider.value) - 1;
-                                    candidate.slider.value = v;
-                                    candidate.number.value = v;
-                                    difference--; 
-                                } else {
-                                    newVal--;
-                                    groups[activeIndex].slider.value = newVal;
-                                    groups[activeIndex].number.value = newVal;
-                                    difference--;
-                                }
-                            } else if (difference < 0) {
-                                let candidate = null;
-                                let minVal = 101;
-                                groups.forEach((g, i) => {
-                                    if (i !== activeIndex) {
-                                        let val = parseInt(g.slider.value);
-                                        if (val < 100 && val < minVal) {
-                                            minVal = val;
-                                            candidate = g;
-                                        }
-                                    }
-                                });
-                                if (candidate) {
-                                    let v = parseInt(candidate.slider.value) + 1;
-                                    candidate.slider.value = v;
-                                    candidate.number.value = v;
-                                    difference++;
-                                } else {
-                                    difference++;
-                                }
-                            }
-                        }
-                    }
-
-                    groups.forEach((group) => {
-                        group.slider.addEventListener('input', (e) => {
-                            updateSliders(group.index, parseInt(e.target.value));
-                        });
-                        group.number.addEventListener('input', (e) => {
-                            let val = parseInt(e.target.value);
-                            if (isNaN(val)) val = 0;
-                            updateSliders(group.index, val);
-                        });
-                        group.slider.addEventListener('change', (e) => {
-                            updateSliders(group.index, parseInt(e.target.value));
-                        });
-                    });
-                });
-            </script>
-
-            <div class="config-card mt-4">
-                <div class="card-header-custom">
+            <section class="section-config mt-4">
+                <div class="section-config-header">
                     <h3>Configuration détaillée par groupe</h3>
                 </div>
                 <div class="card-body-custom config-groupe-stack">
@@ -175,7 +81,7 @@
                                 {% for crit in criteres_choisis %}
                                     {% if crit.grp == grp %}
                                     <div class="critere-sub-box">
-                                        <div class="critere-title">{{ crit.nom }}</div>
+                                        <h4 class="critere-title"><strong>{{ crit.nom }}</strong></h4>
                                         <div class="checkbox-wrapper">
                                             {% set toutes_valeurs = session['liste_val_crit'][crit.nom] %}
                                             {% for val in toutes_valeurs %}
@@ -198,7 +104,7 @@
                         </div>
                     {% endfor %}
                 </div>
-            </div>
+            </section>
         {% endif %}
 
         <div class="submit-area mt-5 mb-5">
