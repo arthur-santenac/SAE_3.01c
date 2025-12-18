@@ -227,6 +227,7 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
 
     Args: 
         liste_eleve (list): liste des élèves importer d'un fichier csv
+        liste_critere (list) : liste des critères à respecter pour les groupes
         dico_importance (dict): dictionnaire contenant les coefficient d'importance des critères
         nb_groupe (int): nombre de groupes a créer
 
@@ -234,6 +235,7 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
         list: liste des groupes finis
     """
     liste_max = None
+    cout_min_global = float('inf')
     debut, actuel = time.time(), time.time()
     dico_pourc_elv = dico_poucentage(liste_eleve)
     cpt = 0
@@ -242,26 +244,51 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
         actuel = time.time()
         random.shuffle(liste_eleve)
         liste_groupes = []
+        liste_compteurs = []
         for _ in range(nb_groupe + 1):
             liste_groupes.append([])
+            liste_compteurs.append({})
         for eleve in liste_eleve:
             liste_groupes_possibles = groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe)
             if len(liste_groupes_possibles) > 0:
                 liste_cout = []
                 for ind_groupe in liste_groupes_possibles:
-                    if len(liste_groupes[ind_groupe]) == 0:
-                        liste_cout.append(float('inf'))
-                    else:
-                        groupe_simul = copy.deepcopy(liste_groupes[ind_groupe])
-                        ancien_cout = diff_cout_groupe(dico_pourc_elv, dico_poucentage(groupe_simul), dico_importance)
-                        groupe_simul.append(eleve)
-                        nouveau_cout = diff_cout_groupe(dico_pourc_elv, dico_poucentage(groupe_simul), dico_importance)
-                        liste_cout.append(ancien_cout - nouveau_cout)
-                liste_groupes[liste_groupes_possibles[max_aleatoire(liste_cout)]].append(eleve)
+                    nb_actuel = len(liste_groupes[ind_groupe])
+                    nb_futur = nb_actuel + 1
+                    cout_futur = 0
+                    for critere, importance in dico_importance.items():
+                        val_eleve = eleve.critere[critere]
+                        dico_val = liste_compteurs[ind_groupe].get(critere, {})
+                        cout_crit = 0
+                        for val, pct_cible in dico_pourc_elv[critere].items():
+                            nb = dico_val.get(val, 0)
+                            if val == val_eleve:
+                                nb += 1
+                            pct_futur = (nb / nb_futur) * 100
+                            cout_crit += abs(pct_futur - pct_cible)
+                        cout_futur += importance * cout_crit
+                    liste_cout.append(-cout_futur)
+                choix = liste_groupes_possibles[max_aleatoire(liste_cout)]
+                liste_groupes[choix].append(eleve)
+                for critere, val in eleve.critere.items():
+                    if critere not in liste_compteurs[choix]:
+                        liste_compteurs[choix][critere] = {}
+                    if val not in liste_compteurs[choix][critere]:
+                        liste_compteurs[choix][critere][val] = 0
+                    liste_compteurs[choix][critere][val] += 1
             else:
                 liste_groupes[-1].append(eleve)
-        if liste_max is None or len(liste_groupes[-1]) < len(liste_max[-1]) or cout_tot(dico_pourc_elv, liste_groupes, dico_importance) < cout_tot(dico_pourc_elv, liste_max, dico_importance):
+        cout_final = cout_tot(dico_pourc_elv, liste_groupes[:-1], dico_importance)
+        if liste_max is None:
             liste_max = copy.deepcopy(liste_groupes)
+            cout_min_global = cout_final
+        else:
+            if len(liste_groupes[-1]) < len(liste_max[-1]):
+                    liste_max = copy.deepcopy(liste_groupes)
+                    cout_min_global = cout_final
+            elif len(liste_groupes[-1]) == len(liste_max[-1]) and cout_final < cout_min_global:
+                    liste_max = copy.deepcopy(liste_groupes)
+                    cout_min_global = cout_final
     print(cpt)
     return liste_max
 
