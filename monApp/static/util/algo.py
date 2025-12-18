@@ -44,6 +44,7 @@ def recup_critere(nom_fichier):
     with open(nom_fichier) as fichier_csv:
         reader = csv.reader(fichier_csv, delimiter=',')
         liste_critere = next(reader)[3:]
+
     return liste_critere
 
 def lire_config(nom_fichier):
@@ -170,11 +171,13 @@ def groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe
             ajouter = False
         for critere in liste_critere:
             if critere.groupe == i + 1:
-                if int(eleve.critere[critere.nom_critere]) not in critere.condition:
+                if eleve.critere[critere.nom_critere] not in critere.condition:
                     ajouter = False
         if ajouter:
             res.append(i)
     return res
+
+
 
 def dico_poucentage(liste_eleves):
     """Permet d'avoir une liste de dictionnaires avec pour chaque valeur de chaque catégorie le pourcentage par rapport au total de la catégorie
@@ -280,3 +283,26 @@ def score_totale(liste_eleve, groupes, dico_importance):
         cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
     return int((cout_totale - cout_grp) / cout_totale * 100)
 
+def recup_ensemble_val_critere(critere: str, nom_fichier: str):
+    valeurs = set()
+    with open(nom_fichier, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for ligne in reader:
+            valeurs.add(ligne[critere])
+    valeurs = list(valeurs)
+    valeurs = sorted(valeurs)
+    return valeurs
+
+def test_creation_liste_critere():
+    liste = []
+
+    liste.append(critere.Critere(1, ["M", "F"], "genre"))
+    liste.append(critere.Critere(1, ["1", "2", "3", "6", "7"], "niveau Français"))
+    liste.append(critere.Critere(2, ["F"], "genre"))
+    liste.append(critere.Critere(2, ["1", "4", "5", "6", "7"], "niveau Français"))
+    liste.append(critere.Critere(3, ["M"], "genre"))
+    liste.append(critere.Critere(3, ["1", "4", "5", "6", "7"], "niveau Français"))
+
+
+    return liste
+    

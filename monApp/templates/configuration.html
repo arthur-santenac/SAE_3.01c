@@ -8,13 +8,12 @@
 
 
 {% block main %}
-
 <div id="loader-overlay">
   <span class="loader"></span>
   <div class="loading-text">Création des groupes en cours...</div>
 </div>
 
-<form action="{{ url_for('configuration') }}" method="POST">
+<form id="form-repartition" action="{{ url_for('configuration') }}" method="POST">
     <div class="container mt-5 pt-2">
         
         {% if error %}
@@ -135,7 +134,7 @@
             </section>
         </section>
         <div class="submit-container" style="text-align: center; margin: 20px 0;">
-            <button type="submit" onclick="submitWithLoader()" name="btn" value="btn-repartition"  class="btn btn-primary btn-lg" 
+            <button type="button" onclick="submitWithLoader()" class="btn btn-primary btn-lg" 
                 {% if valide != True %} 
                     disabled
                     style="background-color: gray; border: 2px solid black ;"
