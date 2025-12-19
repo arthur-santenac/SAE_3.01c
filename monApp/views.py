@@ -19,8 +19,9 @@ def index():
         os.remove(os.path.join(UPLOAD_FOLDER, "configuration.json"))
     return render_template("importer.html")
 
-@app.route("/importerCSV/", methods=["POST"])
-def importerCSV():
+
+@app.route("/importe_csv/", methods=["POST"])
+def importe_csv():
     if "file" not in request.files:
         return "Aucun fichier", 400
     file = request.files.get("file")
@@ -28,22 +29,24 @@ def importerCSV():
         save_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
         file.save(save_path)
         liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
-        session["criteres_groupes"] = [] 
+        session["criteres_groupes"] = []
         session["valide"] = False
         session["dico_importance"] = algo.init_dico_importance(liste_eleve)
-        return render_template("configuration.html",title ="COHORT App")
+        return render_template("configuration.html", title="COHORT App")
     return "Format invalide", 400
 
-@app.route("/importerJSON/", methods=["POST"])
-def importerJSON():
+
+@app.route("/importer_json/", methods=["POST"])
+def importer_json():
     if "file" not in request.files:
         return "Aucun fichier", 400
     file = request.files.get("file")
     if file and file.filename.endswith(".json"):
         save_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
         file.save(save_path)
-        return render_template("configuration.html",title ="COHORT App")
+        return render_template("configuration.html", title="COHORT App")
     return "Format invalide", 400
+
 
 @app.route("/configuration/", methods=["GET", "POST"])
 def configuration():
@@ -59,10 +62,8 @@ def configuration():
         session["nb_groupes"] = 1
         session["criteres_groupes"] = []
 
-    
     if request.method == "POST":
         action = request.form.get("btn")
-
 
         dico_importance = session.get("dico_importance", {})
         for crit_nom in dico_importance:
@@ -73,7 +74,6 @@ def configuration():
                 dico_importance[crit_nom] = int(valeur)
         session["dico_importance"] = dico_importance
 
-
         if action == "btn-valide":
             nb_groupes_str = request.form.get("nb-grp")
             if nb_groupes_str:
@@ -82,15 +82,19 @@ def configuration():
                 session["valide"] = True
                 session["liste_ind_groupes"] = list(range(1, nb_int + 1))
                 tous_les_criteres = []
-                
+
                 for id_grp in range(1, nb_int + 1):
                     for nom_crit in liste_crit_brut:
-                        valeurs_possibles = list(algo.recup_ensemble_val_critere(nom_crit, csv_path))
-                        tous_les_criteres.append({'grp': id_grp, 'nom': nom_crit, 'valeurs': valeurs_possibles})
+                        valeurs_possibles = list(
+                            algo.recup_ensemble_val_critere(
+                                nom_crit, csv_path))
+                        tous_les_criteres.append({
+                            "grp": id_grp,
+                            "nom": nom_crit,
+                            "valeurs": valeurs_possibles
+                        })
                 session["criteres_groupes"] = tous_les_criteres
 
-
-                
         elif action == "btn-repartition":
             liste_crit_brut = algo.recup_critere(csv_path)
             nb_groupes = session.get("nb_groupes", 1)
@@ -99,15 +103,20 @@ def configuration():
                 for nom_crit in liste_crit_brut:
                     nom_input = f"chk_{id_grp}_{nom_crit}"
                     valeurs_cochees = request.form.getlist(nom_input)
-                    nouveaux_criteres_groupes.append({'grp': id_grp, 'nom': nom_crit, 'valeurs': valeurs_cochees})
+                    nouveaux_criteres_groupes.append({
+                        "grp": id_grp,
+                        "nom": nom_crit,
+                        "valeurs": valeurs_cochees
+                    })
 
             session["criteres_groupes"] = nouveaux_criteres_groupes
             session.modified = True
             return redirect(url_for("repartition"))
-    liste_crit_brut = algo.recup_critere(csv_path) if os.path.exists(csv_path) else []
+    liste_crit_brut = algo.recup_critere(csv_path) if os.path.exists(
+        csv_path) else []
     nouveaux_criteres = []
     for crit in session.get("criteres_groupes", []):
-        if crit['nom'] in liste_crit_brut:
+        if crit["nom"] in liste_crit_brut:
             nouveaux_criteres.append(crit)
     session["criteres_groupes"] = nouveaux_criteres
     criteres_pour_template = []
@@ -120,8 +129,14 @@ def configuration():
             valeurs = algo.recup_ensemble_val_critere(crit, csv_path)
             dico_valeurs[crit] = valeurs
         session["liste_val_crit"] = dico_valeurs
-    return render_template("configuration.html", title="COHORT App", criteres=criteres_pour_template, valide=session.get("valide"), liste_grp=session.get("liste_ind_groupes", []),
-        criteres_choisis=session.get("criteres_groupes", []), nb_grp=session.get("nb_groupes", 1))
+    return render_template("configuration.html",
+                           title="COHORT App",
+                           criteres=criteres_pour_template,
+                           valide=session.get("valide"),
+                           liste_grp=session.get("liste_ind_groupes", []),
+                           criteres_choisis=session.get(
+                               "criteres_groupes", []),
+                           nb_grp=session.get("nb_groupes", 1))
 
 
 @app.route("/repartition/", methods=["POST", "GET"])
@@ -135,7 +150,10 @@ def repartition():
             soup = BeautifulSoup(html_content, "html.parser")
             nouveau_dico = dico_importance.copy()
             for critere_nom in nouveau_dico.keys():
-                input_tag = soup.find("input", {"name": critere_nom, "type": "number"})
+                input_tag = soup.find("input", {
+                    "name": critere_nom,
+                    "type": "number"
+                })
                 if input_tag and input_tag.get("value"):
                     try:
                         nouveau_dico[critere_nom] = int(input_tag.get("value"))
@@ -162,14 +180,18 @@ def repartition():
                                 criteres_temp[nom_crit] = []
                             criteres_temp[nom_crit].append(valeur)
                 for nom, valeurs in criteres_temp.items():
-                    nouveau_critere = algo.critere.Critere(num_groupe, valeurs, nom)
+                    nouveau_critere = algo.critere.Critere(
+                        num_groupe, valeurs, nom)
                     liste_critere.append(nouveau_critere)
 
         else:
-            liste_critere=[]
+            liste_critere = []
             for critere in session["criteres_groupes"]:
-                liste_critere.append(algo.critere.Critere(critere['grp'],critere['valeurs'],critere['nom']))
-            liste_eleve_temp = algo.lire_fichier("monApp/static/uploads/groupes.csv")
+                liste_critere.append(
+                    algo.critere.Critere(critere["grp"], critere["valeurs"],
+                                         critere["nom"]))
+            liste_eleve_temp = algo.lire_fichier(
+                "monApp/static/uploads/groupes.csv")
             if not dico_importance:
                 dico_importance = algo.init_dico_importance(liste_eleve_temp)
                 session["dico_importance"] = dico_importance
@@ -177,45 +199,50 @@ def repartition():
         liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
         nombre_groupes = session.get("nb_groupes", 0)
 
-        nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
-        liste_nom_critere = algo.recup_critere("monApp/static/uploads/groupes.csv")
+        nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve,
+                                                       nombre_groupes)
+        liste_nom_critere = algo.recup_critere(
+            "monApp/static/uploads/groupes.csv")
 
         liste_criteres_valeur = []
         for critere in liste_nom_critere:
-            liste_valeur_critere = algo.recup_ensemble_val_critere(critere, "monApp/static/uploads/groupes.csv")
+            liste_valeur_critere = algo.recup_ensemble_val_critere(
+                critere, "monApp/static/uploads/groupes.csv")
             liste_criteres_valeur.append(liste_valeur_critere)
 
         print(dico_importance)
-        groupes = algo.creer_groupe(liste_eleve, liste_critere, dico_importance, nombre_groupes)
+        groupes = algo.creer_groupe(liste_eleve, liste_critere,
+                                    dico_importance, nombre_groupes)
         score = algo.score_totale(liste_eleve, groupes, dico_importance)
 
-        place = str(len(liste_eleve) - len(groupes[-1])) + "/" + str(len(liste_eleve))
+        place = str(len(liste_eleve) - len(groupes[-1])) + "/" + str(
+            len(liste_eleve))
         try:
-            prc_place = str((len(liste_eleve) - len(groupes[-1])) / len(liste_eleve) * 100)
+            prc_place = str(
+                (len(liste_eleve) - len(groupes[-1])) / len(liste_eleve) * 100)
         except ZeroDivisionError:
             prc_place = "0"
         bleu = len(liste_eleve) - len(groupes[-1]) == len(liste_eleve)
 
-        return render_template(
-            "repartition.html",
-            title="COHORT App",
-            nb_eleve_groupe=nb_eleve_groupe,
-            nombre_groupes=nombre_groupes,
-            groupes=groupes,
-            score=score,
-            place=place,
-            prc_place=prc_place,
-            liste_critere=liste_critere,
-            liste_criteres_valeur=liste_criteres_valeur,
-            liste_nom_critere=liste_nom_critere,
-            dico_importance=dico_importance,
-            bleu=bleu
-        )
+        return render_template("repartition.html",
+                               title="COHORT App",
+                               nb_eleve_groupe=nb_eleve_groupe,
+                               nombre_groupes=nombre_groupes,
+                               groupes=groupes,
+                               score=score,
+                               place=place,
+                               prc_place=prc_place,
+                               liste_critere=liste_critere,
+                               liste_criteres_valeur=liste_criteres_valeur,
+                               liste_nom_critere=liste_nom_critere,
+                               dico_importance=dico_importance,
+                               bleu=bleu)
 
     except Exception as e:
         print(f"Erreur dans repartition: {e}")
         traceback.print_exc()
-        return render_template("repartition.html", error="Une erreur est survenue")
+        return render_template("repartition.html",
+                               error="Une erreur est survenue")
 
 
 @app.route("/exporter_groupes", methods=["POST"])
@@ -249,8 +276,10 @@ def exporter_groupes():
             })
     groupes["restants"] = restants
     if groupes:
-        with open("monApp/static/uploads/groupes_finaux.csv", "w+",
-                  newline="", encoding="utf-8") as fichier_csv:
+        with open("monApp/static/uploads/groupes_finaux.csv",
+                  "w+",
+                  newline="",
+                  encoding="utf-8") as fichier_csv:
             writer = csv.writer(fichier_csv)
             liste_critere = []
             for groupe in groupes.values():
