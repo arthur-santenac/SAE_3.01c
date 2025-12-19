@@ -112,83 +112,77 @@ def configuration():
         criteres_choisis=session.get("criteres_groupes", []), nb_grp=session.get("nb_groupes", 1))
 
 
-
 @app.route("/repartition/", methods=["POST", "GET"])
 def repartition():
     try:
-        if request.method == "POST":
-            dico_actuel = session.get("dico_importance", {})
-            for critere in dico_actuel:
-                if critere in request.form:
-                    try:
-                        dico_actuel[critere] = int(request.form[critere])
-                    except ValueError:
-                        pass
-            session["dico_importance"] = dico_actuel
-            session.modified = True
-        liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
-        nombre_groupes = session.get("nb_groupes", 0)
-
+        dico_importance = session.get("dico_importance", {})
         liste_critere = []
+
         if request.method == "POST":
             html_content = request.data.decode("utf-8")
             soup = BeautifulSoup(html_content, "html.parser")
+            nouveau_dico = dico_importance.copy()
+            for critere_nom in nouveau_dico.keys():
+                input_tag = soup.find("input", {"name": critere_nom, "type": "number"})
+                if input_tag and input_tag.get("value"):
+                    try:
+                        nouveau_dico[critere_nom] = int(input_tag.get("value"))
+                    except ValueError:
+                        pass
+
+            session["dico_importance"] = nouveau_dico
+            dico_importance = nouveau_dico
 
             modales = soup.find_all(class_="popup-card")
-
             for modale in modales:
                 h3_tag = modale.find("h3")
-                if not h3_tag:
-                    continue
-
+                if not h3_tag: continue
                 titre_groupe = h3_tag.get_text()
                 num_groupe = int("".join(filter(str.isdigit, titre_groupe)))
-
                 criteres_temp = {}
-
                 all_inputs = modale.find_all("input", {"type": "checkbox"})
-
                 for chk in all_inputs:
                     if chk.has_attr("checked"):
                         nom_crit = chk.get("name")
                         valeur = chk.get("value")
-
                         if nom_crit:
                             if nom_crit not in criteres_temp:
                                 criteres_temp[nom_crit] = []
                             criteres_temp[nom_crit].append(valeur)
-
                 for nom, valeurs in criteres_temp.items():
-                    nouveau_critere = algo.critere.Critere(
-                        num_groupe, valeurs, nom)
+                    nouveau_critere = algo.critere.Critere(num_groupe, valeurs, nom)
                     liste_critere.append(nouveau_critere)
 
         else:
             liste_critere=[]
             for critere in session["criteres_groupes"]:
                 liste_critere.append(algo.critere.Critere(critere['grp'],critere['valeurs'],critere['nom']))
+            liste_eleve_temp = algo.lire_fichier("monApp/static/uploads/groupes.csv")
+            if not dico_importance:
+                dico_importance = algo.init_dico_importance(liste_eleve_temp)
+                session["dico_importance"] = dico_importance
 
-        nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve,
-                                                       nombre_groupes)
-        liste_nom_critere = algo.recup_critere(
-            "monApp/static/uploads/groupes.csv")
+        liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
+        nombre_groupes = session.get("nb_groupes", 0)
+
+        nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
+        liste_nom_critere = algo.recup_critere("monApp/static/uploads/groupes.csv")
 
         liste_criteres_valeur = []
         for critere in liste_nom_critere:
-            liste_valeur_critere = algo.recup_ensemble_val_critere(
-                critere, "monApp/static/uploads/groupes.csv")
+            liste_valeur_critere = algo.recup_ensemble_val_critere(critere, "monApp/static/uploads/groupes.csv")
             liste_criteres_valeur.append(liste_valeur_critere)
 
-        dico_importance = session.get("dico_importance",
-                                      algo.init_dico_importance(liste_eleve))
-
-        groupes = algo.creer_groupe(liste_eleve, liste_critere,
-                                    dico_importance, nombre_groupes)
-
+        print(dico_importance)
+        groupes = algo.creer_groupe(liste_eleve, liste_critere, dico_importance, nombre_groupes)
         score = algo.score_totale(liste_eleve, groupes, dico_importance)
 
         place = str(len(liste_eleve) - len(groupes[-1])) + "/" + str(len(liste_eleve))
-        prc_place = str((len(liste_eleve) - len(groupes[-1])) / len(liste_eleve) * 100)
+        try:
+            prc_place = str((len(liste_eleve) - len(groupes[-1])) / len(liste_eleve) * 100)
+        except ZeroDivisionError:
+            prc_place = "0"
+        bleu = len(liste_eleve) - len(groupes[-1]) == len(liste_eleve)
 
         return render_template(
             "repartition.html",
@@ -202,22 +196,14 @@ def repartition():
             liste_critere=liste_critere,
             liste_criteres_valeur=liste_criteres_valeur,
             liste_nom_critere=liste_nom_critere,
-            dico_importance=dico_importance
+            dico_importance=dico_importance,
+            bleu=bleu
         )
 
     except Exception as e:
         print(f"Erreur dans repartition: {e}")
         traceback.print_exc()
-        return render_template(
-            "repartition.html",
-            title="Erreur",
-            nb_eleve_groupe=0,
-            nombre_groupes=0,
-            groupes=[[]],
-            liste_critere=[],
-            liste_criteres_valeur=[],
-            liste_nom_critere=[],
-        )
+        return render_template("repartition.html", error="Une erreur est survenue")
 
 
 @app.route("/exporter_groupes", methods=["POST"])
