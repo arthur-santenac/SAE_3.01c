@@ -1,0 +1,230 @@
+{% extends "base.html" %} {% block title %}Test{% endblock %} {% block main %}
+<div id="loader-overlay">
+  <span class="loader"></span>
+  <div class="loading-text">Création des groupes en cours...</div>
+</div>
+<link rel="stylesheet" href="../static/css/style.css" />
+
+
+<div class="top_row">
+  
+  <header class="header_score">
+    <div class="dashboard-container">
+      <h1 class="main-title">score</h1>
+      <section class="stats-row">
+        <div class="stat-item">
+          <span class="stat-label">Respect des critères</span>
+          <span class="stat-value">{{ score }}%</span>
+          <div class="progress-bar">
+            <div class="fill green" style="width: {{ score }}%"></div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">élèves placés</span>
+          <span class="stat-value">{{ place }}</span>
+          <div class="progress-bar">
+            {% if bleu %}
+            <div class="fill blue" style="width: {{ prc_place }}%"></div>
+            {% else %}
+            <div class="fill red" style="width: {{ prc_place }}%"></div>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+    </div>
+  </header>
+
+  <section class="empty_space">
+    <h2>Configuration d'importance</h2>
+    <div class="section-importance"> {% for nom_critere, valeur in dico_importance.items() %}
+        <div class="slider-row">
+            <span class="slider-label">{{ nom_critere }}</span>
+            <input class="slider small-slider" type="range" min="0" max="100" step="1" value="{{ valeur }}" >
+            <div>
+                <input type="number" name="{{ nom_critere }}" class="slider-value small-input" min="0" max="100" step="1" value="{{ valeur }}">
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+  </section>
+</div>
+
+<main class="main_repartition">
+  <section id="eleves_classes">
+    <h1>Élèves classés</h1>
+    {% for i in range(groupes|length - 1) %}
+    <article>
+      <details open>
+        <summary>
+          <h2>Groupe {{ i + 1 }}</h2>
+          <span class="count">{{ nb_eleve_groupe[i] }} élèves</span>
+        </summary>
+
+        <details open>
+          <summary class="test">
+            <h2>voir critere Groupe {{ i + 1 }}</h2>
+            <button class="btn-popup" data-target="modale-{{ i + 1 }}">
+              modifier les critere du groupe {{ i + 1 }}
+            </button>
+
+            <div id="modale-{{ i + 1 }}" class="overlay">
+              <div class="popup-card">
+                <h3>Groupe : {{ i + 1 }}</h3>
+
+                {% for idx in range(liste_nom_critere|length) %} {% set
+                nom_du_critere = liste_nom_critere[idx] %} {% set
+                toutes_les_valeurs = liste_criteres_valeur[idx] %}
+
+                <fieldset>
+                  <legend>{{ nom_du_critere }}</legend>
+
+                  <div class="checkbox-container">
+                    {% for valeur in toutes_les_valeurs %} 
+                      {% set ns = namespace(is_checked=false) %} 
+                      {% for critere_actif in liste_critere %} 
+                        {% if critere_actif.groupe == i+1 and critere_actif.nom_critere == nom_du_critere %} 
+                          {% if valeur in critere_actif.condition %} 
+                            {% set ns.is_checked = true %}
+                        {% endif %} 
+                      {% endif %} 
+                    {% endfor %} 
+
+                    <div>
+                      <input
+                        type="checkbox"
+                        id="chk-{{ i+1 }}-{{ nom_du_critere }}-{{ loop.index }}"
+                        name="{{ nom_du_critere }}"
+                        value="{{ valeur }}"
+                        {% if ns.is_checked %}checked{% endif %}
+                      />
+
+                      <label
+                        for="chk-{{ i+1 }}-{{ nom_du_critere }}-{{ loop.index }}"
+                      >
+                        {{ valeur }}
+                      </label>
+                    </div>
+
+                    {% endfor %}
+                  </div>
+                </fieldset>
+
+                {% endfor %}
+
+                <div class="actions">
+                  <button class="btn-valider" data-target="modale-{{ i + 1 }}">
+                    Valider
+                  </button>
+                </div>
+              </div>
+            </div>
+          </summary>
+          <table class="table-criteres">
+            <thead>
+              <tr>
+                <th>Critère</th>
+                <th>Condition</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for jj in liste_critere %} 
+                {% if jj.groupe == i+1 %}
+              <tr>
+                <td>{{jj.nom_critere}}</td>
+                <td>{{jj.condition}}</td>
+              </tr>
+              {% endif %} {% endfor %}
+            </tbody>
+          </table>
+        </details>
+
+        <table class="liste-eleves" data-group="{{ i + 1 }}-classe">
+          <thead>
+            <tr>
+              <th class="effacer">Num</th>
+              <th>Prénom</th>
+              <th>Nom</th>
+              {% for chiffre in liste_nom_critere %}
+              <td>{{ chiffre }}</td>
+              {% endfor %}
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for eleve in groupes[i] %}
+            <tr draggable="true" class="eleve">
+              <td class="effacer">{{ eleve.num }}</td>
+              <td>{{ eleve.prenom }}</td>
+              <td>{{ eleve.nom }}</td>
+              {% for critere_nom in liste_nom_critere %}
+              <td>{{ eleve.critere[critere_nom] }}</td>
+              {% endfor %}
+              <td class="actions">
+                <button class="btn-loupe" aria-label="Rechercher">loupe</button>
+                <button class="supprimer" aria-label="Supprimer">×</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </details>
+    </article>
+    {% endfor %}
+  </section>
+
+  <section id="eleves_restants">
+    <h1>Élèves restants</h1>
+    <article>
+      <details open>
+        <summary>
+          <h2>Élèves non classés</h2>
+          <span class="count">{{ nb_eleve_groupe[-1] }} élèves</span>
+        </summary>
+        <table class="liste-eleves" data-group="restants">
+          <thead>
+            <tr>
+              <th class="effacer">Num</th>
+              <th>Prénom</th>
+              <th>Nom</th>
+              {% for critere_nom in liste_nom_critere %}
+              <td>{{ critere_nom }}</td>
+              {% endfor %}
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for eleve in groupes[-1] %}
+            <tr draggable="true" class="eleve">
+              <td class="effacer">{{ eleve.num }}</td>
+              <td>{{ eleve.prenom }}</td>
+              <td>{{ eleve.nom }}</td>
+              {% for critere_nom in liste_nom_critere %}
+              <td>{{ eleve.critere[critere_nom] }}</td>
+              {% endfor %}
+              <td class="actions">
+                <button class="btn-loupe" aria-label="Rechercher">loupe</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </details>
+    </article>
+    <div class="submit-container" style="text-align: center; margin: 20px 0;">
+<button type="button" 
+        id="btn-relancer"
+        class="btn btn-primary btn-lg" 
+        style="background-color: gray; border: 2px solid black;">
+    Relancer la répartition
+</button>
+    </div>
+  </section>
+  
+</main>
+
+<footer class="header_score">
+  <button id="exporter" aria-label="Rechercher">Exporter</button>
+</footer>
+<script src="../static/script/repartition.js"></script>
+<script src="../static/script/sliders.js"></script>
+{% endblock %}

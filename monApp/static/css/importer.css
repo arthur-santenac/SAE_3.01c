@@ -1,0 +1,117 @@
+.container section {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 3rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+form.dropzone {
+  border: 2px dashed #0056b3;
+  background-color: #f8fbff;
+  border-radius: 12px;
+  min-height: 200px;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+form.dropzone .dz-message {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #0056b3;
+  margin: 0;
+}
+
+form.dropzone.dz-drag-hover {
+  background-color: #e6f0ff;
+  border-style: solid;
+  border-color: #004494;
+  transform: scale(1.02);
+  box-shadow: 0 10px 25px rgba(0, 86, 179, 0.15);
+}
+
+.dropzone.dz-started .dz-message {
+  display: none;
+}
+
+.dz-success-mark, .dz-error-mark {
+  display: none;
+}
+
+.dropzone .dz-preview {
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dropzone .dz-preview.dz-image-preview {
+  background: transparent;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#reset_btn {
+  background: transparent;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#reset_btn_json {
+  background: transparent;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#reset_btn:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+.mise-en-page {
+  max-width: 1140px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+  margin-top: 3rem;
+  padding-top: 0.5rem;
+}
+
+.btn-valider {
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  
+  display: inline-block;
+  padding: 12px 40px;
+  font-size: 1.25rem;
+  border-radius: 8px;
+  
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-valider:hover {
+  background-color: #004494;
+  color: white;
+}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Importer{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/importer.css') }}">
+  <style>
+      .btn-disabled {
+          pointer-events: none;
+          opacity: 0.5;
+          cursor: not-allowed;
+          background-color: #cccccc !important;
+          border-color: #cccccc !important;
+      }
+  </style>
+{% endblock %}
+
+{% block main %}
+
+{{ dropzone.load_js() }}
+{{ dropzone.config() }}
+
+<div class="mise-en-page"></div>
+<div class="mise-en-page">
+    <section>
+        <h2 class="text-center mb-4">Importer la liste d'élève (obligatoire)</h2>
+        
+        <form action="{{ url_for('importerCSV') }}" class="dropzone" id="myDropzone" method="post" enctype="multipart/form-data">
+             <div class="dz-message" data-dz-message>
+                <span>Déposez votre fichier CSV ici ou cliquez pour choisir</span>
+            </div>
+        </form>
+
+        <div class="button-container">
+            <button type="button" id="reset_btn">Supprimer le fichier</button>
+        </div>
+
+    </section>
+</div>
+
+<div class="mise-en-page">
+    <section>
+        <h2 class="text-center mb-4">Importer votre configuration (facultatif)</h2>
+        
+        <form action="{{ url_for('importerJSON') }}" class="dropzone" id="myDropzoneJson" method="post" enctype="multipart/form-data">
+             <div class="dz-message" data-dz-message>
+                <span>Déposez votre fichier JSON ici ou cliquez pour choisir</span>
+            </div>
+        </form>
+
+        <div class="button-container">
+            <button type="button" id="reset_btn_json">Supprimer le fichier</button>
+        </div>
+    </section>
+</div>
+
+<div class="text-center mt-4">
+    <a href="{{ url_for('configuration') }}" id="btn-valider" class="btn-valider btn-disabled">Valider</a>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("reset_btn").addEventListener("click", function() {
+            var dz = Dropzone.forElement("#myDropzone");
+            if (dz) { 
+                dz.removeAllFiles(true); 
+                toggleValiderButton(false);
+            }
+        });
+        document.getElementById("reset_btn_json").addEventListener("click", function() {
+            var dz = Dropzone.forElement("#myDropzoneJson");
+            if (dz) { dz.removeAllFiles(true); }
+        });
+        var btnValider = document.getElementById("btn-valider");
+        function toggleValiderButton(enable) {
+            if (enable) {
+                btnValider.classList.remove("btn-disabled");
+            } else {
+                btnValider.classList.add("btn-disabled");
+            }
+        }
+        var csvDropzone = Dropzone.forElement("#myDropzone");
+        if (csvDropzone) {
+            csvDropzone.on("success", function(file, response) {
+                toggleValiderButton(true);
+            });
+            csvDropzone.on("removedfile", function(file) {
+                if (csvDropzone.files.length === 0) {
+                    toggleValiderButton(false);
+                }
+            });
+            csvDropzone.on("error", function(file) {
+                 if (csvDropzone.getAcceptedFiles().length === 0) {
+                    toggleValiderButton(false);
+                 }
+            });
+        }
+    });
+</script>
+{% endblock %}
