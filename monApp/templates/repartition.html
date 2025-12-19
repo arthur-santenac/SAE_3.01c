@@ -121,7 +121,7 @@
           <summary class="test">
             <h2>voir critere Groupe {{ i + 1 }}</h2>
             <button class="btn-popup" data-target="modale-{{ i + 1 }}">
-              Noter le groupe {{ i + 1 }}
+              modifier les critere du groupe {{ i + 1 }}
             </button>
 
             <div id="modale-{{ i + 1 }}" class="overlay">
@@ -138,7 +138,7 @@
                   <div class="checkbox-container">
                     {% for valeur in toutes_les_valeurs %} 
                       {% set ns = namespace(is_checked=false) %} 
-                      {% for critere_actif in test_liste_critere %} 
+                      {% for critere_actif in liste_critere %} 
                         {% if critere_actif.groupe == i+1 and critere_actif.nom_critere == nom_du_critere %} 
                           {% if valeur in critere_actif.condition %} 
                             {% set ns.is_checked = true %}
@@ -184,7 +184,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for jj in test_liste_critere %} 
+              {% for jj in liste_critere %} 
                 {% if jj.groupe == i+1 %}
               <tr>
                 <td>{{jj.nom_critere}}</td>
