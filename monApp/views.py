@@ -48,6 +48,7 @@ def importerJSON():
 @app.route("/configuration/", methods=["GET", "POST"])
 def configuration():
     csv_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
+    liste_crit_brut = algo.recup_critere(csv_path)
     if "criteres_groupes" not in session:
         session["criteres_groupes"] = []
     if "valide" not in session:
@@ -61,6 +62,18 @@ def configuration():
     
     if request.method == "POST":
         action = request.form.get("btn")
+
+
+        dico_importance = session.get("dico_importance", {})
+        for crit_nom in dico_importance:
+            crit_propre = crit_nom.lower().replace(" ", "_")
+            nom_input = f"importance_{crit_propre}"
+            valeur = request.form.get(nom_input)
+            if valeur:
+                dico_importance[crit_nom] = int(valeur)
+        session["dico_importance"] = dico_importance
+
+
         if action == "btn-valide":
             nb_groupes_str = request.form.get("nb-grp")
             if nb_groupes_str:
@@ -68,14 +81,13 @@ def configuration():
                 session["nb_groupes"] = nb_int
                 session["valide"] = True
                 session["liste_ind_groupes"] = list(range(1, nb_int + 1))
-                liste_crit_brut = algo.recup_critere(csv_path)
                 tous_les_criteres = []
                 
                 for id_grp in range(1, nb_int + 1):
                     for nom_crit in liste_crit_brut:
                         valeurs_possibles = list(algo.recup_ensemble_val_critere(nom_crit, csv_path))
                         tous_les_criteres.append({'grp': id_grp, 'nom': nom_crit, 'valeurs': valeurs_possibles})
-                session["criteres_groupes"] = tous_les_criteres           #critere avec modification
+                session["criteres_groupes"] = tous_les_criteres
 
 
                 
