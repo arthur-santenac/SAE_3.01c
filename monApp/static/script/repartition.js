@@ -142,7 +142,6 @@ document.addEventListener('DOMContentLoaded', function() {
         btnRelancer.addEventListener("click", () => {
             document.getElementById('loader-overlay').style.display = 'flex';
 
-
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             checkboxes.forEach(input => {
                 if (input.checked) {
@@ -150,6 +149,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     input.removeAttribute('checked');
                 }
+            });
+
+            const inputs = document.querySelectorAll('input[type="range"], input[type="number"]');
+            inputs.forEach(input => {
+                input.setAttribute('value', input.value);
             });
 
             fetch("/repartition/", {
