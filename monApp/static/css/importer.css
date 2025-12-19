@@ -39,7 +39,8 @@ form.dropzone.dz-drag-hover {
   display: none;
 }
 
-.dz-success-mark, .dz-error-mark {
+.dz-success-mark,
+.dz-error-mark {
   display: none;
 }
 
@@ -99,12 +100,12 @@ form.dropzone.dz-drag-hover {
   background-color: #0d6efd;
   color: white;
   border: none;
-  
+
   display: inline-block;
   padding: 12px 40px;
   font-size: 1.25rem;
   border-radius: 8px;
-  
+
   text-decoration: none;
   text-align: center;
   cursor: pointer;
