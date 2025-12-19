@@ -333,16 +333,6 @@ def score_totale(liste_eleve, groupes, dico_importance):
         cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
     return int((cout_totale - cout_grp) / cout_totale * 100)
 
-def recup_ensemble_val_critere(critere: str, nom_fichier: str):
-    valeurs = set()
-    with open(nom_fichier, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for ligne in reader:
-            valeurs.add(ligne[critere])
-    valeurs = list(valeurs)
-    valeurs = sorted(valeurs)
-    return valeurs
-
 def test_creation_liste_critere():
     liste = []
 
