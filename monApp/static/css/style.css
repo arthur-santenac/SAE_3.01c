@@ -417,6 +417,10 @@ details[open] summary {
   flex-wrap: nowrap;
 }
 
+#eleves_restants {
+  position: sticky;
+  top: 5em;
+}
 
 
 
