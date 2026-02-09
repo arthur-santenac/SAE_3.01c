@@ -185,7 +185,6 @@ def groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe
     Returns:
         list: Une liste d'index.
     """
-
     nb_elv_grp = nb_max_eleve_par_groupe(liste_eleve, nb_groupes)
     res = []
     for i in range(len(liste_groupes) - 1):
