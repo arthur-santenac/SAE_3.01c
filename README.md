@@ -10,8 +10,6 @@ Actuellement, l'application permet à l'utilisateur d'importer un fichier dans l
 
 # commande permettant de lancer l'application (linux/mac)
 
-pip freeze>requirements.txt
-source venv/bin/activate
 pip install -r requirements.txt
 flask run
 
@@ -20,3 +18,9 @@ flask run
 Appuyez sur Ctrl+Shift+P
 Tapez "Python: Select Interpreter"
 Choisissez l'interpréteur avec venv dans le chemin
+
+
+# bug :
+
+critères : empecher si aucun cocher
+export : première ligne buguer

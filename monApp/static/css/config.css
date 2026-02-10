@@ -134,13 +134,29 @@ body {
 }
 
 .critere-sub-box {
-  background: white;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-left: 5px solid #005a9c;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  display: flex;
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 5px solid #005a9c;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    display: flex;
+}
+
+.critere-title{
+    flex-grow: 0;
+    flex-basis: 25%;
+}
+
+.checkbox-container{
+    flex-grow: 0;
+    flex-basis: 50%;
+}
+
+
+
+.critere-sub-box:last-child {
+    margin-bottom: 0;
 }
 
 .critere-title {
@@ -148,27 +164,10 @@ body {
   flex-basis: 25%;
 }
 
-.checkbox-wrapper {
-  flex-grow: 0;
-  flex-basis: 50%;
-}
-
-.critere-sub-box:last-child {
-  margin-bottom: 0;
-}
-
-.critere-title {
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 0.8rem;
-  padding-bottom: 0.3rem;
-  display: inline-block;
-}
-
-.checkbox-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+.checkbox-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
 .checkbox-badge-item input[type="checkbox"] {
