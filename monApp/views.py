@@ -2,9 +2,10 @@ from flask import render_template, request, redirect, url_for, session, send_fil
 from monApp.app import app
 from monApp.static.util import algo
 import os
-from bs4 import BeautifulSoup
 import csv
+import json
 import traceback
+from flask import jsonify
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
 
@@ -146,45 +147,24 @@ def repartition():
         liste_critere = []
 
         if request.method == "POST":
-            html_content = request.data.decode("utf-8")
-            soup = BeautifulSoup(html_content, "html.parser")
-            nouveau_dico = dico_importance.copy()
-            for critere_nom in nouveau_dico.keys():
-                input_tag = soup.find("input", {
-                    "name": critere_nom,
-                    "type": "number"
-                })
-                if input_tag and input_tag.get("value"):
-                    try:
-                        nouveau_dico[critere_nom] = int(input_tag.get("value"))
-                    except ValueError:
-                        pass
 
-            session["dico_importance"] = nouveau_dico
-            dico_importance = nouveau_dico
+            data = request.get_json()
 
-            modales = soup.find_all(class_="popup-card")
-            for modale in modales:
-                h3_tag = modale.find("h3")
-                if not h3_tag: continue
-                titre_groupe = h3_tag.get_text()
-                num_groupe = int("".join(filter(str.isdigit, titre_groupe)))
-                criteres_temp = {}
-                all_inputs = modale.find_all("input", {"type": "checkbox"})
-                for chk in all_inputs:
-                    if chk.has_attr("checked"):
-                        nom_crit = chk.get("name")
-                        valeur = chk.get("value")
-                        if nom_crit:
-                            if nom_crit not in criteres_temp:
-                                criteres_temp[nom_crit] = []
-                            criteres_temp[nom_crit].append(valeur)
-                for nom, valeurs in criteres_temp.items():
-                    nouveau_critere = algo.critere.Critere(
-                        num_groupe, valeurs, nom)
-                    liste_critere.append(nouveau_critere)
+            if data:
 
+                if "dico_importance" in data:
+                    session["dico_importance"] = data["dico_importance"]
+                    dico_importance = data["dico_importance"]
+
+                if "criteres_groupes" in data:
+                    liste_critere = []
+                    for critere_data in data["criteres_groupes"]:
+                        nouveau_critere = algo.critere.Critere(
+                            critere_data["groupe"], critere_data["valeurs"],
+                            critere_data["nom_critere"])
+                        liste_critere.append(nouveau_critere)
         else:
+
             liste_critere = []
             for critere in session["criteres_groupes"]:
                 liste_critere.append(
@@ -247,68 +227,97 @@ def repartition():
 
 @app.route("/exporter_groupes", methods=["POST"])
 def exporter_groupes():
-    html_content = request.data.decode("utf-8")
-    soup = BeautifulSoup(html_content, "html.parser")
-    groupes = {}
-    for idx, table in enumerate(soup.select("#eleves_classes .liste-eleves")):
-        groupe_nom = f"groupe_{idx + 1}"
-        eleves = []
-        for row in table.select("tr.eleve"):
-            cells = [td.get_text(strip=True) for td in row.find_all("td")]
-            if len(cells) >= 2:
-                eleve = {
-                    "num": cells[0],
-                    "prenom": cells[1],
-                    "nom": cells[2],
-                    "criteres": cells[3:-1],
-                }
-                eleves.append(eleve)
-        groupes[groupe_nom] = eleves
-    restants = []
-    for row in soup.select("#eleves_restants .liste-eleves tr.eleve"):
-        cells = [td.get_text(strip=True) for td in row.find_all("td")]
-        if len(cells) >= 2:
-            restants.append({
-                "num": cells[0],
-                "prenom": cells[1],
-                "nom": cells[2],
-                "criteres": cells[3:-1],
-            })
-    groupes["restants"] = restants
-    if groupes:
-        with open("monApp/static/uploads/groupes_finaux.csv",
-                  "w+",
-                  newline="",
-                  encoding="utf-8") as fichier_csv:
-            writer = csv.writer(fichier_csv)
-            liste_critere = []
-            for groupe in groupes.values():
-                if len(groupe) > 0:
-                    liste_critere = groupe[0].get("criteres", [])
-                    break
-            header = ["num", "nom", "prenom"] + liste_critere + ["groupe"]
-            writer.writerow(header)
-            groupe_id = 1
-            for groupe in groupes.values():
-                for eleve in groupe:
-                    ligne = []
-                    ligne.append(eleve.get("num", ""))
-                    ligne.append(eleve.get("nom", ""))
-                    ligne.append(eleve.get("prenom", ""))
-                    criteres_eleve = eleve.get("criteres",
-                                               eleve.get("critere", []))
-                    for val in criteres_eleve:
-                        ligne.append(val)
-                    ligne.append(groupe_id)
-                    writer.writerow(ligne)
-                groupe_id += 1
-        csv_path = os.path.join(app.root_path, "static", "uploads",
-                                "groupes_finaux.csv")
-        if not os.path.exists(csv_path):
-            return "Fichier non trouvé", 404
-        return send_file(
-            csv_path,
-            mimetype="text/csv",
-            as_attachment=True,
-            download_name="liste_groupes.csv",
-        )
+    data = request.get_json()
+
+    if not data or "groupes" not in data:
+        return "Données manquantes", 400
+
+    groupes_data = data["groupes"]
+
+    liste_critere = data.get("liste_critere", [])
+
+    csv_path = os.path.join(UPLOAD_FOLDER, "groupes_finaux.csv")
+
+    with open(csv_path, "w", newline="", encoding="utf-8") as fichier_csv:
+        writer = csv.writer(fichier_csv)
+
+        header = ["num", "nom", "prenom"] + liste_critere + ["groupe"]
+        writer.writerow(header)
+
+
+        for groupe_id, eleves in enumerate(groupes_data, start=1):
+            for eleve in eleves:
+                ligne = [
+                    eleve.get("num", ""),
+                    eleve.get("nom", ""),
+                    eleve.get("prenom", "")
+                ]
+
+                for critere in liste_critere:
+                    ligne.append(eleve.get("criteres", {}).get(critere, ""))
+
+                ligne.append(groupe_id)
+                writer.writerow(ligne)
+
+    return send_file(csv_path,
+                     mimetype="text/csv",
+                     as_attachment=True,
+                     download_name="liste_groupes.csv")
+
+
+@app.route("/api/calculer_stats", methods=["POST"])
+def api_calculer_stats():
+
+    try:
+        data = request.get_json()
+
+
+        groupes_data = data.get("groupes", [])
+        dico_importance = data.get("dico_importance", {})
+
+
+        class MockEleve:
+
+            def __init__(self, criteres):
+                self.critere = criteres
+
+        liste_eleve_complete = []
+        groupes_reconstruits = []
+
+        for grp_idx, liste_eleves_json in enumerate(groupes_data):
+            groupe_courant = []
+            for el_json in liste_eleves_json:
+                nouvel_eleve = MockEleve(el_json.get('criteres', {}))
+                groupe_courant.append(nouvel_eleve)
+                liste_eleve_complete.append(nouvel_eleve)
+
+            groupes_reconstruits.append(groupe_courant)
+
+
+        nb_total = len(liste_eleve_complete)
+        nb_restants = len(
+            groupes_reconstruits[-1]) if groupes_reconstruits else 0
+        nb_places = nb_total - nb_restants
+
+        score = algo.score_totale(liste_eleve_complete, groupes_reconstruits,
+                                  dico_importance)
+
+        ratio_place = 0
+        if nb_total > 0:
+            ratio_place = (nb_places / nb_total) * 100
+
+        is_complete = (nb_restants == 0)
+
+        return jsonify({
+            "success": True,
+            "score": score,
+            "place_text": f"{nb_places}/{nb_total}",
+            "prc_place": ratio_place,
+            "is_complete": is_complete
+        })
+
+    except Exception as e:
+        print(f"Erreur API Stats: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
