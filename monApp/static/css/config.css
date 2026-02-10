@@ -148,7 +148,7 @@ body {
     flex-basis: 25%;
 }
 
-.checkbox-wrapper{
+.checkbox-container{
     flex-grow: 0;
     flex-basis: 50%;
 }
@@ -167,7 +167,7 @@ body {
     display: inline-block;
 }
 
-.checkbox-wrapper {
+.checkbox-container {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;

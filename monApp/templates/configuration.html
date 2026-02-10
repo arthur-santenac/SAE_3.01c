@@ -64,8 +64,6 @@
                 </section>
             </section>
 
-            <script src="../static/script/sliders.js"></script>
-
             <section class="section-config mt-4">
                 <div class="section-config-header">
                     <h3>Configuration détaillée par groupe</h3>
@@ -81,7 +79,7 @@
                                     {% if crit.grp == grp %}
                                     <div class="critere-sub-box">
                                         <h4 class="critere-title"><strong>{{ crit.nom }}</strong></h4>
-                                        <div class="checkbox-wrapper">
+                                        <div class="checkbox-container">
                                             {% set toutes_valeurs = session['liste_val_crit'][crit.nom] %}
                                             {% for val in toutes_valeurs %}
                                                 <div class="checkbox-badge-item">
@@ -116,7 +114,8 @@
 
     </div>
 </form> 
-
+<script src="../static/script/checkbox.js" defer></script>
 <script src="../static/script/repartition.js"></script>
+<script src="../static/script/sliders.js"></script>
 
 {% endblock main %}
