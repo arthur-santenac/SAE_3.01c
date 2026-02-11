@@ -4,6 +4,7 @@
   <div class="loading-text">Création des groupes en cours...</div>
 </div>
 <link rel="stylesheet" href="../static/css/style.css" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/commun.css') }}">
 
 
 <div class="top_row">
@@ -210,26 +211,25 @@
       </details>
     </article>
     <div class="submit-container" style="text-align: center; margin: 20px 0; display: flex; justify-content: center; gap: 20px;">
-        <a href="{{ url_for('exporter_config') }}" 
-           class="btn btn-primary btn-lg" 
-           style="background-color: white; color: black; border: 2px solid black; display: flex; align-items: center;">
-            Exporter la configuration
-        </a>
 
-        <button type="button" 
-                id="btn-relancer"
-                class="btn btn-primary btn-lg" 
-                style="background-color: gray; border: 2px solid black;">
-            Relancer la répartition
-        </button>
+
+    <button type="button" 
+            class="btn-valider"
+            onclick="window.location.href='{{ url_for('exporter_config')}}'">
+        Exporter la configuration
+    </button>
+
+    <button type="button" 
+            id="btn-relancer"
+            class="btn-valider">
+        Relancer la répartition
+    </button>
+
+    <button type="button" id="exporter" class="btn-valider">Exporter</button>
     </div>
   </section>
   
 </main>
-
-<footer class="header_score">
-  <button id="exporter" aria-label="Rechercher">Exporter</button>
-</footer>
 <script src="../static/script/repartition.js"></script>
 <script src="../static/script/checkbox.js" defer></script>
 <script src="../static/script/sliders.js"></script>

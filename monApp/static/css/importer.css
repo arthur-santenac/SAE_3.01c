@@ -96,23 +96,3 @@ form.dropzone.dz-drag-hover {
   padding-top: 0.5rem;
 }
 
-.btn-valider {
-  background-color: #0d6efd;
-  color: white;
-  border: none;
-
-  display: inline-block;
-  padding: 12px 40px;
-  font-size: 1.25rem;
-  border-radius: 8px;
-
-  text-decoration: none;
-  text-align: center;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.btn-valider:hover {
-  background-color: #004494;
-  color: white;
-}

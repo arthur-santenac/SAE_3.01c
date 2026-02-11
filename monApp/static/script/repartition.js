@@ -141,11 +141,22 @@ class Interface {
 
     action() {
         document.addEventListener("click", (e) => {
+            if (e.target.closest("#btn-relancer")) {
+                this.relancerRepartition();
+                return;
+            }
+
+            if (e.target.closest("#exporter")) {
+                this.exporter();
+                return;
+            }
+
             const btnPopup = e.target.closest(".btn-popup");
             if (btnPopup) {
                 this.popup(btnPopup.dataset.target, true);
                 return;
             }
+            
             const btnValider = e.target.closest(".btn-valider");
             if (btnValider) {
                 this.popup(btnValider.dataset.target, false);
@@ -154,16 +165,6 @@ class Interface {
 
             if (e.target.classList.contains("supprimer")) {
                 this.suprimer(e);
-                return;
-            }
-
-            if (e.target.closest("#btn-relancer")) {
-                this.relancerRepartition();
-                return;
-            }
-
-            if (e.target.closest("#exporter")) {
-                this.exporter();
                 return;
             }
         });
@@ -356,7 +357,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// Gestion de l'animation
 function submitWithLoader() {
 
     const loader = document.getElementById('loader-overlay');
