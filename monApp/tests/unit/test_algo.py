@@ -122,3 +122,10 @@ def test_score_totale():
     score2 = algo.score_totale([e1, e2], groupes2, dico_imp)
     assert score == 50
     assert score2 == 0
+    
+def test_recup_ensemble_val_critere_simple():
+    nom_fichier = 'monApp/static/exemple/exemple2.csv'
+    resultat = algo.recup_ensemble_val_critere("genre", nom_fichier)
+    assert isinstance(resultat, list)
+    assert "M" in resultat
+    assert "F" in resultat
