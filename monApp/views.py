@@ -5,6 +5,7 @@ import os
 from bs4 import BeautifulSoup
 import csv
 import traceback
+import json
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
 
@@ -27,11 +28,17 @@ def importerCSV():
     if file and file.filename.endswith(".csv"):
         save_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
         file.save(save_path)
-        liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
-        session["criteres_groupes"] = [] 
+
+        json_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
+        if os.path.exists(json_path):
+            os.remove(json_path)
+
+        session.pop("dico_importance", None)
+        session.pop("criteres_groupes", None)
+        session.pop("nb_groupes", None)
         session["valide"] = False
-        session["dico_importance"] = algo.init_dico_importance(liste_eleve)
-        return render_template("configuration.html",title ="COHORT App")
+        
+        return redirect(url_for("configuration"))
     return "Format invalide", 400
 
 @app.route("/importerJSON/", methods=["POST"])
@@ -42,38 +49,62 @@ def importerJSON():
     if file and file.filename.endswith(".json"):
         save_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
         file.save(save_path)
-        return render_template("configuration.html",title ="COHORT App")
+
+        session.pop("dico_importance", None)
+        session.pop("criteres_groupes", None)
+        session.pop("nb_groupes", None)
+        
+        return redirect(url_for("configuration"))
     return "Format invalide", 400
 
 @app.route("/configuration/", methods=["GET", "POST"])
 def configuration():
     csv_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
-    liste_crit_brut = algo.recup_critere(csv_path)
-    if "criteres_groupes" not in session:
-        session["criteres_groupes"] = []
-    if "valide" not in session:
-        session["valide"] = False
-
-    if request.method == "GET":
-        session["valide"] = False
-        session["nb_groupes"] = 1
-        session["criteres_groupes"] = []
-
+    json_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
+    liste_crit_brut = algo.recup_critere(csv_path) if os.path.exists(csv_path) else []
     
+    dico_importance = None
+    criteres_groupes = None
+
+    if session.get("dico_importance") and session.get("criteres_groupes"):
+        dico_importance = session.get("dico_importance")
+        criteres_groupes = session.get("criteres_groupes")
+        nb_groupes = session.get("nb_groupes", 1)
+        
+    elif request.method == "GET" and os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config_json = json.load(f)
+            dico_importance = config_json.get("dico_importance")
+            criteres_groupes = config_json.get("liste_critere") 
+            nb_groupes = config_json.get("nb_groupes", 1)
+            session["valide"] = True
+        except Exception as e:
+            print(f"Erreur lecture JSON: {e}")
+
+    if dico_importance is None and os.path.exists(csv_path):
+        liste_eleve_temp = algo.lire_fichier(csv_path)
+        dico_importance = algo.init_dico_importance(liste_eleve_temp)
+        nb_groupes = 1
+        criteres_groupes = []
+        for nom_crit in liste_crit_brut:
+            valeurs_possibles = list(algo.recup_ensemble_val_critere(nom_crit, csv_path))
+            criteres_groupes.append({'grp': 1, 'nom': nom_crit, 'valeurs': valeurs_possibles})
+        session["valide"] = False
+    session["dico_importance"] = dico_importance
+    session["criteres_groupes"] = criteres_groupes
+    session["nb_groupes"] = nb_groupes
+    session["liste_ind_groupes"] = list(range(1, nb_groupes + 1))
     if request.method == "POST":
         action = request.form.get("btn")
-
-
-        dico_importance = session.get("dico_importance", {})
-        for crit_nom in dico_importance:
-            crit_propre = crit_nom.lower().replace(" ", "_")
-            nom_input = f"importance_{crit_propre}"
-            valeur = request.form.get(nom_input)
-            if valeur:
-                dico_importance[crit_nom] = int(valeur)
-        session["dico_importance"] = dico_importance
-
-
+        if dico_importance:
+            for crit_nom in dico_importance:
+                crit_propre = crit_nom.lower().replace(" ", "_")
+                nom_input = f"importance_{crit_propre}"
+                valeur = request.form.get(nom_input)
+                if valeur:
+                    dico_importance[crit_nom] = int(valeur)
+            session["dico_importance"] = dico_importance
         if action == "btn-valide":
             nb_groupes_str = request.form.get("nb-grp")
             if nb_groupes_str:
@@ -82,47 +113,49 @@ def configuration():
                 session["valide"] = True
                 session["liste_ind_groupes"] = list(range(1, nb_int + 1))
                 tous_les_criteres = []
-                
                 for id_grp in range(1, nb_int + 1):
                     for nom_crit in liste_crit_brut:
                         valeurs_possibles = list(algo.recup_ensemble_val_critere(nom_crit, csv_path))
                         tous_les_criteres.append({'grp': id_grp, 'nom': nom_crit, 'valeurs': valeurs_possibles})
                 session["criteres_groupes"] = tous_les_criteres
-
-
-                
         elif action == "btn-repartition":
-            liste_crit_brut = algo.recup_critere(csv_path)
-            nb_groupes = session.get("nb_groupes", 1)
             nouveaux_criteres_groupes = []
-            for id_grp in range(1, nb_groupes + 1):
+            nb_actuel = session.get("nb_groupes", 1)
+            for id_grp in range(1, nb_actuel + 1):
                 for nom_crit in liste_crit_brut:
                     nom_input = f"chk_{id_grp}_{nom_crit}"
                     valeurs_cochees = request.form.getlist(nom_input)
                     nouveaux_criteres_groupes.append({'grp': id_grp, 'nom': nom_crit, 'valeurs': valeurs_cochees})
-
             session["criteres_groupes"] = nouveaux_criteres_groupes
             session.modified = True
             return redirect(url_for("repartition"))
-    liste_crit_brut = algo.recup_critere(csv_path) if os.path.exists(csv_path) else []
-    nouveaux_criteres = []
-    for crit in session.get("criteres_groupes", []):
-        if crit['nom'] in liste_crit_brut:
-            nouveaux_criteres.append(crit)
-    session["criteres_groupes"] = nouveaux_criteres
+    criteres_propres_session = []
+    if session.get("criteres_groupes"):
+        for crit in session["criteres_groupes"]:
+            if crit['nom'] in liste_crit_brut:
+                criteres_propres_session.append(crit)
+    session["criteres_groupes"] = criteres_propres_session
     criteres_pour_template = []
+    map_importance = {}
     for crit_brut in liste_crit_brut:
         format_propre = crit_brut.lower().replace(" ", "_")
         criteres_pour_template.append(format_propre)
+        if dico_importance and crit_brut in dico_importance:
+            map_importance[format_propre] = dico_importance[crit_brut]
     if os.path.exists(csv_path):
         dico_valeurs = {}
         for crit in liste_crit_brut:
-            valeurs = algo.recup_ensemble_val_critere(crit, csv_path)
-            dico_valeurs[crit] = valeurs
+            dico_valeurs[crit] = algo.recup_ensemble_val_critere(crit, csv_path)
         session["liste_val_crit"] = dico_valeurs
-    return render_template("configuration.html", title="COHORT App", criteres=criteres_pour_template, valide=session.get("valide"), liste_grp=session.get("liste_ind_groupes", []),
-        criteres_choisis=session.get("criteres_groupes", []), nb_grp=session.get("nb_groupes", 1))
-
+    return render_template("configuration.html", 
+        title="COHORT App", 
+        criteres=criteres_pour_template, 
+        valide=session.get("valide"), 
+        liste_grp=session.get("liste_ind_groupes", []),
+        criteres_choisis=session.get("criteres_groupes", []), 
+        nb_grp=session.get("nb_groupes", 1),
+        map_importance=map_importance
+    )
 
 @app.route("/repartition/", methods=["POST", "GET"])
 def repartition():
@@ -144,6 +177,7 @@ def repartition():
 
             session["dico_importance"] = nouveau_dico
             dico_importance = nouveau_dico
+            criteres_pour_session = []
 
             modales = soup.find_all(class_="popup-card")
             for modale in modales:
@@ -164,6 +198,13 @@ def repartition():
                 for nom, valeurs in criteres_temp.items():
                     nouveau_critere = algo.critere.Critere(num_groupe, valeurs, nom)
                     liste_critere.append(nouveau_critere)
+                    criteres_pour_session.append({
+                        'grp': num_groupe, 
+                        'nom': nom, 
+                        'valeurs': valeurs
+                    })
+            session["criteres_groupes"] = criteres_pour_session
+            session.modified = True
 
         else:
             liste_critere=[]
@@ -185,7 +226,6 @@ def repartition():
             liste_valeur_critere = algo.recup_ensemble_val_critere(critere, "monApp/static/uploads/groupes.csv")
             liste_criteres_valeur.append(liste_valeur_critere)
 
-        print(dico_importance)
         groupes = algo.creer_groupe(liste_eleve, liste_critere, dico_importance, nombre_groupes)
         score = algo.score_totale(liste_eleve, groupes, dico_importance)
 
@@ -283,3 +323,30 @@ def exporter_groupes():
             as_attachment=True,
             download_name="liste_groupes.csv",
         )
+    
+@app.route("/exporter_config/", methods=["GET"])
+def exporter_config():
+    nb_groupes = session.get("nb_groupes")
+    dico_importance = session.get("dico_importance", {})
+    criteres_groupes = session.get("criteres_groupes", [])
+
+    config_data = {
+        "nb_groupes": nb_groupes,
+        "dico_importance": dico_importance,
+        "liste_critere": criteres_groupes
+    }
+
+    json_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
+
+    try:
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(config_data, f, indent=4, ensure_ascii=False)
+            
+        return send_file(
+            json_path,
+            mimetype="application/json",
+            as_attachment=True,
+            download_name="configuration.json",
+        )
+    except Exception as e:
+        return "Erreur lors de la création du fichier de configuration", 500

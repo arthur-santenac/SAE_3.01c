@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
-    // Gestion de l'animation
+// Gestion de l'animation
 function submitWithLoader() {
 
     const loader = document.getElementById('loader-overlay');

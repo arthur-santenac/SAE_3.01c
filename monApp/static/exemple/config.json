@@ -1,19 +1,65 @@
 {
+  "nb_groupes" : 3,
   "liste_critere": [
     {
-      "groupe": 2,
-      "appartient": [5, 6],
-      "nom": "niveau Français"
+      "grp": 1,
+      "nom": "genre",
+      "valeurs": ["F"]
     },
     {
-      "groupe": 2,
-      "appartient": [4, 5, 6],
-      "nom": "niveau Maths"
+      "grp": 1,
+      "nom": "niveau Français",
+      "valeurs": ["3", "4", "5", "6", "7"]
     },
     {
-      "groupe": 3,
-      "appartient": [4, 5, 6],
-      "nom": "niveau Maths"
+      "grp": 1,
+      "nom": "niveau Maths",
+      "valeurs": ["1", "2", "3", "4", "5", "6"]
+    },
+    {
+      "grp": 1,
+      "nom": "Pénibilité",
+      "valeurs": ["A", "B", "C"]
+    },
+    {
+      "grp": 2,
+      "nom": "genre",
+      "valeurs": ["F", "M"]
+    },
+    {
+      "grp": 2,
+      "nom": "niveau Français",
+      "valeurs": ["1", "2", "3", "4", "5", "6", "7"]
+    },
+    {
+      "grp": 2,
+      "nom": "niveau Maths",
+      "valeurs": ["1", "2", "3", "4"]
+    },
+    {
+      "grp": 2,
+      "nom": "Pénibilité",
+      "valeurs": ["A", "B", "C"]
+    },
+    {
+      "grp": 3,
+      "nom": "genre",
+      "valeurs": ["F", "M"]
+    },
+    {
+      "grp": 3,
+      "nom": "niveau Français",
+      "valeurs": ["1", "2", "3", "4", "5", "6", "7"]
+    },
+    {
+      "grp": 3,
+      "nom": "niveau Maths",
+      "valeurs": ["1", "2", "3", "4", "5", "6"]
+    },
+    {
+      "grp": 3,
+      "nom": "Pénibilité",
+      "valeurs": ["A", "B"]
     }
   ],
   "dico_importance": {
