@@ -209,13 +209,19 @@
         </table>
       </details>
     </article>
-    <div class="submit-container" style="text-align: center; margin: 20px 0;">
-<button type="button" 
-        id="btn-relancer"
-        class="btn btn-primary btn-lg" 
-        style="background-color: gray; border: 2px solid black;">
-    Relancer la répartition
-</button>
+    <div class="submit-container" style="text-align: center; margin: 20px 0; display: flex; justify-content: center; gap: 20px;">
+        <a href="{{ url_for('exporter_config') }}" 
+           class="btn btn-primary btn-lg" 
+           style="background-color: white; color: black; border: 2px solid black; display: flex; align-items: center;">
+            Exporter la configuration
+        </a>
+
+        <button type="button" 
+                id="btn-relancer"
+                class="btn btn-primary btn-lg" 
+                style="background-color: gray; border: 2px solid black;">
+            Relancer la répartition
+        </button>
     </div>
   </section>
   
