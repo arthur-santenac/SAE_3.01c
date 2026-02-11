@@ -18,9 +18,3 @@ flask run
 Appuyez sur Ctrl+Shift+P
 Tapez "Python: Select Interpreter"
 Choisissez l'interpréteur avec venv dans le chemin
-
-
-# bug :
-
-critères : empecher si aucun cocher
-export : première ligne buguer
