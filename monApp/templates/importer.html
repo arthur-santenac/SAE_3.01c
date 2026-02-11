@@ -24,7 +24,7 @@
     <section>
         <h2 class="text-center mb-4">Importer la liste d'élève (obligatoire)</h2>
         
-        <form action="{{ url_for('importerCSV') }}" class="dropzone" id="myDropzone" method="post" enctype="multipart/form-data">
+        <form action="{{ url_for('importe_csv') }}" class="dropzone" id="myDropzone" method="post" enctype="multipart/form-data">
              <div class="dz-message" data-dz-message>
                 <span>Déposez votre fichier CSV ici ou cliquez pour choisir</span>
             </div>
@@ -41,7 +41,7 @@
     <section>
         <h2 class="text-center mb-4">Importer votre configuration (facultatif)</h2>
         
-        <form action="{{ url_for('importerJSON') }}" class="dropzone" id="myDropzoneJson" method="post" enctype="multipart/form-data">
+        <form action="{{ url_for('importer_json') }}" class="dropzone" id="myDropzoneJson" method="post" enctype="multipart/form-data">
              <div class="dz-message" data-dz-message>
                 <span>Déposez votre fichier JSON ici ou cliquez pour choisir</span>
             </div>

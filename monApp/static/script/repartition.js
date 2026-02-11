@@ -1,187 +1,360 @@
-document.addEventListener('DOMContentLoaded', function() {
+class Page {
+    constructor() {
+        console.log("Page: Initialisée");
+    }
 
-    // Gestion de l'affichage du nombre d'élèves
-    const tables = document.querySelectorAll(".liste-eleves");
-    const rows = document.querySelectorAll(".liste-eleves tr.eleve");
+    async getStats(informations) {
+        const réponse = await fetch("/api/calculer_stats", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(informations)
+        });
+        return await réponse.json();
+    }
 
-    function updateCounts() {
-        document.querySelectorAll("article").forEach(article => {
-            const tbody = article.querySelector(".liste-eleves tbody");
-            const countSpan = article.querySelector(".count");
-            if (tbody && countSpan) {
-                const nb = tbody.querySelectorAll("tr.eleve").length;
-                countSpan.textContent = nb + (nb > 1 ? " élèves" : " élève");
+    async exporterGroupes(informations) {
+        const réponse = await fetch("/exporter_groupes", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(informations)
+        });
+        return await réponse.blob();
+    }
+
+    async relancerRepartition(informations) {
+        const réponse = await fetch("/repartition/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(informations)
+        });
+        return await réponse.text();
+    }
+}
+
+
+class DragAndDrop {
+    constructor() {
+        this.élémentEnCoursDeDéplacement = null;
+        this.init();
+
+        document.addEventListener('dom-refreshed', () => {
+            this.init();
+        });
+    }
+
+    init() {
+        this.ajouterDragEvent();
+        this.ajouterDragZone();
+    }
+
+    ajouterDragEvent() {
+        const lignes = document.querySelectorAll(".liste-eleves tr.eleve");
+        lignes.forEach(ligne => {
+            ligne.addEventListener("dragstart", (e) => this.dragStart(e, ligne));
+            ligne.addEventListener("dragend", () => this.dragEnd(ligne));
+        });
+    }
+
+    ajouterDragZone() {
+        const zonesDeDépôt = document.querySelectorAll(".liste-eleves");
+        zonesDeDépôt.forEach(corpsTableau => {
+            const tableau = corpsTableau.closest("table");
+            corpsTableau.addEventListener("dragover", (e) => this.dragOver(e, tableau));
+            corpsTableau.addEventListener("dragleave", (e) => this.dragLeave(e, corpsTableau, tableau));
+            corpsTableau.addEventListener("drop", (e) => this.handleDrop(e, corpsTableau, tableau));
+        });
+    }
+
+    dragStart(e, ligne) {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/html", ligne.innerHTML);
+        this.élémentEnCoursDeDéplacement = ligne;
+        ligne.classList.add("dragging");
+    }
+
+    dragEnd(ligne) {
+        ligne.classList.remove("dragging");
+        this.élémentEnCoursDeDéplacement = null;
+    }
+
+    dragOver(e, tableau) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (tableau) tableau.classList.add("over");
+    }
+
+    dragLeave(e, corpsTableau, tableau) {
+        if (!corpsTableau.contains(e.relatedTarget) && tableau) {
+            tableau.classList.remove("over");
+        }
+    }
+
+    handleDrop(e, corpsTableau, tableau) {
+        e.preventDefault();
+        if (tableau) tableau.classList.remove("over");
+
+        if (!this.élémentEnCoursDeDéplacement) return;
+
+        corpsTableau.querySelector("tbody").appendChild(this.élémentEnCoursDeDéplacement);
+        this.updateRowActions(this.élémentEnCoursDeDéplacement, corpsTableau);
+
+        document.dispatchEvent(new CustomEvent('update-counts'));
+    }
+
+    updateRowActions(ligne, corpsTableau) {
+        const estDansUnGroupe = corpsTableau.closest("#eleves_classes") !== null;
+        const estDansLaSectionRestants = corpsTableau.closest("#eleves_restants") !== null;
+        const celluleActions = ligne.querySelector("td.actions");
+
+        if (!celluleActions) return;
+
+        const btnSupprimer = celluleActions.querySelector(".supprimer");
+
+        if (estDansUnGroupe && !btnSupprimer) {
+            const nouveauBouton = document.createElement("button");
+            nouveauBouton.className = "supprimer";
+            nouveauBouton.setAttribute("aria-label", "Supprimer");
+            nouveauBouton.textContent = "×";
+            celluleActions.appendChild(nouveauBouton);
+        } else if (estDansLaSectionRestants && btnSupprimer) {
+            btnSupprimer.remove();
+        }
+    }
+}
+
+
+class Interface {
+    constructor(apiService) {
+        this.apiService = apiService;
+        this.init();
+    }
+
+    init() {
+        this.miseAJourCompteur();
+        this.action();
+
+        document.addEventListener('update-counts', () => {
+            this.miseAJourCompteur();
+            this.miseAJourSats();
+        });
+    }
+
+    action() {
+        document.addEventListener("click", (e) => {
+            const btnPopup = e.target.closest(".btn-popup");
+            if (btnPopup) {
+                this.popup(btnPopup.dataset.target, true);
+                return;
+            }
+            const btnValider = e.target.closest(".btn-valider");
+            if (btnValider) {
+                this.popup(btnValider.dataset.target, false);
+                return;
+            }
+
+            if (e.target.classList.contains("supprimer")) {
+                this.suprimer(e);
+                return;
+            }
+
+            if (e.target.closest("#btn-relancer")) {
+                this.relancerRepartition();
+                return;
+            }
+
+            if (e.target.closest("#exporter")) {
+                this.exporter();
+                return;
             }
         });
     }
 
-    // Gestion du Drag & Drop
-    rows.forEach(row => {
-        row.addEventListener("dragstart", e => {
-            e.dataTransfer.effectAllowed = "move";
-            e.dataTransfer.setData("text/html", row.innerHTML);
-            row.classList.add("dragging");
-        });
-        row.addEventListener("dragend", e => {
-            row.classList.remove("dragging");
-        });
-    });
-
-    tables.forEach(tbody => {
-        const table = tbody.closest("table");
-        tbody.addEventListener("dragover", e => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = "move";
-            if (table) table.classList.add("over");
-        });
-        tbody.addEventListener("dragleave", e => {
-            if (!tbody.contains(e.relatedTarget)) {
-                if (table) table.classList.remove("over");
+    miseAJourCompteur() {
+        document.querySelectorAll("article").forEach((article) => {
+            const corpsTableau = article.querySelector(".liste-eleves tbody");
+            const spanCompteur = article.querySelector(".count");
+            if (corpsTableau && spanCompteur) {
+                const nombreEleves = corpsTableau.querySelectorAll("tr.eleve").length;
+                spanCompteur.textContent = `${nombreEleves} ${nombreEleves > 1 ? "élèves" : "élève"}`;
             }
         });
-        tbody.addEventListener("drop", e => {
-            e.preventDefault();
-            if (table) table.classList.remove("over");
-            const dragged = document.querySelector(".dragging");
-            if (!dragged) return;
-            const isInClassesSection = tbody.closest('#eleves_classes') !== null;
-            const isInRestantsSection = tbody.closest('#eleves_restants') !== null;
-            table.querySelector("tbody").appendChild(dragged);
-            const actionsCell = dragged.querySelector('td.actions');
-            if (actionsCell) {
-                const btnSupprimer = actionsCell.querySelector('.supprimer');
-                if (isInClassesSection) {
-                    if (!btnSupprimer) {
-                        const newBtnSupprimer = document.createElement('button');
-                        newBtnSupprimer.className = 'supprimer';
-                        newBtnSupprimer.setAttribute('aria-label', 'Supprimer');
-                        newBtnSupprimer.textContent = '×';
-                        actionsCell.appendChild(newBtnSupprimer);
-                    }
-                } else if (isInRestantsSection) {
-                    if (btnSupprimer) {
-                        btnSupprimer.remove();
+    }
+
+    async miseAJourSats() {
+        const nomsCritères = this.collectCriteriaNames();
+        const donnéesGroupes = this.collectGroupsData(nomsCritères);
+
+        const dicoImportance = {};
+        document.querySelectorAll('.section-importance input[type="number"]').forEach((input) => {
+            const valeur = parseInt(input.value);
+            if (input.name && !isNaN(valeur)) dicoImportance[input.name] = valeur;
+        });
+
+        const stats = await this.apiService.getStats({
+            groupes: donnéesGroupes,
+            dico_importance: dicoImportance
+        });
+
+        if (stats && stats.success) {
+            const conteneurStats = document.querySelector(".stats-row");
+            if (!conteneurStats) return;
+
+            const indicateurs = conteneurStats.querySelectorAll(".stat-item");
+            if (indicateurs.length >= 1) {
+                const indicateurRespect = indicateurs[0];
+                const valeurRespect = indicateurRespect.querySelector(".stat-value");
+                const barreRespect = indicateurRespect.querySelector(".fill");
+                if (valeurRespect) valeurRespect.textContent = `${stats.score}%`;
+                if (barreRespect) barreRespect.style.width = `${stats.score}%`;
+            }
+
+            if (indicateurs.length >= 2) {
+                const indicateurPlace = indicateurs[1];
+                const valeurPlace = indicateurPlace.querySelector(".stat-value");
+                const barrePlace = indicateurPlace.querySelector(".fill");
+                if (valeurPlace) valeurPlace.textContent = stats.place_text;
+                if (barrePlace) {
+                    barrePlace.style.width = `${stats.prc_place}%`;
+                    if (stats.is_complete) {
+                        barrePlace.classList.replace("red", "blue");
+                    } else {
+                        barrePlace.classList.replace("blue", "red");
                     }
                 }
             }
-            updateCounts();
-        });
-    });
+        }
+    }
 
-    // Gestion des suppressions
-    const containerClasses = document.getElementById('eleves_classes');
-    if (containerClasses) {
-        containerClasses.addEventListener('click', function(e) {
-            if (e.target.classList.contains('supprimer')) {
-                const row = e.target.closest('tr');
-                if (!row) return;
-                const tbodyRestants = document.querySelector('#eleves_restants .liste-eleves tbody');
-                if (!tbodyRestants) return;
-                tbodyRestants.appendChild(row);
-                e.target.remove();
-                updateCounts();
+    suprimer(e) {
+        const ligne = e.target.closest("tr");
+        const corpsRestants = document.querySelector("#eleves_restants .liste-eleves tbody");
+        if (ligne && corpsRestants) {
+            corpsRestants.appendChild(ligne);
+            e.target.remove();
+            document.dispatchEvent(new CustomEvent('update-counts'));
+        }
+    }
+
+    collectCriteriaNames() {
+        const liste = [];
+        const cellulesEntête = document.querySelectorAll("#eleves_classes .liste-eleves thead th, #eleves_classes .liste-eleves thead td");
+        cellulesEntête.forEach((cellule) => {
+            const texte = cellule.textContent.trim();
+            if (texte && !["Num", "Prénom", "Nom", "Actions"].includes(texte)) {
+                liste.push(texte);
             }
         });
+        return liste;
     }
 
-
-    // Gestion des Pop-up
-    const boutonsOuvrir = document.querySelectorAll('.btn-popup');
-    boutonsOuvrir.forEach(bouton => {
-        bouton.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
-            const modale = document.getElementById(targetId);
-            if (modale) modale.style.display = "block";
-        });
-    });
-
-    const boutonsFermer = document.querySelectorAll('.btn-valider');
-    boutonsFermer.forEach(bouton => {
-        bouton.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
-            const modale = document.getElementById(targetId);
-            if (modale) modale.style.display = "none";
-        });
-    });
-    // gestion du bouton exporter
-    const btnExporter = document.getElementById("exporter");
-    if (btnExporter) {
-        btnExporter.addEventListener("click", () => {
-            fetch("/exporter_groupes", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "text/html"
-                    },
-                    body: document.documentElement.outerHTML,
-                })
-                .then(res => {
-                    if (res.ok) return res.blob();
-                    throw new Error("Erreur lors de la génération du fichier");
-                })
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = "groupes_finaux.csv";
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Une erreur est survenue lors du téléchargement.");
+    collectGroupsData(nomsCritères) {
+        const tousLesGroupes = [];
+        const traiterLignes = (lignes) => {
+            const eleves = [];
+            lignes.forEach(ligne => {
+                const cellules = ligne.querySelectorAll("td");
+                if (cellules.length < 3) return;
+                const eleve = {
+                    num: cellules[0].textContent.trim(),
+                    prenom: cellules[1].textContent.trim(),
+                    nom: cellules[2].textContent.trim(),
+                    criteres: {}
+                };
+                nomsCritères.forEach((critère, index) => {
+                    if (cellules[3 + index]) {
+                        eleve.criteres[critère] = cellules[3 + index].textContent.trim();
+                    }
                 });
+                eleves.push(eleve);
+            });
+            return eleves;
+        };
+
+        document.querySelectorAll("#eleves_classes article").forEach((article) => {
+            const lignes = article.querySelectorAll(".liste-eleves tr.eleve");
+            tousLesGroupes.push(traiterLignes(lignes));
         });
+
+        const lignesRestantes = document.querySelectorAll("#eleves_restants .liste-eleves tr.eleve");
+        tousLesGroupes.push(traiterLignes(lignesRestantes));
+
+        return tousLesGroupes;
     }
 
+    async relancerRepartition() {
+        const chargeur = document.getElementById("loader-overlay");
+        if (chargeur) chargeur.style.display = "flex";
 
-    const btnRelancer = document.getElementById("btn-relancer");
-    
-    if (btnRelancer) {
-        btnRelancer.addEventListener("click", () => {
-            document.getElementById('loader-overlay').style.display = 'flex';
+        const dicoImportance = {};
+        document.querySelectorAll('.section-importance input[type="number"]').forEach((input) => {
+            const valeur = parseInt(input.value);
+            if (input.name && !isNaN(valeur)) dicoImportance[input.name] = valeur;
+        });
 
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(input => {
-                if (input.checked) {
-                    input.setAttribute('checked', 'checked');
-                } else {
-                    input.removeAttribute('checked');
+        const criteresGroupes = [];
+        document.querySelectorAll('.overlay .popup-card').forEach((modale) => {
+            const titre = modale.querySelector('h3').textContent;
+            const match = titre.match(/\d+/);
+            const numGroupe = match ? parseInt(match[0]) : 0;
+
+            modale.querySelectorAll('fieldset').forEach((fieldset) => {
+                const nomCrit = fieldset.querySelector('legend').textContent;
+                const valeursCochées = Array.from(fieldset.querySelectorAll('input:checked')).map(cb => cb.value);
+                if (valeursCochées.length > 0) {
+                    criteresGroupes.push({
+                        groupe: numGroupe,
+                        nom_critere: nomCrit,
+                        valeurs: valeursCochées
+                    });
                 }
             });
-
-            const inputs = document.querySelectorAll('input[type="range"], input[type="number"]');
-            inputs.forEach(input => {
-                input.setAttribute('value', input.value);
-            });
-
-            fetch("/repartition/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "text/html"
-                    },
-                    body: document.documentElement.outerHTML,
-                })
-                .then(res => {
-                    if (res.ok) {
-                        return res.text();
-                    }
-                    throw new Error("Erreur lors du rechargement");
-                })
-                .then(html => {
-                    document.open();
-                    document.write(html);
-                    document.close();
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Une erreur est survenue lors du rechargement.");
-                });
         });
+
+        const nouveauHtml = await this.apiService.relancerRepartition({
+            dico_importance: dicoImportance,
+            criteres_groupes: criteresGroupes
+        });
+
+        const analyseur = new DOMParser();
+        const doc = analyseur.parseFromString(nouveauHtml, 'text/html');
+        document.body.innerHTML = doc.body.innerHTML;
+        document.dispatchEvent(new CustomEvent('dom-refreshed'));
+
+        const chargeurActuel = document.getElementById("loader-overlay");
+        if (chargeurActuel) chargeurActuel.style.display = "none";
     }
 
+    async exporter() {
+        const nomsCritères = this.collectCriteriaNames();
+        const donnéesGroupes = this.collectGroupsData(nomsCritères);
+
+        const blocDonnées = await this.apiService.exporterGroupes({
+            groupes: donnéesGroupes,
+            liste_critere: nomsCritères
+        });
+
+        const url = window.URL.createObjectURL(blocDonnées);
+        const lien = document.createElement("a");
+        lien.href = url;
+        lien.download = "groupes_finaux.csv";
+        document.body.appendChild(lien);
+        lien.click();
+        lien.remove();
+        window.URL.revokeObjectURL(url);
+    }
+
+    popup(id, estVisible) {
+        const modale = document.getElementById(id);
+        if (modale) modale.style.display = estVisible ? "block" : "none";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const apiService = new Page();
+    new DragAndDrop();
+    new Interface(apiService);
 });
+
 
 // Gestion de l'animation
 function submitWithLoader() {
