@@ -48,21 +48,20 @@
                     <h3>Répartition d'importance</h3>
                 </div>
                 
-               <section class="section-importance">
-                {% for crit_propre in criteres %}
-                    {% set nom = "importance_" + crit_propre %}
-                    {% set titre_crit = crit_propre.replace('_', ' ').capitalize() %}
-                    {% set valeur_defaut_calc = 100 // (criteres|length) %}
-                    {% set val_actuelle = map_importance.get(crit_propre, valeur_defaut_calc) %}
-                    <div class="{{ crit_propre }}">
-                        <h4><strong>{{ titre_crit }}</strong></h4>
-                        <input type="range" name="{{ nom }}" min="0" max="100" step="1" class="slider" value="{{ val_actuelle }}">
-                        <div>
-                            <input type="number" name="{{ nom }}" class="slider-value" min="0" max="100" step="1" value="{{ val_actuelle }}">
+                <section class="section-importance">
+                    {% for crit_propre in criteres %}
+                        {% set nom = "importance_" + crit_propre %}
+                        {% set titre_crit = crit_propre.replace('_', ' ').capitalize() %}
+                        {% set valeur_defaut = 100 // (criteres|length) %}
+                        <div class="{{ crit_propre }}">
+                            <h4><strong>{{ titre_crit }}</strong></h4>
+                            <input type="range" name="{{ nom }}" min="0" max="100" step="1" class="slider" value="{{ valeur_defaut }}">
+                            <div>
+                                <input type="number" name="{{ nom }}" class="slider-value" min="0" max="100" step="1" value="{{ valeur_defaut }}">
+                            </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </section>
+                    {% endfor %}
+                </section>
             </section>
 
             <script src="../static/script/sliders.js"></script>
