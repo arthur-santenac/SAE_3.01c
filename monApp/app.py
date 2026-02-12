@@ -1,22 +1,34 @@
 import os
-from flask import Flask, render_template, request
+import sys
+from flask import Flask
 from flask_dropzone import Dropzone
 from flask_bootstrap5 import Bootstrap
 
-app = Flask(__name__)
-# Config options - Make sure you created a 'config.py' file.
-app.config.from_object('config')
-# To get one variable, tape app.config['MY_VARIABLE']
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath(os.path.dirname(__file__)), relative_path)
 
-Bootstrap(app)
+app = Flask(__name__,
+            template_folder=resource_path('templates'),
+            static_folder=resource_path('static'))
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+if getattr(sys, 'frozen', False):
+    application_path = os.path.dirname(sys.executable)
+else:
+    application_path = os.path.abspath(os.path.dirname(__file__))
+
+upload_path = os.path.join(application_path, 'uploads_data')
+if not os.path.exists(upload_path):
+    os.makedirs(upload_path)
 
 app.config.update(
-    UPLOADED_PATH=os.path.join(os.path.dirname(__file__), "static", "uploads"),
+    SECRET_KEY='2lzUl{$*D6#`8uXqlU.',
+    UPLOADED_PATH=upload_path,
     DROPZONE_ALLOWED_FILE_CUSTOM=True,
     DROPZONE_ALLOWED_FILE_TYPE='.csv',
     DROPZONE_MAX_FILES=1,
 )
 
+Bootstrap(app)
 dropzone = Dropzone(app)

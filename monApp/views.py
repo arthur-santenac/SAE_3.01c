@@ -8,7 +8,8 @@ import traceback
 import json
 from flask import jsonify
 
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
+UPLOAD_FOLDER = app.config['UPLOADED_PATH']
+
 
 
 @app.route("/")
@@ -172,6 +173,7 @@ def configuration():
 @app.route("/repartition/", methods=["POST", "GET"])
 def repartition():
     try:
+        csv_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
         dico_importance = session.get("dico_importance", {})
         liste_critere = []
 
@@ -199,24 +201,20 @@ def repartition():
                 liste_critere.append(
                     algo.critere.Critere(critere["grp"], critere["valeurs"],
                                          critere["nom"]))
-            liste_eleve_temp = algo.lire_fichier(
-                "monApp/static/uploads/groupes.csv")
+            liste_eleve_temp = algo.lire_fichier(csv_path)
             if not dico_importance:
                 dico_importance = algo.init_dico_importance(liste_eleve_temp)
                 session["dico_importance"] = dico_importance
 
-        liste_eleve = algo.lire_fichier("monApp/static/uploads/groupes.csv")
+        liste_eleve = algo.lire_fichier(csv_path)
         nombre_groupes = session.get("nb_groupes", 0)
 
-        nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve,
-                                                       nombre_groupes)
-        liste_nom_critere = algo.recup_critere(
-            "monApp/static/uploads/groupes.csv")
+        nb_eleve_groupe = algo.nb_max_eleve_par_groupe(liste_eleve, nombre_groupes)
+        liste_nom_critere = algo.recup_critere(csv_path)
 
         liste_criteres_valeur = []
         for critere in liste_nom_critere:
-            liste_valeur_critere = algo.recup_ensemble_val_critere(
-                critere, "monApp/static/uploads/groupes.csv")
+            liste_valeur_critere = algo.recup_ensemble_val_critere(critere, csv_path)
             liste_criteres_valeur.append(liste_valeur_critere)
 
         groupes = algo.creer_groupe(liste_eleve, liste_critere, dico_importance, nombre_groupes)
