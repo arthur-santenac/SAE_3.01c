@@ -250,6 +250,7 @@ def repartition():
                                error="Une erreur est survenue")
 
 
+    
 @app.route("/exporter_groupes", methods=["POST"])
 def exporter_groupes():
     data = request.get_json()
@@ -257,13 +258,12 @@ def exporter_groupes():
         return "Aucune donnée reçue", 400
     noms_criteres = data.get('noms_criteres', [])
     liste_eleves = data.get('eleves', [])
+    csv_path = os.path.join(UPLOAD_FOLDER, "groupes_finaux.csv")
 
-    csv_path = os.path.join(app.root_path, "static", "uploads", "groupes_finaux.csv")
     with open(csv_path, "w", newline="", encoding="utf-8-sig") as fichier_csv:
         writer = csv.writer(fichier_csv, delimiter=",")
         header = ["Num", "Nom", "Prénom"] + noms_criteres + ["Groupe"]
         writer.writerow(header)
-
         for eleve in liste_eleves:
             ligne = []
             ligne.append(eleve.get("num"))
@@ -281,34 +281,7 @@ def exporter_groupes():
             
             writer.writerow(ligne)
 
-    return send_file(
-        csv_path,
-        mimetype="text/csv",
-        as_attachment=True,
-        download_name="liste_groupes.csv",
-    )
-
-
-    
-@app.route("/exporter_config/", methods=["GET"])
-def exporter_config():
-    nb_groupes = session.get("nb_groupes")
-    dico_importance = session.get("dico_importance", {})
-    criteres_groupes = session.get("criteres_groupes", [])
-
-    config_data = {
-        "nb_groupes": nb_groupes,
-        "dico_importance": dico_importance,
-        "liste_critere": criteres_groupes
-    }
-    json_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
-    try:
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(config_data, f, indent=4, ensure_ascii=False)
-            
-        return send_file(json_path,mimetype="application/json", as_attachment=True, download_name="configuration.json",)
-    except Exception as e:
-        return "Erreur lors de la création du fichier de configuration", 500
+    return send_file(csv_path,mimetype="text/csv",as_attachment=True,download_name="liste_groupes.csv",)
 
 @app.route("/api/calculer_stats", methods=["POST"])
 def api_calculer_stats():
