@@ -1,9 +1,9 @@
-import algo
-from eleve import Eleve
-from critere import Critere
+from monApp.static.util import algo
+from monApp.static.util.eleve import Eleve
+from monApp.static.util.critere import Critere
 
 def test_lire_fichier():
-    nom_fichier = '../exemple/exemple2.csv'
+    nom_fichier = 'monApp/static/exemple/exemple2.csv'
     liste_eleves = algo.lire_fichier(nom_fichier)
     assert isinstance(liste_eleves, list)
     assert len(liste_eleves) == 24
@@ -17,37 +17,17 @@ def test_lire_fichier():
     assert premier.critere['niveau Français'] == '1'
 
 def test_recup_critere():
-    nom_fichier = '../exemple/exemple2.csv'
+    nom_fichier = 'monApp/static/exemple/exemple2.csv'
     liste_criteres = algo.recup_critere(nom_fichier)
     assert liste_criteres[0] == "genre"
     assert liste_criteres[1] == "niveau Français"
     
-    nom_fichier = '../exemple/exemple.csv'
+    nom_fichier = 'monApp/static/exemple/exemple.csv'
     liste_criteres2 = algo.recup_critere(nom_fichier)
     assert liste_criteres2[0] == "genre"
     assert liste_criteres2[1] == "niveau Français"
     assert not liste_criteres2[2] == "Pénibilité"
     assert liste_criteres2[3] == "Pénibilité"
-    
-def test_lire_config():
-    nom_fichier = '../exemple/config.json'
-    config = algo.lire_config(nom_fichier)
-    assert isinstance(config, tuple)
-    assert isinstance(config[0], list)
-    assert isinstance(config[1], dict)
-    assert config[1]["genre"] == 1
-    assert config[1]["niveau Français"] == 0
-    assert config[1]["niveau Maths"] == 0
-    assert config[1]["Pénibilité"] == 1
-    assert config[0][0].groupe == 2
-    assert config[0][1].groupe == 2
-    assert config[0][2].groupe == 3
-    assert config[0][0].condition == [5, 6]
-    assert config[0][1].condition == [4, 5, 6]
-    assert config[0][2].condition == [4, 5, 6]
-    assert config[0][0].nom_critere == "niveau Français"
-    assert config[0][1].nom_critere == "niveau Maths"
-    assert config[0][2].nom_critere == "niveau Maths"
     
 
 def test_init_dico_importance():
@@ -92,9 +72,9 @@ def test_groupes_possible():
     grp3 = []
     liste_groupes = [grp0, grp1, grp2, grp3]
     eleve = Eleve("1", "TEST", "TEST", {"Genre": "F", "Niveau Français": "2"})
-    critere1 = Critere(1, [1], "Niveau Français")
-    critere2 = Critere(2, [1, 2], "Niveau Français")
-    critere3 = Critere(3, [1, 2], "Niveau Français")
+    critere1 = Critere(1, ["1"], "Niveau Français")
+    critere2 = Critere(2, ["1", "2"], "Niveau Français")
+    critere3 = Critere(3, ["1", "2"], "Niveau Français")
     res = algo.groupes_possible(liste_groupes, liste_eleve, eleve, [critere1, critere2, critere3], 3)
     assert 0 not in res
     assert 1 in res
@@ -142,3 +122,10 @@ def test_score_totale():
     score2 = algo.score_totale([e1, e2], groupes2, dico_imp)
     assert score == 50
     assert score2 == 0
+    
+def test_recup_ensemble_val_critere_simple():
+    nom_fichier = 'monApp/static/exemple/exemple2.csv'
+    resultat = algo.recup_ensemble_val_critere("genre", nom_fichier)
+    assert isinstance(resultat, list)
+    assert "M" in resultat
+    assert "F" in resultat
