@@ -61,14 +61,22 @@ def test_complet(client):
 
 def test_exporter_groupes_success(client):
     data = {
-        "liste_critere": ["Genre", "Niveau Maths"],
-        "groupes": [
-            [
-                {"num": "1", "nom": "Nom1", "prenom": "Prenom1", "criteres": {"Genre": "M", "Niveau Maths": "1"}}
-            ],
-            [
-                {"num": "2", "nom": "Nom2", "prenom": "Prenom2", "criteres": {"Genre": "F", "Niveau Maths": "2"}}
-            ]
+        "noms_criteres": ["Genre", "Niveau Maths"],
+        "eleves": [
+            {
+                "num": "1", 
+                "nom": "Nom1", 
+                "prenom": "Prenom1", 
+                "criteres": ["M", "1"],
+                "groupe": 1
+            },
+            {
+                "num": "2", 
+                "nom": "Nom2", 
+                "prenom": "Prenom2", 
+                "criteres": ["F", "2"], 
+                "groupe": 2
+            }
         ]
     }
     response = client.post("/exporter_groupes", json=data)
@@ -76,14 +84,14 @@ def test_exporter_groupes_success(client):
     assert response.headers["Content-Disposition"].startswith("attachment")
     assert response.mimetype == "text/csv"
     content = response.data.decode("utf-8")
-    assert "num,nom,prenom,Genre,Niveau Maths,groupe" in content
+    assert "Num,Nom,Prénom,Genre,Niveau Maths,Groupe" in content
     assert "1,Nom1,Prenom1,M,1,1" in content
     assert "2,Nom2,Prenom2,F,2,2" in content
 
 def test_exporter_groupes_sans_data(client):
     response = client.post("/exporter_groupes", json={})
     assert response.status_code == 400
-    assert b"manquantes" in response.data
+    assert b"Aucune" in response.data
 
 def test_calculer_stats(client):
     data = {
