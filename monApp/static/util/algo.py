@@ -278,13 +278,13 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
                     if val not in liste_compteurs[choix][critere]:
                         liste_compteurs[choix][critere][val] = 0
                     liste_compteurs[choix][critere][val] += 1
-            else: # pragma: no cover
+            else:
                 liste_groupes[-1].append(eleve)
         cout_final = cout_tot(dico_pourc_elv, liste_groupes[:-1], dico_importance)
         if liste_max is None:
             liste_max = copy.deepcopy(liste_groupes)
             cout_min_global = cout_final
-        else: # pragma: no cover
+        else:
             if len(liste_groupes[-1]) < len(liste_max[-1]):
                     liste_max = copy.deepcopy(liste_groupes)
                     cout_min_global = cout_final
