@@ -8,7 +8,7 @@ except:
     import eleve
 import random
 import copy
-import json
+import numpy as np
 
 def lire_fichier(nom_fichier):
     """ Lit un fichier csv et le transforme en liste
@@ -65,27 +65,6 @@ def recup_ensemble_val_critere(critere: str, nom_fichier: str):
     valeurs = list(valeurs)
     valeurs = sorted(valeurs)
     return valeurs
-
-
-def exporter_fichier():
-    ...
-
-def lire_config(nom_fichier):
-    """Lis les critères avec les valeurs associées d'un fichier json 
-
-    Args:
-        nom_fichier (str): chemin vers le fichier json
-
-    Returns:
-        tuple: Tuple contenant la liste des critères et le dictionnaire d'importance associé
-    """    
-    with open(nom_fichier) as fichier_json:
-        config = json.load(fichier_json)
-    liste_critere = []
-    for un_critere in config["liste_critere"]:
-        liste_critere.append(critere.Critere(un_critere["groupe"], un_critere["appartient"], un_critere["nom"]))
-    dico_importance = config["dico_importance"]
-    return liste_critere, dico_importance
 
 def init_dico_importance(liste_eleve):
     """Initialise le dictionnaire d'importance à partir d'une liste d'élèves
@@ -152,7 +131,7 @@ def cout_tot(groupe, liste_groupes, dico_importance):
     """
     cout_total = 0
     for un_groupe in liste_groupes:
-        pourcentage = dico_poucentage(un_groupe)
+        pourcentage = dico_pourcentage(un_groupe)
         cout_total += diff_cout_groupe(groupe, pourcentage, dico_importance)
     return cout_total
 
@@ -199,9 +178,7 @@ def groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe
             res.append(i)
     return res
 
-
-
-def dico_poucentage(liste_eleves):
+def dico_pourcentage(liste_eleves):
     """Permet d'avoir une liste de dictionnaires avec pour chaque valeur de chaque catégorie le pourcentage par rapport au total de la catégorie
 
     Args:
@@ -227,7 +204,7 @@ def dico_poucentage(liste_eleves):
             dico_res[critere] = dico_total
     return dico_res
 
-def max_aleatoire(liste_cout):
+def min_aleatoire(liste_cout):
     """ Renvoie l'indice de l'élément le plus grand de la liste,
         si il y en a plusieurs renvoie un indice aléatoire parmis ceux des élément les plus grands
 
@@ -237,10 +214,10 @@ def max_aleatoire(liste_cout):
     Returns:
         int: indice pour insérer un élève
     """
-    max_val = max(liste_cout)
+    min_val = min(liste_cout)
     liste_index = []
     for i in range(len(liste_cout)):
-        if liste_cout[i] == max_val:
+        if liste_cout[i] == min_val:
             liste_index.append(i)
     return random.choice(liste_index)
 
@@ -259,7 +236,7 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
     liste_max = None
     cout_min_global = float('inf')
     debut, actuel = time.time(), time.time()
-    dico_pourc_elv = dico_poucentage(liste_eleve)
+    dico_pourc_elv = dico_pourcentage(liste_eleve)
     cpt = 0
     while actuel - debut < 4:
         cpt += 1
@@ -275,8 +252,7 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
             if len(liste_groupes_possibles) > 0:
                 liste_cout = []
                 for ind_groupe in liste_groupes_possibles:
-                    nb_actuel = len(liste_groupes[ind_groupe])
-                    nb_futur = nb_actuel + 1
+                    taille_groupe_future = len(liste_groupes[ind_groupe]) + 1
                     cout_futur = 0
                     for critere, importance in dico_importance.items():
                         val_eleve = eleve.critere[critere]
@@ -286,11 +262,11 @@ def creer_groupe(liste_eleve, liste_critere, dico_importance, nb_groupe):
                             nb = dico_val.get(val, 0)
                             if val == val_eleve:
                                 nb += 1
-                            pct_futur = (nb / nb_futur) * 100
+                            pct_futur = (nb / taille_groupe_future) * 100
                             cout_crit += abs(pct_futur - pct_cible)
                         cout_futur += importance * cout_crit
-                    liste_cout.append(-cout_futur)
-                choix = liste_groupes_possibles[max_aleatoire(liste_cout)]
+                    liste_cout.append(cout_futur)
+                choix = liste_groupes_possibles[min_aleatoire(liste_cout)]
                 liste_groupes[choix].append(eleve)
                 for critere, val in eleve.critere.items():
                     if critere not in liste_compteurs[choix]:
@@ -325,23 +301,57 @@ def score_totale(liste_eleve, groupes, dico_importance):
     Returns:
         int: score compris entre 0 et 100
     """
-    dico_pourc_elv = dico_poucentage(liste_eleve)
+    dico_pourc_elv = dico_pourcentage(liste_eleve)
     cout_grp = cout_tot(dico_pourc_elv, groupes, dico_importance)
     cout_totale = 0
     for critere in dico_pourc_elv:
         cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
     return int((cout_totale - cout_grp) / cout_totale * 100)
 
-def test_creation_liste_critere():
-    liste = []
+def creer_groupe_numpy(liste_eleve, liste_critere, dico_importance, nb_groupe, nom_fichier):
+    debut, actuel = time.time(), time.time()
+    criteres = recup_critere(nom_fichier)
+    liste_groupes, importance, nb_mod, nb_ref, liste_val_crit = [], [], [], [], []
+    for _ in range(nb_groupe + 1):
+            liste_groupes.append([])
+    dico_pourc = dico_pourcentage(liste_eleve)
 
-    liste.append(critere.Critere(1, ["M", "F"], "genre"))
-    liste.append(critere.Critere(1, ["1", "2", "3", "6", "7"], "niveau Français"))
-    liste.append(critere.Critere(2, ["F"], "genre"))
-    liste.append(critere.Critere(2, ["1", "4", "5", "6", "7"], "niveau Français"))
-    liste.append(critere.Critere(3, ["M"], "genre"))
-    liste.append(critere.Critere(3, ["1", "4", "5", "6", "7"], "niveau Français"))
+    for crit in criteres:
+        val_crit = recup_ensemble_val_critere(crit, nom_fichier)
+        liste_val_crit.append(val_crit)
+        importance.append(dico_importance[crit])
+        nb_mod.append(len(val_crit))
+        for modalite in val_crit:
+            nb_ref.append(dico_pourc[crit][modalite])
+    nb_ref = np.array(nb_ref)
+    vecteur_importance = np.repeat(importance, nb_mod)
+    cpt = 0
+    while actuel - debut < 4:
+        cpt += 1
+        actuel = time.time()
 
+        for eleve in liste_eleve:
+            liste_groupe_np = []
+            for i in range(len(liste_groupes) - 1):
+                liste_ajout = []
+                dico_pourc = dico_pourcentage(liste_groupes[i])
+                for j in range(len(criteres)):
+                    for modalite in liste_val_crit[j]:
+                        try:
+                            liste_ajout.append(dico_pourc[crit][modalite])
+                        except:
+                            liste_ajout.append(0)
+                liste_groupe_np.append(liste_ajout)
+            liste_groupe_np = np.array(liste_groupe_np)
+            distance = (np.absolute(liste_groupe_np - nb_ref) * vecteur_importance).sum(axis=1)
+            liste_grp_possible = groupes_possible(liste_groupes, liste_eleve, eleve, liste_critere, nb_groupe)
+            ...
+            
+        random.shuffle(liste_eleve)
 
-    return liste
-    
+    print(cpt)
+    return liste_groupes
+
+liste = lire_fichier("/home/iut45/Etudiants/o22406613/Documents/SAE_BUT2/SAE_3.01c/monApp/static/uploads/groupes.csv")
+
+creer_groupe_numpy(liste, [], {"genre": 10, "niveau Français" : 20, "niveau Maths" : 30, "Pénibilité" : 40}, 3, "/home/iut45/Etudiants/o22406613/Documents/SAE_BUT2/SAE_3.01c/monApp/static/uploads/groupes.csv")
