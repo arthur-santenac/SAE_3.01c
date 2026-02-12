@@ -253,40 +253,42 @@ def repartition():
 @app.route("/exporter_groupes", methods=["POST"])
 def exporter_groupes():
     data = request.get_json()
+    if not data:
+        return "Aucune donnée reçue", 400
+    noms_criteres = data.get('noms_criteres', [])
+    liste_eleves = data.get('eleves', [])
 
-    if not data or "groupes" not in data:
-        return "Données manquantes", 400
-
-    groupes_data = data["groupes"]
-
-    liste_critere = data.get("liste_critere", [])
-
-    csv_path = os.path.join(UPLOAD_FOLDER, "groupes_finaux.csv")
-
-    with open(csv_path, "w", newline="", encoding="utf-8") as fichier_csv:
-        writer = csv.writer(fichier_csv)
-
-        header = ["num", "nom", "prenom"] + liste_critere + ["groupe"]
+    csv_path = os.path.join(app.root_path, "static", "uploads", "groupes_finaux.csv")
+    with open(csv_path, "w", newline="", encoding="utf-8-sig") as fichier_csv:
+        writer = csv.writer(fichier_csv, delimiter=",")
+        header = ["Num", "Nom", "Prénom"] + noms_criteres + ["Groupe"]
         writer.writerow(header)
 
-        for groupe_id, eleves in enumerate(groupes_data, start=1):
-            for eleve in eleves:
-                ligne = [
-                    eleve.get("num", ""),
-                    eleve.get("nom", ""),
-                    eleve.get("prenom", "")
-                ]
+        for eleve in liste_eleves:
+            ligne = []
+            ligne.append(eleve.get("num"))
+            ligne.append(eleve.get("nom"))
+            ligne.append(eleve.get("prenom"))
+            for val in eleve.get("criteres", []):
+                ligne.append(val)
+            
+            nb_criteres_attendus = len(noms_criteres)
+            nb_criteres_recus = len(eleve.get("criteres", []))
+            if nb_criteres_recus < nb_criteres_attendus:
+                 ligne.extend([""] * (nb_criteres_attendus - nb_criteres_recus))
 
-                for critere in liste_critere:
-                    ligne.append(eleve.get("criteres", {}).get(critere, ""))
+            ligne.append(eleve.get("groupe"))
+            
+            writer.writerow(ligne)
 
-                ligne.append(groupe_id)
-                writer.writerow(ligne)
+    return send_file(
+        csv_path,
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name="liste_groupes.csv",
+    )
 
-    return send_file(csv_path,
-                     mimetype="text/csv",
-                     as_attachment=True,
-                     download_name="liste_groupes.csv")
+
     
 @app.route("/exporter_config/", methods=["GET"])
 def exporter_config():
@@ -299,19 +301,12 @@ def exporter_config():
         "dico_importance": dico_importance,
         "liste_critere": criteres_groupes
     }
-
     json_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
-
     try:
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(config_data, f, indent=4, ensure_ascii=False)
             
-        return send_file(
-            json_path,
-            mimetype="application/json",
-            as_attachment=True,
-            download_name="configuration.json",
-        )
+        return send_file(json_path,mimetype="application/json", as_attachment=True, download_name="configuration.json",)
     except Exception as e:
         return "Erreur lors de la création du fichier de configuration", 500
 
