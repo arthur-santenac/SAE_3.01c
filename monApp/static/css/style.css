@@ -209,12 +209,12 @@ button {
   border-radius: 8px;
   margin: 10px 0;
   table-layout: auto;
-  border: 2px dashed #dcdde1;
   width: 100%;
 }
 
 .liste-eleves {
   transition: all 0.3s ease;
+  border: 2px dashed #dcdde1;
 }
 
 .liste-eleves.over {

@@ -377,3 +377,9 @@ function submitWithLoader() {
         }
     }, 50);
 }
+
+document.addEventListener('dom-refreshed', () => {
+    if (window.setupSliders) {
+        window.setupSliders();
+    }
+});

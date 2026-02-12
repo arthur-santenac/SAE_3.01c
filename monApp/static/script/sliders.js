@@ -1,4 +1,5 @@
-document.addEventListener("DOMContentLoaded", () => {
+function setupSliders() {
+
   const groups = [];
   const container = document.querySelector(".section-importance");
 
@@ -70,4 +71,10 @@ document.addEventListener("DOMContentLoaded", () => {
       updateSliders(group.index, parseInt(e.target.value));
     });
   });
-});
+
+
+
+}
+
+document.addEventListener("DOMContentLoaded", setupSliders);
+document.addEventListener('dom-refreshed', setupSliders);
