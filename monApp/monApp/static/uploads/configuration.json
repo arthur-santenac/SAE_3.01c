@@ -1,0 +1,133 @@
+{
+    "nb_groupes": 3,
+    "dico_importance": {
+        "Pénibilité": 25,
+        "genre": 25,
+        "niveau Français": 25,
+        "niveau Maths": 25
+    },
+    "liste_critere": [
+        {
+            "grp": 1,
+            "nom": "genre",
+            "valeurs": [
+                "F",
+                "M"
+            ]
+        },
+        {
+            "grp": 1,
+            "nom": "niveau Français",
+            "valeurs": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7"
+            ]
+        },
+        {
+            "grp": 1,
+            "nom": "niveau Maths",
+            "valeurs": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6"
+            ]
+        },
+        {
+            "grp": 1,
+            "nom": "Pénibilité",
+            "valeurs": [
+                "C"
+            ]
+        },
+        {
+            "grp": 2,
+            "nom": "genre",
+            "valeurs": [
+                "F",
+                "M"
+            ]
+        },
+        {
+            "grp": 2,
+            "nom": "niveau Français",
+            "valeurs": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7"
+            ]
+        },
+        {
+            "grp": 2,
+            "nom": "niveau Maths",
+            "valeurs": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6"
+            ]
+        },
+        {
+            "grp": 2,
+            "nom": "Pénibilité",
+            "valeurs": [
+                "C"
+            ]
+        },
+        {
+            "grp": 3,
+            "nom": "genre",
+            "valeurs": [
+                "F",
+                "M"
+            ]
+        },
+        {
+            "grp": 3,
+            "nom": "niveau Français",
+            "valeurs": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7"
+            ]
+        },
+        {
+            "grp": 3,
+            "nom": "niveau Maths",
+            "valeurs": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6"
+            ]
+        },
+        {
+            "grp": 3,
+            "nom": "Pénibilité",
+            "valeurs": [
+                "A",
+                "B",
+                "C"
+            ]
+        }
+    ]
+}
