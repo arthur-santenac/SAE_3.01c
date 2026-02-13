@@ -53,6 +53,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        
         document.getElementById("reset_btn").addEventListener("click", function() {
             var dz = Dropzone.forElement("#myDropzone");
             if (dz) { 
@@ -64,6 +65,7 @@
             var dz = Dropzone.forElement("#myDropzoneJson");
             if (dz) { dz.removeAllFiles(true); }
         });
+
         var btnValider = document.getElementById("btn-valider");
         function toggleValiderButton(enable) {
             if (enable) {
@@ -72,21 +74,45 @@
                 btnValider.classList.add("btn-disabled");
             }
         }
-        var csvDropzone = Dropzone.forElement("#myDropzone");
-        if (csvDropzone) {
-            csvDropzone.on("success", function(file, response) {
-                toggleValiderButton(true);
-            });
-            csvDropzone.on("removedfile", function(file) {
-                if (csvDropzone.files.length === 0) {
-                    toggleValiderButton(false);
+
+        function limitDropzoneToOneFile(dropzoneInstance) {
+            dropzoneInstance.on("addedfile", function(file) {
+                if (this.files.length > 1) {
+                    this.removeFile(this.files[0]);
                 }
             });
-            csvDropzone.on("error", function(file) {
-                 if (csvDropzone.getAcceptedFiles().length === 0) {
-                    toggleValiderButton(false);
-                 }
-            });
+        }
+
+        try {
+            var csvDropzone = Dropzone.forElement("#myDropzone");
+            if (csvDropzone) {
+                limitDropzoneToOneFile(csvDropzone);
+
+                csvDropzone.on("success", function(file, response) {
+                    toggleValiderButton(true);
+                });
+                csvDropzone.on("removedfile", function(file) {
+                    if (csvDropzone.files.length === 0) {
+                        toggleValiderButton(false);
+                    }
+                });
+                csvDropzone.on("error", function(file) {
+                     if (csvDropzone.getAcceptedFiles().length === 0) {
+                        toggleValiderButton(false);
+                     }
+                });
+            }
+        } catch(e) {
+            console.log("Dropzone CSV non initialisée");
+        }
+
+        try {
+            var jsonDropzone = Dropzone.forElement("#myDropzoneJson");
+            if (jsonDropzone) {
+                limitDropzoneToOneFile(jsonDropzone);
+            }
+        } catch(e) {
+            console.log("Dropzone JSON non initialisée");
         }
     });
 </script>
