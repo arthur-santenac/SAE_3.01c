@@ -352,6 +352,62 @@ def creer_groupe_numpy(liste_eleve, liste_critere, dico_importance, nb_groupe, n
     print(cpt)
     return liste_groupes
 
+def comparaison():
+    vecteur_importance = [10, 10, 20, 20, 30, 30, 40, 40]
+    vecteur_importance = [50, 50, 25, 75, 30, 70, 45, 55]
+    matrice = []
+
+    for _ in range(100):
+        matrice.append([])
+        for _ in range(8):
+            matrice[-1].append(random.randint(0, 100))
+
+    vecteur_importance = np.array(vecteur_importance, dtype=np.int64)
+    vecteur_ref = np.array(vecteur_importance, dtype=np.int64)
+    np_matrix = np.array(matrice, dtype=np.int64)
+
+    dico_importance = {"genre": 10, "niveau Maths": 20, "niveau Français": 30, "Pénibilité": 40}
+    
+    dico_ref = {
+        "genre": {"M": 50, "F": 50},
+        "niveau Maths": {"1": 25, "2": 75},
+        "niveau Français": {"1": 30, "2": 70},
+        "Pénibilité": {"A": 45, "B": 55}
+    }
+
+    liste_dico_groupes = []
+    for ligne in matrice:
+        g = {
+            "genre": {"M": ligne[0], "F": ligne[1]},
+            "niveau Maths": {"1": ligne[2], "2": ligne[3]},
+            "niveau Français": {"1": ligne[4], "2": ligne[5]},
+            "Pénibilité": {"A": ligne[6], "B": ligne[7]}
+        }
+        liste_dico_groupes.append(g)
+
+    debut_py = time.time()
+    
+    for _ in range(100):
+        for grp in liste_dico_groupes:
+            diff_cout_groupe(dico_ref, grp, dico_importance)
+
+    fin_py = time.time()
+    tps_py = fin_py - debut_py
+
+    debut_np = time.time()
+
+    for _ in range(100):
+        (np.absolute(np_matrix - vecteur_ref) * vecteur_importance).sum()
+
+    fin_np = time.time()
+    tps_np = fin_np - debut_np
+
+    print("Python : " + str(tps_py * 1000))
+    print("Numpy  : " + str(tps_np * 1000))
+    print("Numpy est " + str(tps_py / tps_np) + " fois plus rapide")
+
+comparaison()
+
 liste = lire_fichier("/home/iut45/Etudiants/o22406613/Documents/SAE_BUT2/SAE_3.01c/monApp/static/uploads/groupes.csv")
 
 creer_groupe_numpy(liste, [], {"genre": 10, "niveau Français" : 20, "niveau Maths" : 30, "Pénibilité" : 40}, 3, "/home/iut45/Etudiants/o22406613/Documents/SAE_BUT2/SAE_3.01c/monApp/static/uploads/groupes.csv")
