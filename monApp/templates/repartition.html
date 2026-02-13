@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block title %}Test{% endblock %} {% block main %}
+{% extends "base.html" %} {% block title %}Repartition{% endblock %} {% block main %}
 <div id="loader-overlay">
   <span class="loader"></span>
   <div class="loading-text">Création des groupes en cours...</div>
@@ -132,7 +132,7 @@
                 {% if jj.groupe == i+1 %}
               <tr>
                 <td>{{jj.nom_critere}}</td>
-                <td>{{jj.condition}}</td>
+                <td>{{ jj.condition|string|replace("[", "")|replace("]", "")|replace("'", "")}}</td>
               </tr>
               {% endif %} {% endfor %}
             </tbody>
@@ -189,7 +189,7 @@
               {% for critere_nom in liste_nom_critere %}
               <td>{{ critere_nom }}</td>
               {% endfor %}
-              <th>Actions</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -201,9 +201,7 @@
               {% for critere_nom in liste_nom_critere %}
               <td>{{ eleve.critere[critere_nom] }}</td>
               {% endfor %}
-              <td class="actions">
-                <button class="btn-loupe" aria-label="Rechercher">loupe</button>
-              </td>
+              <td class="actions"></td>
             </tr>
             {% endfor %}
           </tbody>
