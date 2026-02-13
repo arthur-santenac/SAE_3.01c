@@ -30,10 +30,6 @@ def importe_csv():
         save_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
         file.save(save_path)
 
-        json_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
-        if os.path.exists(json_path):
-            os.remove(json_path)
-
         session.pop("dico_importance", None)
         session.pop("criteres_groupes", None)
         session.pop("nb_groupes", None)
