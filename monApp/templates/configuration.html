@@ -4,6 +4,7 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/config.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/commun.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 {% endblock %}
 
@@ -31,12 +32,12 @@
                 <div class="row align-items-center justify-content-center">
                     <div class="col-md-6 text-center">
                         <label for="nb-grp" class="form-label fw-bold">Nombre de groupes souhaités</label>
-                        <div class="input-group mb-3">
-                            <input type="number" class="form-control form-control-lg text-center fw-bold" id="nb-grp" name="nb-grp" min="1" value="{{ request.form.get('nb-grp', nb_grp ) }}" required>
-                            <button type="submit" name="btn" value="btn-valide" class="btn btn-primary btn-lg">
-                                Valider
-                            </button>
-                        </div>
+<div class="input-group mb-3">
+    <input type="number" class="form-control form-control-lg text-center fw-bold" id="nb-grp" name="nb-grp" min="1" value="{{ request.form.get('nb-grp', nb_grp ) }}" required>
+    <button type="submit" name="btn" value="btn-valide" class="btn-valider">
+        Valider
+    </button>
+</div>
                     </div>
                 </div>
             </div>
@@ -49,22 +50,21 @@
                 </div>
                 
                 <section class="section-importance">
-                    {% for crit_propre in criteres %}
-                        {% set nom = "importance_" + crit_propre %}
-                        {% set titre_crit = crit_propre.replace('_', ' ').capitalize() %}
-                        {% set valeur_defaut = 100 // (criteres|length) %}
-                        <div class="{{ crit_propre }}">
-                            <h4><strong>{{ titre_crit }}</strong></h4>
-                            <input type="range" name="{{ nom }}" min="0" max="100" step="1" class="slider" value="{{ valeur_defaut }}">
-                            <div>
-                                <input type="number" name="{{ nom }}" class="slider-value" min="0" max="100" step="1" value="{{ valeur_defaut }}">
-                            </div>
+                {% for crit_propre in criteres %}
+                    {% set nom = "importance_" + crit_propre %}
+                    {% set titre_crit = crit_propre.replace('_', ' ').capitalize() %}
+                    {% set valeur_defaut_calc = 100 // (criteres|length) %}
+                    {% set val_actuelle = map_importance.get(crit_propre, valeur_defaut_calc) %}
+                    <div class="{{ crit_propre }}">
+                        <h4><strong>{{ titre_crit }}</strong></h4>
+                        <input type="range" name="{{ nom }}" min="0" max="100" step="1" class="slider" value="{{ val_actuelle }}">
+                        <div>
+                            <input type="number" name="{{ nom }}" class="slider-value" min="0" max="100" step="1" value="{{ val_actuelle }}">
                         </div>
+                    </div>
                     {% endfor %}
                 </section>
             </section>
-
-            <script src="../static/script/sliders.js"></script>
 
             <section class="section-config mt-4">
                 <div class="section-config-header">
@@ -81,7 +81,7 @@
                                     {% if crit.grp == grp %}
                                     <div class="critere-sub-box">
                                         <h4 class="critere-title"><strong>{{ crit.nom }}</strong></h4>
-                                        <div class="checkbox-wrapper">
+                                        <div class="checkbox-container">
                                             {% set toutes_valeurs = session['liste_val_crit'][crit.nom] %}
                                             {% for val in toutes_valeurs %}
                                                 <div class="checkbox-badge-item">
@@ -106,17 +106,23 @@
             </section>
         {% endif %}
 
-        <div class="submit-area mt-5 mb-5">
-            <button type="submit" onclick="submitWithLoader()" name="btn" value="btn-repartition"  
-                class="btn-cta {% if valide != True %}disabled{% endif %}"
-                {% if valide != True %}disabled{% endif %}>
-                <span>Lancer la répartition</span>
-            </button>
-        </div>
+<div class="submit-area mt-5 mb-5 d-flex justify-content-center gap-4 align-items-center">
+    
+
+    <button type="submit" 
+            onclick="submitWithLoader()" 
+            name="btn" 
+            value="btn-repartition"  
+            class="btn-valider {% if not valide %}btn-disabled{% endif %}"
+            {% if not valide %}disabled{% endif %}>
+        Lancer la répartition
+    </button>
+</div>
 
     </div>
 </form> 
-
+<script src="../static/script/checkbox.js" defer></script>
 <script src="../static/script/repartition.js"></script>
+<script src="../static/script/sliders.js"></script>
 
 {% endblock main %}

@@ -3,15 +3,7 @@
 
 {% block extra_css %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/importer.css') }}">
-  <style>
-      .btn-disabled {
-          pointer-events: none;
-          opacity: 0.5;
-          cursor: not-allowed;
-          background-color: #cccccc !important;
-          border-color: #cccccc !important;
-      }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/commun.css') }}">
 {% endblock %}
 
 {% block main %}
@@ -24,7 +16,7 @@
     <section>
         <h2 class="text-center mb-4">Importer la liste d'élève (obligatoire)</h2>
         
-        <form action="{{ url_for('importerCSV') }}" class="dropzone" id="myDropzone" method="post" enctype="multipart/form-data">
+        <form action="{{ url_for('importe_csv') }}" class="dropzone" id="myDropzone" method="post" enctype="multipart/form-data">
              <div class="dz-message" data-dz-message>
                 <span>Déposez votre fichier CSV ici ou cliquez pour choisir</span>
             </div>
@@ -41,7 +33,7 @@
     <section>
         <h2 class="text-center mb-4">Importer votre configuration (facultatif)</h2>
         
-        <form action="{{ url_for('importerJSON') }}" class="dropzone" id="myDropzoneJson" method="post" enctype="multipart/form-data">
+        <form action="{{ url_for('importer_json') }}" class="dropzone" id="myDropzoneJson" method="post" enctype="multipart/form-data">
              <div class="dz-message" data-dz-message>
                 <span>Déposez votre fichier JSON ici ou cliquez pour choisir</span>
             </div>
@@ -54,11 +46,14 @@
 </div>
 
 <div class="text-center mt-4">
-    <a href="{{ url_for('configuration') }}" id="btn-valider" class="btn-valider btn-disabled">Valider</a>
+    <button type="button" id="btn-valider" class="btn-valider btn-disabled" onclick="window.location.href='{{ url_for('configuration')}}'">
+        Valider
+    </button>
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        
         document.getElementById("reset_btn").addEventListener("click", function() {
             var dz = Dropzone.forElement("#myDropzone");
             if (dz) { 
@@ -70,6 +65,7 @@
             var dz = Dropzone.forElement("#myDropzoneJson");
             if (dz) { dz.removeAllFiles(true); }
         });
+
         var btnValider = document.getElementById("btn-valider");
         function toggleValiderButton(enable) {
             if (enable) {
@@ -78,21 +74,45 @@
                 btnValider.classList.add("btn-disabled");
             }
         }
-        var csvDropzone = Dropzone.forElement("#myDropzone");
-        if (csvDropzone) {
-            csvDropzone.on("success", function(file, response) {
-                toggleValiderButton(true);
-            });
-            csvDropzone.on("removedfile", function(file) {
-                if (csvDropzone.files.length === 0) {
-                    toggleValiderButton(false);
+
+        function limitDropzoneToOneFile(dropzoneInstance) {
+            dropzoneInstance.on("addedfile", function(file) {
+                if (this.files.length > 1) {
+                    this.removeFile(this.files[0]);
                 }
             });
-            csvDropzone.on("error", function(file) {
-                 if (csvDropzone.getAcceptedFiles().length === 0) {
-                    toggleValiderButton(false);
-                 }
-            });
+        }
+
+        try {
+            var csvDropzone = Dropzone.forElement("#myDropzone");
+            if (csvDropzone) {
+                limitDropzoneToOneFile(csvDropzone);
+
+                csvDropzone.on("success", function(file, response) {
+                    toggleValiderButton(true);
+                });
+                csvDropzone.on("removedfile", function(file) {
+                    if (csvDropzone.files.length === 0) {
+                        toggleValiderButton(false);
+                    }
+                });
+                csvDropzone.on("error", function(file) {
+                     if (csvDropzone.getAcceptedFiles().length === 0) {
+                        toggleValiderButton(false);
+                     }
+                });
+            }
+        } catch(e) {
+            console.log("Dropzone CSV non initialisée");
+        }
+
+        try {
+            var jsonDropzone = Dropzone.forElement("#myDropzoneJson");
+            if (jsonDropzone) {
+                limitDropzoneToOneFile(jsonDropzone);
+            }
+        } catch(e) {
+            console.log("Dropzone JSON non initialisée");
         }
     });
 </script>

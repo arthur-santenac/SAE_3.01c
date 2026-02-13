@@ -1,12 +1,13 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const groups = [];
-    const container = document.querySelector(".section-importance");
+function setupSliders() {
+
+  const groups = [];
+  const container = document.querySelector(".section-importance");
+
+  if (container) {
+    const sliders = container.querySelectorAll(".slider");
+    const values = container.querySelectorAll(".slider-value");
     
-    if(container) {
-        const sliders = container.querySelectorAll(".slider");
-        const values = container.querySelectorAll(".slider-value");
-        
-        sliders.forEach((slider, index) => {
+    sliders.forEach((slider, index) => {
             groups.push({
                 slider: slider,
                 number: values[index],
@@ -15,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const TOTAL_TARGET = 100;
+  const TOTAL_TARGET = 100;
 
     function updateSliders(activeIndex, newVal) {
         newVal = Math.max(0, Math.min(TOTAL_TARGET, newVal));
@@ -76,17 +77,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    groups.forEach((group) => {
-        group.slider.addEventListener('input', (e) => {
-            updateSliders(group.index, parseInt(e.target.value));
-        });
-        group.number.addEventListener('input', (e) => {
-            let val = parseInt(e.target.value);
-            if (isNaN(val)) val = 0;
-            updateSliders(group.index, val);
-        });
-        group.slider.addEventListener('change', (e) => {
-            updateSliders(group.index, parseInt(e.target.value));
-        });
+  groups.forEach((group) => {
+    group.slider.addEventListener("input", (e) => {
+      updateSliders(group.index, parseInt(e.target.value));
     });
-});
+    group.number.addEventListener("input", (e) => {
+      let val = parseInt(e.target.value);
+      if (isNaN(val)) val = 0;
+      updateSliders(group.index, val);
+    });
+    group.slider.addEventListener("change", (e) => {
+      updateSliders(group.index, parseInt(e.target.value));
+    });
+  });
+
+
+
+}
+
+document.addEventListener("DOMContentLoaded", setupSliders);
+document.addEventListener('dom-refreshed', setupSliders);
