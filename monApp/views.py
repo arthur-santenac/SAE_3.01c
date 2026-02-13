@@ -10,8 +10,6 @@ from flask import jsonify
 
 UPLOAD_FOLDER = app.config['UPLOADED_PATH']
 
-
-
 @app.route("/")
 def index():
     if os.path.exists(os.path.join(UPLOAD_FOLDER, "groupes.csv")):
@@ -31,10 +29,6 @@ def importe_csv():
     if file and file.filename.endswith(".csv"):
         save_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
         file.save(save_path)
-
-        json_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
-        if os.path.exists(json_path):
-            os.remove(json_path)
 
         session.pop("dico_importance", None)
         session.pop("criteres_groupes", None)
@@ -64,152 +58,126 @@ def importer_json():
 
 @app.route("/configuration/", methods=["GET", "POST"])
 def configuration():
-    try:
-        # 1. Définition des chemins
-        csv_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
-        json_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
-        
-        # 2. Récupération des critères bruts
-        liste_crit_brut = algo.recup_critere(csv_path) if os.path.exists(csv_path) else []
-        
-        dico_importance = None
-        criteres_groupes = None
+    csv_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
+    json_path = os.path.join(UPLOAD_FOLDER, "configuration.json")
+    
+    liste_crit_brut = algo.recup_critere(csv_path) if os.path.exists(csv_path) else []
+    dico_importance = None
+    criteres_groupes = None
 
-        # 3. Chargement de la session ou du JSON
-        if session.get("dico_importance") and session.get("criteres_groupes"):
-            dico_importance = session.get("dico_importance")
-            criteres_groupes = session.get("criteres_groupes")
-            nb_groupes = session.get("nb_groupes", 1)
-            
-        elif request.method == "GET" and os.path.exists(json_path):
-            try:
-                with open(json_path, 'r', encoding='utf-8') as f:
-                    config_json = json.load(f)
-                dico_importance = config_json.get("dico_importance")
-                criteres_groupes = config_json.get("liste_critere") 
-                nb_groupes = config_json.get("nb_groupes", 1)
+    if session.get("dico_importance") and session.get("criteres_groupes"):
+        dico_importance = session.get("dico_importance")
+        criteres_groupes = session.get("criteres_groupes")
+        nb_groupes = session.get("nb_groupes", 1)
+        
+    elif request.method == "GET" and os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                config_json = json.load(f)
+            dico_importance = config_json.get("dico_importance")
+            criteres_groupes = config_json.get("liste_critere") 
+            nb_groupes = config_json.get("nb_groupes", 1)
+            session["valide"] = True
+        except Exception as e:
+            print(f"Erreur lecture JSON: {e}")
+
+    if dico_importance is None and os.path.exists(csv_path):
+        liste_eleve_temp = algo.lire_fichier(csv_path)
+        dico_importance = algo.init_dico_importance(liste_eleve_temp)
+        nb_groupes = 1
+        criteres_groupes = []
+
+        for nom_crit in liste_crit_brut:
+            valeurs_possibles = list(algo.recup_ensemble_val_critere(nom_crit, csv_path))
+            criteres_groupes.append({'grp': 1, 'nom': nom_crit, 'valeurs': valeurs_possibles})
+        session["valide"] = False
+    session["dico_importance"] = dico_importance
+    session["criteres_groupes"] = criteres_groupes
+    session["nb_groupes"] = nb_groupes
+
+    if not isinstance(nb_groupes, int): nb_groupes = 1
+    session["liste_ind_groupes"] = list(range(1, nb_groupes + 1))
+
+    if request.method == "POST":
+        action = request.form.get("btn")
+
+        if dico_importance:
+            for crit_nom in dico_importance:
+                crit_propre = crit_nom.lower().replace(" ", "_")
+                nom_input = f"importance_{crit_propre}"
+                valeur = request.form.get(nom_input)
+                if valeur:
+                    dico_importance[crit_nom] = int(valeur)
+            session["dico_importance"] = dico_importance
+
+        if action == "btn-valide":
+            nb_groupes_str = request.form.get("nb-grp")
+
+            if nb_groupes_str and nb_groupes_str.strip().isdigit():
+                nb_int = int(nb_groupes_str)
+                session["nb_groupes"] = nb_int
                 session["valide"] = True
-            except Exception as e:
-                print(f"Erreur lecture JSON: {e}")
+                session["liste_ind_groupes"] = list(range(1, nb_int + 1))
+                tous_les_criteres = []
 
-        # 4. Initialisation par défaut si rien n'existe
-        if dico_importance is None and os.path.exists(csv_path):
-            liste_eleve_temp = algo.lire_fichier(csv_path)
-            dico_importance = algo.init_dico_importance(liste_eleve_temp)
-            nb_groupes = 1
-            criteres_groupes = []
-            
-            # Optimisation lecture valeurs
-            for nom_crit in liste_crit_brut:
-                # On convertit en liste immédiatement pour éviter les problèmes de session
-                valeurs_possibles = list(algo.recup_ensemble_val_critere(nom_crit, csv_path))
-                criteres_groupes.append({'grp': 1, 'nom': nom_crit, 'valeurs': valeurs_possibles})
-            session["valide"] = False
+                cache_valeurs = {}
+                for nom_crit in liste_crit_brut:
+                    cache_valeurs[nom_crit] = list(algo.recup_ensemble_val_critere(nom_crit, csv_path))
 
-        session["dico_importance"] = dico_importance
-        session["criteres_groupes"] = criteres_groupes
-        session["nb_groupes"] = nb_groupes
-        # Sécurité : on s'assure que nb_groupes est un entier valide
-        if not isinstance(nb_groupes, int): nb_groupes = 1
-        session["liste_ind_groupes"] = list(range(1, nb_groupes + 1))
-
-        # 5. Gestion du POST (Formulaires)
-        if request.method == "POST":
-            action = request.form.get("btn")
-            
-            # Mise à jour des importances
-            if dico_importance:
-                for crit_nom in dico_importance:
-                    crit_propre = crit_nom.lower().replace(" ", "_")
-                    nom_input = f"importance_{crit_propre}"
-                    valeur = request.form.get(nom_input)
-                    if valeur:
-                        dico_importance[crit_nom] = int(valeur)
-                session["dico_importance"] = dico_importance
-            
-            # ACTION : VALIDER NOMBRE DE GROUPES
-            if action == "btn-valide":
-                nb_groupes_str = request.form.get("nb-grp")
-                
-                # Vérification que l'entrée n'est pas vide
-                if nb_groupes_str and nb_groupes_str.strip().isdigit():
-                    nb_int = int(nb_groupes_str)
-                    session["nb_groupes"] = nb_int
-                    session["valide"] = True
-                    session["liste_ind_groupes"] = list(range(1, nb_int + 1))
-                    
-                    tous_les_criteres = []
-
-                    # --- OPTIMISATION ---
-                    # On charge les valeurs UNE SEULE FOIS pour ne pas ouvrir le fichier 50 fois
-                    cache_valeurs = {}
+                for id_grp in range(1, nb_int + 1):
                     for nom_crit in liste_crit_brut:
-                        cache_valeurs[nom_crit] = list(algo.recup_ensemble_val_critere(nom_crit, csv_path))
+                        tous_les_criteres.append({
+                            "grp": id_grp,
+                            "nom": nom_crit,
+                            "valeurs": cache_valeurs[nom_crit]
+                        })
+                session["criteres_groupes"] = tous_les_criteres
+            else:
+                pass 
 
-                    for id_grp in range(1, nb_int + 1):
-                        for nom_crit in liste_crit_brut:
-                            tous_les_criteres.append({
-                                "grp": id_grp,
-                                "nom": nom_crit,
-                                "valeurs": cache_valeurs[nom_crit]
-                            })
-                    session["criteres_groupes"] = tous_les_criteres
-                else:
-                    # Si l'utilisateur n'a rien rentré
-                    pass 
+        elif action == "btn-repartition":
+            nouveaux_criteres_groupes = []
+            nb_actuel = session.get("nb_groupes", 1)
+            for id_grp in range(1, nb_actuel + 1):
+                for nom_crit in liste_crit_brut:
+                    nom_input = f"chk_{id_grp}_{nom_crit}"
+                    valeurs_cochees = request.form.getlist(nom_input)
+                    nouveaux_criteres_groupes.append({'grp': id_grp, 'nom': nom_crit, 'valeurs': valeurs_cochees})
+            session["criteres_groupes"] = nouveaux_criteres_groupes
+            session.modified = True
+            return redirect(url_for("repartition"))
 
-            # ACTION : REPARTITION (Checkboxes)
-            elif action == "btn-repartition":
-                nouveaux_criteres_groupes = []
-                nb_actuel = session.get("nb_groupes", 1)
-                for id_grp in range(1, nb_actuel + 1):
-                    for nom_crit in liste_crit_brut:
-                        nom_input = f"chk_{id_grp}_{nom_crit}"
-                        valeurs_cochees = request.form.getlist(nom_input)
-                        nouveaux_criteres_groupes.append({'grp': id_grp, 'nom': nom_crit, 'valeurs': valeurs_cochees})
-                session["criteres_groupes"] = nouveaux_criteres_groupes
-                session.modified = True
-                return redirect(url_for("repartition"))
+    criteres_propres_session = []
+    if session.get("criteres_groupes"):
+        for crit in session["criteres_groupes"]:
+            if crit['nom'] in liste_crit_brut:
+                criteres_propres_session.append(crit)
+    session["criteres_groupes"] = criteres_propres_session
+    
+    criteres_pour_template = []
+    map_importance = {}
+    for crit_brut in liste_crit_brut:
+        format_propre = crit_brut.lower().replace(" ", "_")
+        criteres_pour_template.append(format_propre)
+        if dico_importance and crit_brut in dico_importance:
+            map_importance[format_propre] = dico_importance[crit_brut]
+    
+    if os.path.exists(csv_path):
+        dico_valeurs = {}
+        for crit in liste_crit_brut:
+            dico_valeurs[crit] = list(algo.recup_ensemble_val_critere(crit, csv_path))
+        session["liste_val_crit"] = dico_valeurs
 
-        # 6. Préparation pour l'affichage (GET)
-        criteres_propres_session = []
-        if session.get("criteres_groupes"):
-            for crit in session["criteres_groupes"]:
-                if crit['nom'] in liste_crit_brut:
-                    criteres_propres_session.append(crit)
-        session["criteres_groupes"] = criteres_propres_session
-        
-        criteres_pour_template = []
-        map_importance = {}
-        for crit_brut in liste_crit_brut:
-            format_propre = crit_brut.lower().replace(" ", "_")
-            criteres_pour_template.append(format_propre)
-            if dico_importance and crit_brut in dico_importance:
-                map_importance[format_propre] = dico_importance[crit_brut]
-        
-        if os.path.exists(csv_path):
-            dico_valeurs = {}
-            for crit in liste_crit_brut:
-                # Utilisation de list() pour être sûr que ce soit sérialisable
-                dico_valeurs[crit] = list(algo.recup_ensemble_val_critere(crit, csv_path))
-            session["liste_val_crit"] = dico_valeurs
+    return render_template("configuration.html", 
+        title="COHORT App", 
+        criteres=criteres_pour_template, 
+        valide=session.get("valide"), 
+        liste_grp=session.get("liste_ind_groupes", []),
+        criteres_choisis=session.get("criteres_groupes", []), 
+        nb_grp=session.get("nb_groupes", 1),
+        map_importance=map_importance
+    )
 
-        return render_template("configuration.html", 
-            title="COHORT App", 
-            criteres=criteres_pour_template, 
-            valide=session.get("valide"), 
-            liste_grp=session.get("liste_ind_groupes", []),
-            criteres_choisis=session.get("criteres_groupes", []), 
-            nb_grp=session.get("nb_groupes", 1),
-            map_importance=map_importance
-        )
-
-    except Exception as e:
-        # C'est ici que la magie opère : on affiche l'erreur dans le navigateur
-        # au lieu de Internal Server Error
-        print(f"ERREUR CRITIQUE DANS CONFIGURATION : {e}")
-        traceback.print_exc()
-        return f"<h1>Une erreur est survenue</h1><p>{str(e)}</p><pre>{traceback.format_exc()}</pre>", 500
 
 @app.route("/repartition/", methods=["POST", "GET"])
 def repartition():
@@ -217,7 +185,7 @@ def repartition():
         csv_path = os.path.join(UPLOAD_FOLDER, "groupes.csv")
         dico_importance = session.get("dico_importance", {})
         liste_critere = []
-
+  
         if request.method == "POST":
 
             data = request.get_json()
@@ -230,11 +198,22 @@ def repartition():
 
                 if "criteres_groupes" in data:
                     liste_critere = []
+                    nouveaux_criteres_session = []
+                    
                     for critere_data in data["criteres_groupes"]:
                         nouveau_critere = algo.critere.Critere(
                             critere_data["groupe"], critere_data["valeurs"],
                             critere_data["nom_critere"])
                         liste_critere.append(nouveau_critere)
+
+                        nouveaux_criteres_session.append({
+                            'grp': critere_data["groupe"],
+                            'nom': critere_data["nom_critere"],
+                            'valeurs': critere_data["valeurs"]
+                        })
+
+                    session["criteres_groupes"] = nouveaux_criteres_session
+                    session.modified = True
         else:
 
             liste_critere = []
