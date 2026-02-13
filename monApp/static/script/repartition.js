@@ -346,7 +346,35 @@ class Interface {
 
     popup(id, estVisible) {
         const modale = document.getElementById(id);
-        if (modale) modale.style.display = estVisible ? "block" : "none";
+        if (!modale) return;
+        modale.style.display = estVisible ? "block" : "none";
+
+        if (!estVisible) {
+            const match = id.match(/\d+/);
+            if (!match) return;
+            const numGroupe = parseInt(match[0]);
+
+            const articles = document.querySelectorAll("#eleves_classes article");
+            const article = articles[numGroupe - 1];
+            if (!article) return;
+
+            const tbody = article.querySelector(".table-criteres tbody");
+            if (!tbody) return;
+
+            tbody.innerHTML = "";
+            modale.querySelectorAll("fieldset").forEach((fieldset) => {
+                const nomCritere = fieldset.querySelector("legend").textContent.trim();
+                const valeursCochees = Array.from(
+                    fieldset.querySelectorAll("input[type='checkbox']:checked")
+                ).map(cb => cb.value);
+
+                if (valeursCochees.length > 0) {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `<td>${nomCritere}</td><td>${valeursCochees.join(", ")}</td>`;
+                    tbody.appendChild(tr);
+                }
+            });
+        }
     }
 }
 

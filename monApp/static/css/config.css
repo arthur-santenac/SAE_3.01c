@@ -22,7 +22,7 @@ body {
 
 .section-config-header h3 {
   margin: 0;
-  color: #005a9c;
+  color:  #3498db;
   font-weight: 700;
   font-size: 1.5rem;
 }
@@ -52,7 +52,7 @@ body {
 }
 
 .section-importance {
-  background-color: #005a9c;
+  background-color:  #3498db;
   padding: 1%;
   border-radius: 15px;
   margin: 1%;
@@ -116,7 +116,7 @@ body {
 }
 
 .groupe-header {
-  background-color: #005a9c;
+  background-color:  #3498db;
   color: white;
   padding: 1rem;
   text-align: center;
@@ -138,7 +138,7 @@ body {
     border-radius: 8px;
     padding: 1rem;
     margin-bottom: 1rem;
-    border-left: 5px solid #005a9c;
+    border-left: 5px solid  #3498db;
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
     display: flex;
 }
@@ -189,7 +189,7 @@ body {
 }
 
 .checkbox-badge-item input[type="checkbox"]:checked + label {
-  background-color: #005a9c;
+  background-color:  #3498db;
   color: white;
   box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
 }
@@ -207,7 +207,7 @@ body {
 }
 
 .btn-cta {
-  background: linear-gradient(135deg, #0d6efd, #005a9c);
+  background: linear-gradient(135deg, #0d6efd,  #3498db);
   color: white;
   border: none;
   padding: 1rem 3rem;
@@ -263,7 +263,7 @@ body {
   border-top: 5px solid #2c3e50;
   border-bottom: 5px solid #2c3e50;
   position: relative;
-  background: linear-gradient(#005a9c 30px, transparent 0) no-repeat;
+  background: linear-gradient( #3498db 30px, transparent 0) no-repeat;
   background-size: 2px 40px;
   background-position: 50% 0px;
   animation: spinx 2.5s linear infinite;
@@ -293,46 +293,4 @@ body {
   animation: lqb 2.5s linear infinite;
 }
 
-@keyframes lqt {
-  0%,
-  100% {
-    background-image: linear-gradient(#005a9c 40px, transparent 0);
-    background-position: 0% 0px;
-  }
-  50% {
-    background-image: linear-gradient(#005a9c 40px, transparent 0);
-    background-position: 0% 40px;
-  }
-  50.1% {
-    background-image: linear-gradient(#005a9c 40px, transparent 0);
-    background-position: 0% -40px;
-  }
-}
 
-@keyframes lqb {
-  0% {
-    background-image: linear-gradient(#005a9c 40px, transparent 0);
-    background-position: 0 40px;
-  }
-  100% {
-    background-image: linear-gradient(#005a9c 40px, transparent 0);
-    background-position: 0 -40px;
-  }
-}
-
-@keyframes spinx {
-  0%,
-  46% {
-    transform: rotate(0deg);
-    background-position: 50% 36px;
-  }
-  54%,
-  92% {
-    transform: rotate(180deg);
-    background-position: 50% 4px;
-  }
-  100% {
-    transform: rotate(360deg);
-    background-position: 50% 36px;
-  }
-}

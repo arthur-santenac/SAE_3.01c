@@ -14,14 +14,14 @@
       <h1 class="main-title">score</h1>
       <section class="stats-row">
         <div class="stat-item">
-          <span class="stat-label">Respect des critères</span>
+          <h2 >Respect des critères</h2>
           <span class="stat-value">{{ score }}%</span>
           <div class="progress-bar">
             <div class="fill green" style="width: {{ score }}%"></div>
           </div>
         </div>
         <div class="stat-item">
-          <span class="stat-label">élèves placés</span>
+          <h2> élèves placés</h2>
           <span class="stat-value">{{ place }}</span>
           <div class="progress-bar">
             {% if bleu %}
@@ -36,7 +36,7 @@
   </header>
 
   <section class="empty_space">
-    <h2>Configuration d'importance</h2>
+    <h1 class="main-title" >Configuration d'importance</h1>
     <div class="section-importance"> {% for nom_critere, valeur in dico_importance.items() %}
         <div class="slider-row">
             <span class="slider-label">{{ nom_critere }}</span>
@@ -52,7 +52,7 @@
 
 <main class="main_repartition">
   <section id="eleves_classes">
-    <h1>Élèves classés</h1>
+    <h1 class="main-title" >Élèves classés</h1>
     {% for i in range(groupes|length - 1) %}
     <article>
       <details open>
@@ -63,7 +63,7 @@
 
         <details open>
           <summary class="test">
-            <h2>voir critere Groupe {{ i + 1 }}</h2>
+            <h3>voir critere Groupe {{ i + 1 }}</h3>
             <button class="btn-popup" data-target="modale-{{ i + 1 }}">
               modifier les critere du groupe {{ i + 1 }}
             </button>
@@ -76,38 +76,42 @@
                 nom_du_critere = liste_nom_critere[idx] %} {% set
                 toutes_les_valeurs = liste_criteres_valeur[idx] %}
 
-                <fieldset>
-                  <legend>{{ nom_du_critere }}</legend>
+                <fieldset style="border:none; padding:0; margin:0;">
+                  <legend style="display:none;">{{ nom_du_critere }}</legend>
 
-                  <div class="checkbox-container">
-                    {% for valeur in toutes_les_valeurs %} 
-                      {% set ns = namespace(is_checked=false) %} 
-                      {% for critere_actif in liste_critere %} 
-                        {% if critere_actif.groupe == i+1 and critere_actif.nom_critere == nom_du_critere %} 
-                          {% if valeur in critere_actif.condition %} 
-                            {% set ns.is_checked = true %}
+                  <div class="critere-sub-box">
+                    <h4 class="critere-title"><strong>{{ nom_du_critere }}</strong></h4>
+
+                    <div class="checkbox-container">
+                      {% for valeur in toutes_les_valeurs %} 
+                        {% set ns = namespace(is_checked=false) %} 
+                        {% for critere_actif in liste_critere %} 
+                          {% if critere_actif.groupe == i+1 and critere_actif.nom_critere == nom_du_critere %} 
+                            {% if valeur in critere_actif.condition %} 
+                              {% set ns.is_checked = true %}
+                          {% endif %} 
                         {% endif %} 
-                      {% endif %} 
-                    {% endfor %} 
+                      {% endfor %} 
 
-                    <div>
-                      <input
-                        type="checkbox"
-                        id="chk-{{ i+1 }}-{{ nom_du_critere }}-{{ loop.index }}"
-                        name="{{ nom_du_critere }}"
-                        value="{{ valeur }}"
-                        {% if ns.is_checked %}checked{% endif %}
-                      />
+                        <div class="checkbox-badge-item">
+                          <input
+                            type="checkbox"
+                            id="chk-{{ i+1 }}-{{ nom_du_critere }}-{{ loop.index }}"
+                            name="{{ nom_du_critere }}"
+                            value="{{ valeur }}"
+                            {% if ns.is_checked %}checked{% endif %}
+                          />
+                          <label
+                            for="chk-{{ i+1 }}-{{ nom_du_critere }}-{{ loop.index }}"
+                          >
+                            {{ valeur }}
+                          </label>
+                        </div>
 
-                      <label
-                        for="chk-{{ i+1 }}-{{ nom_du_critere }}-{{ loop.index }}"
-                      >
-                        {{ valeur }}
-                      </label>
+                      {% endfor %}
                     </div>
-
-                    {% endfor %}
                   </div>
+
                 </fieldset>
 
                 {% endfor %}
@@ -173,7 +177,7 @@
   </section>
 
   <section id="eleves_restants">
-    <h1>Élèves restants</h1>
+    <h1 class="main-title" >Élèves restants</h1>
     <article>
       <details open>
         <summary>
