@@ -3,15 +3,7 @@
 
 {% block extra_css %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/importer.css') }}">
-  <style>
-      .btn-disabled {
-          pointer-events: none;
-          opacity: 0.5;
-          cursor: not-allowed;
-          background-color: #cccccc !important;
-          border-color: #cccccc !important;
-      }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/commun.css') }}">
 {% endblock %}
 
 {% block main %}
@@ -54,7 +46,9 @@
 </div>
 
 <div class="text-center mt-4">
-    <a href="{{ url_for('configuration') }}" id="btn-valider" class="btn-valider btn-disabled">Valider</a>
+    <button type="button" id="btn-valider" class="btn-valider btn-disabled" onclick="window.location.href='{{ url_for('configuration')}}'">
+        Valider
+    </button>
 </div>
 
 <script>

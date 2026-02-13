@@ -1,10 +1,13 @@
-document.addEventListener("DOMContentLoaded", function() {
+function setupCheckboxes() {
     const containers = document.querySelectorAll('.checkbox-container');
-    
+
     containers.forEach(container => {
+        if (container.dataset.checkboxInit) return;
+        container.dataset.checkboxInit = "1";
+
         container.addEventListener('change', function(e) {
             const target = e.target;
-            
+
             if (target.type === 'checkbox' && !target.checked) {
                 const nbCoches = container.querySelectorAll('input[type="checkbox"]:checked').length;
                 if (nbCoches === 0) {
@@ -14,4 +17,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     });
-});
+}
+
+document.addEventListener("DOMContentLoaded", setupCheckboxes);
+document.addEventListener("dom-refreshed", setupCheckboxes);
