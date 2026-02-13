@@ -3,7 +3,7 @@ import csv
 try:    
     from . import critere
     from . import eleve
-except:
+except: # pragma: no cover
     import critere
     import eleve
 import random
@@ -66,26 +66,6 @@ def recup_ensemble_val_critere(critere: str, nom_fichier: str):
     valeurs = sorted(valeurs)
     return valeurs
 
-
-def exporter_fichier():
-    ...
-
-def lire_config(nom_fichier):
-    """Lis les critères avec les valeurs associées d'un fichier json 
-
-    Args:
-        nom_fichier (str): chemin vers le fichier json
-
-    Returns:
-        tuple: Tuple contenant la liste des critères et le dictionnaire d'importance associé
-    """    
-    with open(nom_fichier) as fichier_json:
-        config = json.load(fichier_json)
-    liste_critere = []
-    for un_critere in config["liste_critere"]:
-        liste_critere.append(critere.Critere(un_critere["groupe"], un_critere["appartient"], un_critere["nom"]))
-    dico_importance = config["dico_importance"]
-    return liste_critere, dico_importance
 
 def init_dico_importance(liste_eleve):
     """Initialise le dictionnaire d'importance à partir d'une liste d'élèves
@@ -331,17 +311,3 @@ def score_totale(liste_eleve, groupes, dico_importance):
     for critere in dico_pourc_elv:
         cout_totale += 100 * dico_importance[critere] * (len(groupes) - 1)
     return int((cout_totale - cout_grp) / cout_totale * 100)
-
-def test_creation_liste_critere():
-    liste = []
-
-    liste.append(critere.Critere(1, ["M", "F"], "genre"))
-    liste.append(critere.Critere(1, ["1", "2", "3", "6", "7"], "niveau Français"))
-    liste.append(critere.Critere(2, ["F"], "genre"))
-    liste.append(critere.Critere(2, ["1", "4", "5", "6", "7"], "niveau Français"))
-    liste.append(critere.Critere(3, ["M"], "genre"))
-    liste.append(critere.Critere(3, ["1", "4", "5", "6", "7"], "niveau Français"))
-
-
-    return liste
-    
