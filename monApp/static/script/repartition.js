@@ -238,13 +238,16 @@ class Interface {
 
     collectCriteriaNames() {
         const liste = [];
-        const cellulesEntête = document.querySelectorAll("#eleves_classes .liste-eleves thead th, #eleves_classes .liste-eleves thead td");
-        cellulesEntête.forEach((cellule) => {
-            const texte = cellule.textContent.trim();
-            if (texte && !["Num", "Prénom", "Nom", "Actions"].includes(texte)) {
-                liste.push(texte);
-            }
-        });
+        const premierTableau = document.querySelector(".liste-eleves");
+        if (premierTableau) {
+            const cellulesEntête = premierTableau.querySelectorAll("thead th, thead td");
+            cellulesEntête.forEach((cellule) => {
+                const texte = cellule.textContent.trim();
+                if (texte && !["Num", "Prénom", "Nom", "Actions"].includes(texte)) {
+                    liste.push(texte);
+                }
+            });
+        }
         return liste;
     }
 
@@ -275,23 +278,19 @@ class Interface {
             const lignes = article.querySelectorAll(".liste-eleves tr.eleve");
             tousLesGroupes.push(traiterLignes(lignes));
         });
-
         const lignesRestantes = document.querySelectorAll("#eleves_restants .liste-eleves tr.eleve");
         tousLesGroupes.push(traiterLignes(lignesRestantes));
-
         return tousLesGroupes;
     }
 
     async relancerRepartition() {
         const chargeur = document.getElementById("loader-overlay");
         if (chargeur) chargeur.style.display = "flex";
-
         const dicoImportance = {};
         document.querySelectorAll('.section-importance input[type="number"]').forEach((input) => {
             const valeur = parseInt(input.value);
             if (input.name && !isNaN(valeur)) dicoImportance[input.name] = valeur;
         });
-
         const criteresGroupes = [];
         document.querySelectorAll('.overlay .popup-card').forEach((modale) => {
             const titre = modale.querySelector('h3').textContent;
@@ -327,11 +326,28 @@ class Interface {
 
     async exporter() {
         const nomsCritères = this.collectCriteriaNames();
-        const donnéesGroupes = this.collectGroupsData(nomsCritères);
+        const groupesBruts = this.collectGroupsData(nomsCritères);
+        const tousLesElevesPlats = [];
+        groupesBruts.forEach((groupe, indexGroupe) => {
+            const estDernierGroupe = indexGroupe === groupesBruts.length - 1;
+            const nomGroupe = estDernierGroupe ? "Non classé" : (indexGroupe + 1);
+            
+            groupe.forEach(eleve => {
+                const valeursCriteres = nomsCritères.map(nom => eleve.criteres[nom] || "");
+                
+                tousLesElevesPlats.push({
+                    num: eleve.num,
+                    nom: eleve.nom,
+                    prenom: eleve.prenom,
+                    criteres: valeursCriteres,
+                    groupe: nomGroupe
+                });
+            });
+        });
 
         const blocDonnées = await this.apiService.exporterGroupes({
-            groupes: donnéesGroupes,
-            liste_critere: nomsCritères
+            eleves: tousLesElevesPlats,
+            noms_criteres: nomsCritères
         });
 
         const url = window.URL.createObjectURL(blocDonnées);
