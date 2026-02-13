@@ -141,11 +141,22 @@ class Interface {
 
     action() {
         document.addEventListener("click", (e) => {
+            if (e.target.closest("#btn-relancer")) {
+                this.relancerRepartition();
+                return;
+            }
+
+            if (e.target.closest("#exporter")) {
+                this.exporter();
+                return;
+            }
+
             const btnPopup = e.target.closest(".btn-popup");
             if (btnPopup) {
                 this.popup(btnPopup.dataset.target, true);
                 return;
             }
+            
             const btnValider = e.target.closest(".btn-valider");
             if (btnValider) {
                 this.popup(btnValider.dataset.target, false);
@@ -154,16 +165,6 @@ class Interface {
 
             if (e.target.classList.contains("supprimer")) {
                 this.suprimer(e);
-                return;
-            }
-
-            if (e.target.closest("#btn-relancer")) {
-                this.relancerRepartition();
-                return;
-            }
-
-            if (e.target.closest("#exporter")) {
-                this.exporter();
                 return;
             }
         });
@@ -361,7 +362,35 @@ class Interface {
 
     popup(id, estVisible) {
         const modale = document.getElementById(id);
-        if (modale) modale.style.display = estVisible ? "block" : "none";
+        if (!modale) return;
+        modale.style.display = estVisible ? "block" : "none";
+
+        if (!estVisible) {
+            const match = id.match(/\d+/);
+            if (!match) return;
+            const numGroupe = parseInt(match[0]);
+
+            const articles = document.querySelectorAll("#eleves_classes article");
+            const article = articles[numGroupe - 1];
+            if (!article) return;
+
+            const tbody = article.querySelector(".table-criteres tbody");
+            if (!tbody) return;
+
+            tbody.innerHTML = "";
+            modale.querySelectorAll("fieldset").forEach((fieldset) => {
+                const nomCritere = fieldset.querySelector("legend").textContent.trim();
+                const valeursCochees = Array.from(
+                    fieldset.querySelectorAll("input[type='checkbox']:checked")
+                ).map(cb => cb.value);
+
+                if (valeursCochees.length > 0) {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `<td>${nomCritere}</td><td>${valeursCochees.join(", ")}</td>`;
+                    tbody.appendChild(tr);
+                }
+            });
+        }
     }
 }
 
@@ -377,15 +406,10 @@ function submitWithLoader() {
     if (loader) {
         loader.style.display = 'flex';
     }
-    setTimeout(() => {
-        const form = document.getElementById('form-repartition');
-        if (form) {
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'btn';
-            hiddenInput.value = 'btn-repartition';
-            form.appendChild(hiddenInput);
-            form.submit();
-        }
-    }, 50);
 }
+
+document.addEventListener('dom-refreshed', () => {
+    if (window.setupSliders) {
+        window.setupSliders();
+    }
+});

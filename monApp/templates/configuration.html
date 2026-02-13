@@ -4,6 +4,7 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/config.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/commun.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 {% endblock %}
 
@@ -31,12 +32,12 @@
                 <div class="row align-items-center justify-content-center">
                     <div class="col-md-6 text-center">
                         <label for="nb-grp" class="form-label fw-bold">Nombre de groupes souhaités</label>
-                        <div class="input-group mb-3">
-                            <input type="number" class="form-control form-control-lg text-center fw-bold" id="nb-grp" name="nb-grp" min="1" value="{{ request.form.get('nb-grp', nb_grp ) }}" required>
-                            <button type="submit" name="btn" value="btn-valide" class="btn btn-primary btn-lg">
-                                Valider
-                            </button>
-                        </div>
+<div class="input-group mb-3">
+    <input type="number" class="form-control form-control-lg text-center fw-bold" id="nb-grp" name="nb-grp" min="1" value="{{ request.form.get('nb-grp', nb_grp ) }}" required>
+    <button type="submit" name="btn" value="btn-valide" class="btn-valider">
+        Valider
+    </button>
+</div>
                     </div>
                 </div>
             </div>
@@ -105,20 +106,18 @@
             </section>
         {% endif %}
 
-        <div class="submit-area mt-5 mb-5 d-flex justify-content-center gap-3 align-items-center">
-            
-            {% if valide %}
-            <a href="{{ url_for('exporter_config') }}" class="btn btn-secondary btn-lg" style="border-radius: 50px; padding: 15px 30px;">
-                Exporter la configuration
-            </a>
-            {% endif %}
+<div class="submit-area mt-5 mb-5 d-flex justify-content-center gap-4 align-items-center">
+    
 
-            <button type="submit" onclick="submitWithLoader()" name="btn" value="btn-repartition"  
-                class="btn-cta {% if valide != True %}disabled{% endif %}"
-                {% if valide != True %}disabled{% endif %}>
-                <span>Lancer la répartition</span>
-            </button>
-        </div>
+    <button type="submit" 
+            onclick="submitWithLoader()" 
+            name="btn" 
+            value="btn-repartition"  
+            class="btn-valider {% if not valide %}btn-disabled{% endif %}"
+            {% if not valide %}disabled{% endif %}>
+        Lancer la répartition
+    </button>
+</div>
 
     </div>
 </form> 
