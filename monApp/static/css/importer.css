@@ -1,3 +1,7 @@
+/* ============================================
+   IMPORTER.CSS - Styles spécifiques à importer.html
+   ============================================ */
+
 .container section {
   background-color: #ffffff;
   border-radius: 12px;
@@ -8,7 +12,7 @@
 }
 
 form.dropzone {
-  border: 2px dashed #0056b3;
+  border: 2px dashed #005a9c;
   background-color: #f8fbff;
   border-radius: 12px;
   min-height: 200px;
@@ -23,14 +27,14 @@ form.dropzone {
 form.dropzone .dz-message {
   font-size: 1.2rem;
   font-weight: 500;
-  color: #0056b3;
+  color: #005a9c;
   margin: 0;
 }
 
 form.dropzone.dz-drag-hover {
   background-color: #e6f0ff;
   border-style: solid;
-  border-color: #004494;
+  border-color: #005a9c;
   transform: scale(1.02);
   box-shadow: 0 10px 25px rgba(0, 86, 179, 0.15);
 }
@@ -61,16 +65,7 @@ form.dropzone.dz-drag-hover {
   justify-content: flex-end;
 }
 
-#reset_btn {
-  background: transparent;
-  border: 1px solid #dc3545;
-  color: #dc3545;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
+#reset_btn,
 #reset_btn_json {
   background: transparent;
   border: 1px solid #dc3545;
@@ -81,7 +76,8 @@ form.dropzone.dz-drag-hover {
   transition: background-color 0.2s;
 }
 
-#reset_btn:hover {
+#reset_btn:hover,
+#reset_btn_json:hover {
   background-color: #dc3545;
   color: white;
 }
@@ -95,4 +91,3 @@ form.dropzone.dz-drag-hover {
   margin-top: 3rem;
   padding-top: 0.5rem;
 }
-
