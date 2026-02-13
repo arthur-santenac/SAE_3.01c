@@ -382,3 +382,8 @@ details[open] summary {
     background-position: 50% 36px;
   }
 }
+
+#eleves_restants {
+  position: sticky;
+  top: 5em;
+}

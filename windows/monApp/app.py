@@ -13,7 +13,10 @@ if getattr(sys, 'frozen', False):
 else:
     base_dir = os.path.abspath(os.path.dirname(__file__))
 
-upload_path = os.path.join(base_dir, 'monApp', 'static', 'uploads')
+if os.path.exists('monApp'):
+    upload_path = os.path.join(base_dir, 'monApp', 'static', 'uploads')
+else:
+    upload_path = os.path.join(base_dir, 'static', 'uploads')
 
 if not os.path.exists(upload_path):
     os.makedirs(upload_path)
